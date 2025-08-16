@@ -8,7 +8,7 @@ import os
 from pathlib import Path
 
 # Cấu hình
-IGNORE_DIRS = {'.git', '__pycache__', '.vscode', 'node_modules', '.idea', 'venv', '.env'}
+IGNORE_DIRS = {'.git', '__pycache__', '.vscode', 'node_modules', '.idea', 'venv', '.env', 'assets', 'data'}
 IGNORE_FILES = {'.gitignore', '.DS_Store', '*.pyc', '*.pyo'}
 
 # Mô tả cho từng thư mục/file (tùy chỉnh theo dự án)
