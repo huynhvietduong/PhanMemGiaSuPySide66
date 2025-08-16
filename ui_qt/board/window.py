@@ -262,32 +262,62 @@ class DrawingBoardWindowQt(QtWidgets.QMainWindow):
     def _toggle_max_restore(self): self.showNormal() if self.isMaximized() else self.showMaximized()
 
     # ========== screen capture ==========
+    # Fix: Cải thiện việc quản lý SnipController
     def toggle_snip_controller(self):
         if getattr(self, "_snip_ctrl", None) and self._snip_ctrl.isVisible():
-            self._snip_ctrl.hide(); return
+            self._snip_ctrl.hide()
+            return
+
         if not getattr(self, "_snip_ctrl", None):
             self._snip_ctrl = SnipController(on_pick_mode=self._start_snip_mode)
-        self._snip_ctrl.show(); self._snip_ctrl.raise_()
-        if not getattr(self._snip_ctrl, "_placed", False):
-            geo = QtGui.QGuiApplication.primaryScreen().availableGeometry()
-            self._snip_ctrl.move(geo.right()-self._snip_ctrl.width()-40, geo.bottom()-self._snip_ctrl.height()-40)
-            self._snip_ctrl._placed = True
 
+        # Fix: Đảm bảo SnipController hiển thị đúng
+        self._snip_ctrl.show()
+        self._snip_ctrl.raise_()
+        self._snip_ctrl.activateWindow()
+
+        if not getattr(self._snip_ctrl, "_placed", False):
+            # Fix: Lấy geometry của screen hiện tại thay vì primary screen
+            current_screen = QtGui.QGuiApplication.screenAt(self.pos())
+            if not current_screen:
+                current_screen = QtGui.QGuiApplication.primaryScreen()
+
+            geo = current_screen.availableGeometry()
+            self._snip_ctrl.move(
+                geo.right() - self._snip_ctrl.width() - 40,
+                geo.bottom() - self._snip_ctrl.height() - 40
+            )
+            self._snip_ctrl._placed = True
     def _printscreen_behavior(self):
         if getattr(self, "_snip_ctrl", None) and self._snip_ctrl.isVisible():
             self._snip_ctrl._pick("rect")
         else:
             self.toggle_snip_controller()
 
+    # Fix: Cải thiện việc khởi động snip mode
     def _start_snip_mode(self, mode: str):
-        self.hide(); QtWidgets.QApplication.processEvents()
-        def _done(img: QImage, target: str):
-            self.show(); self.raise_(); self.activateWindow()
-            if target == "new": self._page_add()
-            self._place_new_img(img)
-            if getattr(self, "_snip_ctrl", None): self._snip_ctrl.show(); self._snip_ctrl.raise_()
-        self._snip_overlay = ScreenSnipOverlay(on_done=_done, mode=mode)
+        # Fix: Ẩn DrawingBoard tạm thời
+        self.hide()
+        QtWidgets.QApplication.processEvents()
 
+        def _done(img: QImage, target: str):
+            # Fix: Hiện lại DrawingBoard với proper activation
+            self.show()
+            self.raise_()
+            self.activateWindow()
+
+            # Xử lý ảnh
+            if target == "new":
+                self._page_add()
+            self._place_new_img(img)
+
+            # Fix: Hiện lại SnipController nếu cần
+            if getattr(self, "_snip_ctrl", None):
+                self._snip_ctrl.show()
+                self._snip_ctrl.raise_()
+
+        # Tạo overlay với callback đã cải thiện
+        self._snip_overlay = ScreenSnipOverlay(on_done=_done, mode=mode)
 # ======= Entrypoint (chạy rời) =======
 def main():
     app = QtWidgets.QApplication(sys.argv)

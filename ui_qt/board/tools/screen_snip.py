@@ -8,27 +8,62 @@ class ScreenSnipOverlay(QtWidgets.QWidget):
     def __init__(self, on_done, mode="rect", parent=None):
         super().__init__(None)
         self.on_done = on_done; self.mode = mode
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Tool | Qt.WindowStaysOnTopHint)
+        # Fix: Thêm flags để đảm bảo overlay hoạt động đúng
+        self.setWindowFlags(
+            Qt.FramelessWindowHint |
+            Qt.Tool |
+            Qt.WindowStaysOnTopHint |
+            Qt.BypassWindowManagerHint
+        )
         self.setAttribute(Qt.WA_TranslucentBackground, True)
         self.setCursor(Qt.CrossCursor)
-        self._snap, self._virt = self._grab_full_desktop()
-        self.setGeometry(self._virt)
+        # Fix: Đảm bảo capture thành công với error handling
+        try:
+            self._snap, self._virt = self._grab_full_desktop()
+            self.setGeometry(self._virt)
+        except Exception as e:
+            print(f"Error capturing desktop: {e}")
+            self.close()
+            return
         self._dragging = False; self._origin = QtCore.QPoint()
         self._rect = QtCore.QRect(); self._lasso_pts: list[QtCore.QPoint] = []
-        self.show(); self.activateWindow()
+        # Fix: Đảm bảo hiển thị và activate đúng cách
+        self.show()
+        self.raise_()
+        self.activateWindow()
         if self.mode == "full":
             self._rect = QtCore.QRect(QtCore.QPoint(0,0), self._virt.size())
             QtCore.QTimer.singleShot(0, lambda: self._finalize(QtGui.QCursor.pos()))
 
+    # Fix: Cải thiện việc capture desktop với error handling
     def _grab_full_desktop(self):
-        app = QGuiApplication.instance(); primary = app.primaryScreen()
-        virt = primary.virtualGeometry(); result = QPixmap(virt.size()); result.fill(Qt.transparent)
-        p = QPainter(result)
-        for s in app.screens():
-            pm = s.grabWindow(0); g = s.geometry()
-            p.drawPixmap(g.topLeft() - virt.topLeft(), pm)
-        p.end(); return result, virt
+        app = QGuiApplication.instance()
+        if not app:
+            raise Exception("No QApplication instance")
 
+        primary = app.primaryScreen()
+        if not primary:
+            raise Exception("No primary screen found")
+
+        virt = primary.virtualGeometry()
+        result = QPixmap(virt.size())
+        result.fill(Qt.transparent)
+
+        p = QPainter(result)
+        try:
+            for s in app.screens():
+                try:
+                    pm = s.grabWindow(0)
+                    if not pm.isNull():
+                        g = s.geometry()
+                        p.drawPixmap(g.topLeft() - virt.topLeft(), pm)
+                except Exception as e:
+                    print(f"Error capturing screen {s.name()}: {e}")
+                    continue
+        finally:
+            p.end()
+
+        return result, virt
     def _finalize(self, global_pt: QtCore.QPoint):
         if self.mode == "lasso":
             if len(self._lasso_pts) < 5: self.close(); return
@@ -90,7 +125,13 @@ class SnipController(QtWidgets.QWidget):
     def __init__(self, on_pick_mode, parent=None):
         super().__init__(None)
         self.on_pick_mode = on_pick_mode
-        self.setWindowFlags(Qt.Tool | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        # Fix: Thêm flag để đảm bảo luôn ở trên và tránh xung đột
+        self.setWindowFlags(
+            Qt.Tool |
+            Qt.FramelessWindowHint |
+            Qt.WindowStaysOnTopHint |
+            Qt.BypassWindowManagerHint
+        )
         self.setAttribute(Qt.WA_TranslucentBackground, True)
         frame = QtWidgets.QFrame(self)
         frame.setStyleSheet("""

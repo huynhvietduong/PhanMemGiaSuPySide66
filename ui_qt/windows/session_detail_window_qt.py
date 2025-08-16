@@ -515,8 +515,9 @@ class SessionDetailWindowQt(QDialog):
             self.db.add_lesson_file(self.session_id, path, "board", title, "")
             self._render_lesson_files()
 
+        # Fix: Tạo DrawingBoard độc lập để tránh xung đột modal
         win = DrawingBoardWindowQt(
-            parent=self,
+            parent=None,  # Thay đổi từ self thành None
             group_name=self.group_name,
             session_date=self.session_date,
             session_id=self.session_id,
@@ -524,8 +525,23 @@ class SessionDetailWindowQt(QDialog):
             board_path=board_path,
             on_saved=_on_saved
         )
-        win.setWindowModality(Qt.ApplicationModal)
+
+        # Fix: Thêm window flags để đảm bảo hoạt động độc lập
+        win.setWindowFlags(win.windowFlags() | Qt.Window)
+
+        # Fix: Ẩn SessionDetailWindow tạm thời để tránh xung đột
+        self.hide()
+
+        # Fix: Xử lý khi đóng DrawingBoard - hiện lại SessionDetailWindow
+        def on_board_closed():
+            self.show()
+            self.raise_()
+            self.activateWindow()
+
+        win.destroyed.connect(on_board_closed)
         win.show()
+        win.raise_()
+        win.activateWindow()
 
     def _open_skill_rating(self):
         # lấy danh sách học sinh
