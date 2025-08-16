@@ -99,21 +99,41 @@ class DashboardWindowQt(QtWidgets.QMainWindow):
         lay = QtWidgets.QVBoxLayout(wrap); lay.setContentsMargins(6,6,6,6); lay.addWidget(btn, 0, Qt.AlignLeft)
         return wrap
 
+    # ui_qt/windows/dashboard_window_qt.py
+
     def _open(self, module_path: str, class_name: str):
         def _handler():
             cls = _safe_import(module_path, class_name)
             if not cls:
                 QtWidgets.QMessageBox.information(self, "Thông tin", f"Chức năng '{class_name}' (Qt) chưa sẵn sàng.")
                 return
-            # hầu hết các cửa sổ hiện là QWidget/QDialog — show popup
+
+            # Tạo cửa sổ con
             win = cls(self.db, parent=self)
-            # nếu là QDialog
+
+            # Kiểm tra loại cửa sổ và xử lý hiển thị phù hợp
             if isinstance(win, QtWidgets.QDialog):
                 win.exec()
             else:
+                # Fix: Đảm bảo cửa sổ QWidget luôn hiển thị trên cùng
+                win.setWindowFlags(win.windowFlags() | Qt.Window)
                 win.show()
-        return _handler
+                win.raise_()  # Đưa lên trên cùng
+                win.activateWindow()  # Kích hoạt cửa sổ
 
+                # Lưu tham chiếu để tránh bị garbage collect
+                if not hasattr(self, '_child_windows'):
+                    self._child_windows = []
+                self._child_windows.append(win)
+
+                # Xóa tham chiếu khi cửa sổ đóng
+                def on_window_closed():
+                    if win in self._child_windows:
+                        self._child_windows.remove(win)
+
+                win.destroyed.connect(on_window_closed)
+
+        return _handler
     def _open_main_window(self):
         # mở “Lịch dạy” / MainWindow (Qt)
         from ui_qt.main_window import MainWindow

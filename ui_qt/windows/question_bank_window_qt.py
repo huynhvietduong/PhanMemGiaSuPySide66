@@ -281,7 +281,7 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
             ent.blockSignals(False)
 
         opts = json.loads(q["options"] or "[]")
-        correct = q.get("correct", "") or ""
+        correct = q["correct"] if q["correct"] else ""
         if correct and correct in [b.text() for b in self.correct_group.buttons()]:
             for b in self.correct_group.buttons():
                 if b.text() == correct:

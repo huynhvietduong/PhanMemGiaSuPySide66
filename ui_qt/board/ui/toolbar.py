@@ -102,7 +102,7 @@ class BoardToolbar(QtWidgets.QToolBar):
         self.addAction(self._act("📂 Chèn ảnh…", self.requestInsertImage.emit))
         a_paste = self._act("📋 Dán ảnh", self.requestPasteImage.emit); a_paste.setShortcut(QKeySequence("Ctrl+V")); self.addAction(a_paste)
         a_snip = self._act("📸 Chụp màn hình", self.requestSnip.emit); a_snip.setShortcut(QKeySequence("Ctrl+Shift+S")); self.addAction(a_snip)
-        a_del = self._act("🗑 Xoá ảnh", self.requestDeleteImage.emit); a_del.setShortcut(QKeySequence.Delete); self.addAction(a_del)
+        a_del = self._act("🗑 Xóa ảnh", self.requestDeleteImage.emit); a_del.setShortcut(QKeySequence.Delete); self.addAction(a_del)
 
         self.addSeparator()
 
@@ -117,7 +117,7 @@ class BoardToolbar(QtWidgets.QToolBar):
         self.addAction(self._act("◀ Trang trước", self.pagePrev.emit))
         self.addAction(self._act("Trang sau ▶", self.pageNext.emit))
         self.addAction(self._act("➕ Thêm trang", self.pageAdd.emit))
-        self.addAction(self._act("🗑 Xoá trang", self.pageDel.emit))
+        self.addAction(self._act("🗑 Xóa trang", self.pageDel.emit))
 
         self.addSeparator()
 

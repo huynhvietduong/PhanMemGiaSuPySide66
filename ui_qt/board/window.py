@@ -100,7 +100,12 @@ class DrawingBoardWindowQt(QtWidgets.QMainWindow):
         # PrintScreen shortcut (như bản gốc)
         self._sc_snip = QShortcut(QKeySequence(Qt.Key_Print), self)
         self._sc_snip.activated.connect(self._printscreen_behavior)
-
+        self._sc_undo = QShortcut(QKeySequence("Ctrl+Z"), self)
+        self._sc_undo.activated.connect(self._perform_undo)
+        self._sc_redo = QShortcut(QKeySequence("Ctrl+Y"), self)
+        self._sc_redo.activated.connect(self._perform_redo)
+        self._sc_redo_alt = QShortcut(QKeySequence("Ctrl+Shift+Z"), self)
+        self._sc_redo_alt.activated.connect(self._perform_redo)
     # ========== tools ==========
     def _install_tools(self):
         self._tools: dict[str, Tool] = {
@@ -294,6 +299,20 @@ class DrawingBoardWindowQt(QtWidgets.QMainWindow):
         else:
             self.toggle_snip_controller()
 
+    # Xử lý Undo/Redo actions
+    def _perform_undo(self):
+        """Thực hiện hoàn tác"""
+        if self.state.undo():
+            self._refresh_ink()
+            # Cập nhật trạng thái toolbar nếu cần
+            self.toolbar.update_undo_redo_state(self.state.can_undo(), self.state.can_redo())
+
+    def _perform_redo(self):
+        """Thực hiện làm lại"""
+        if self.state.redo():
+            self._refresh_ink()
+            # Cập nhật trạng thái toolbar nếu cần
+            self.toolbar.update_undo_redo_state(self.state.can_undo(), self.state.can_redo())
     # Fix: Cải thiện việc khởi động snip mode
     def _start_snip_mode(self, mode: str):
         # Fix: Ẩn DrawingBoard tạm thời

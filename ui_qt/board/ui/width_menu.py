@@ -1,30 +1,57 @@
+# ui_qt/board/ui/width_menu.py
 from __future__ import annotations
-from typing import Tuple
-from PySide6 import QtWidgets, QtCore
+from typing import Callable, Tuple
+from PySide6 import QtCore, QtWidgets
 from PySide6.QtCore import Qt
 
-def create_width_menu(parent, kind: str, init_value: int, on_change) -> Tuple[QtWidgets.QMenu, QtWidgets.QSlider, QtWidgets.QLabel]:
-    """Tạo popover độ dày (slider + các mốc nhanh)."""
+
+def create_width_menu(parent, tool_name: str, init_value: int, callback: Callable[[int], None]) -> Tuple[
+    QtWidgets.QMenu, QtWidgets.QSlider, QtWidgets.QLabel]:
+    """
+    Tạo menu popup chọn độ dày cho pen/eraser
+
+    Returns:
+        Tuple[QMenu, QSlider, QLabel] - Menu, slider, và label để parent có thể tham chiếu
+    """
     menu = QtWidgets.QMenu(parent)
-    w = QtWidgets.QWidget(parent)
-    vbox = QtWidgets.QVBoxLayout(w); vbox.setContentsMargins(8,8,8,8)
 
-    label = QtWidgets.QLabel()
-    label.setAlignment(Qt.AlignCenter); label.setStyleSheet("font-weight:600; padding:2px;")
+    # Widget container
+    widget = QtWidgets.QWidget()
+    layout = QtWidgets.QVBoxLayout(widget)
+    layout.setContentsMargins(10, 10, 10, 10)
+    layout.setSpacing(8)
 
-    slider = QtWidgets.QSlider(Qt.Horizontal); slider.setRange(1,100)
-    slider.setSingleStep(1); slider.setPageStep(5); slider.setFixedWidth(240)
+    # Label hiển thị giá trị
+    label = QtWidgets.QLabel(f"Độ dày {tool_name.title()}: {init_value}px")
+    label.setAlignment(Qt.AlignCenter)
+    layout.addWidget(label)
+
+    # Slider chọn độ dày
+    slider = QtWidgets.QSlider(Qt.Horizontal)
+    slider.setMinimum(1)
+    slider.setMaximum(100)
     slider.setValue(init_value)
-    label.setText(f"Độ dày {'Bút' if kind=='pen' else 'Tẩy'}: {init_value}px")
+    slider.setFixedWidth(200)
+    layout.addWidget(slider)
 
-    quick = QtWidgets.QHBoxLayout(); quick.setSpacing(4)
-    for val in [1,2,3,5,8,12,16,20,30,50,80]:
-        b = QtWidgets.QToolButton(); b.setText(str(val)); b.setAutoRaise(True)
-        b.clicked.connect(lambda _=False, v=val: on_change(int(v)))
-        quick.addWidget(b)
+    # Buttons cho các giá trị thường dùng
+    buttons_layout = QtWidgets.QHBoxLayout()
+    common_values = [1, 2, 4, 6, 8, 12, 16, 20, 30] if tool_name == "pen" else [10, 20, 30, 40, 50, 60, 80, 100]
 
-    vbox.addWidget(label); vbox.addWidget(slider); vbox.addLayout(quick)
-    act = QtWidgets.QWidgetAction(parent); act.setDefaultWidget(w); menu.addAction(act)
+    for value in common_values:
+        btn = QtWidgets.QPushButton(str(value))
+        btn.setFixedSize(30, 25)
+        btn.clicked.connect(lambda checked=False, v=value: slider.setValue(v))
+        buttons_layout.addWidget(btn)
 
-    slider.valueChanged.connect(lambda v: on_change(int(v)))
+    layout.addLayout(buttons_layout)
+
+    # Kết nối slider với callback
+    slider.valueChanged.connect(callback)
+
+    # Tạo action và thêm vào menu
+    action = QtWidgets.QWidgetAction(parent)
+    action.setDefaultWidget(widget)
+    menu.addAction(action)
+
     return menu, slider, label

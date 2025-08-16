@@ -64,6 +64,30 @@ class ScreenSnipOverlay(QtWidgets.QWidget):
             p.end()
 
         return result, virt
+
+    # Fix: Thêm các phương thức chuyển đổi tọa độ
+    def _widget_to_virtual(self, widget_pos: QtCore.QPoint) -> QtCore.QPoint:
+        """Chuyển đổi từ widget coordinates sang virtual desktop coordinates"""
+        return widget_pos + self._virt.topLeft()
+
+    def _virtual_to_widget(self, virtual_pos: QtCore.QPoint) -> QtCore.QPoint:
+        """Chuyển đổi từ virtual desktop coordinates sang widget coordinates"""
+        return virtual_pos - self._virt.topLeft()
+
+    def _virtual_to_global(self, virtual_pos: QtCore.QPoint) -> QtCore.QPoint:
+        """Chuyển đổi từ virtual coordinates sang global screen coordinates"""
+        return virtual_pos
+
+    def _calculate_lasso_center(self) -> QtCore.QPoint:
+        """Tính toán điểm trung tâm của lasso"""
+        if not self._lasso_pts:
+            return QtCore.QPoint(0, 0)
+
+        sum_x = sum(p.x() for p in self._lasso_pts)
+        sum_y = sum(p.y() for p in self._lasso_pts)
+        count = len(self._lasso_pts)
+
+        return QtCore.QPoint(sum_x // count, sum_y // count)
     def _finalize(self, global_pt: QtCore.QPoint):
         if self.mode == "lasso":
             if len(self._lasso_pts) < 5: self.close(); return
@@ -73,8 +97,13 @@ class ScreenSnipOverlay(QtWidgets.QWidget):
             path = QtGui.QPainterPath(); path.addPolygon(QtGui.QPolygonF([QtCore.QPointF(p - br.topLeft()) for p in self._lasso_pts]))
             painter.setClipPath(path); painter.drawPixmap(-br.topLeft(), self._snap); painter.end(); cropped = img
         else:
-            cropped = self._snap.copy(self._rect).toImage()
-
+            # Fix: Đảm bảo crop đúng vùng được chọn trong virtual coordinates
+            virtual_rect = self._rect.intersected(QtCore.QRect(0, 0, self._snap.width(), self._snap.height()))
+            if virtual_rect.isValid():
+                cropped = self._snap.copy(virtual_rect).toImage()
+            else:
+                cropped = QImage(1, 1, QImage.Format_ARGB32_Premultiplied)
+                cropped.fill(Qt.transparent)
         menu = QtWidgets.QMenu(self); act_cur = menu.addAction("Dán vào TRANG HIỆN TẠI"); act_new = menu.addAction("Dán vào TRANG MỚI")
         chosen = menu.exec(global_pt)
         if chosen: self.on_done(cropped, "current" if chosen == act_cur else "new")
@@ -82,41 +111,93 @@ class ScreenSnipOverlay(QtWidgets.QWidget):
 
     def paintEvent(self, e: QtGui.QPaintEvent):
         if self.mode == "full": return
-        p = QPainter(self); p.setRenderHint(QPainter.Antialiasing, True); p.setRenderHint(QPainter.SmoothPixmapTransform, True)
-        p.drawPixmap(0,0,self._snap); p.fillRect(self.rect(), QColor(0,0,0,120))
-        if self.mode == "rect" and not self._rect.isNull():
-            p.drawPixmap(self._rect, self._snap, self._rect)
-            p.setPen(QPen(Qt.white, 1, Qt.DashLine)); p.setBrush(Qt.NoBrush); p.drawRect(self._rect)
-        if self.mode == "lasso" and self._lasso_pts:
-            path = QtGui.QPainterPath(); path.addPolygon(QtGui.QPolygonF([QtCore.QPointF(p) for p in self._lasso_pts]))
-            p.save(); p.setClipPath(path); p.drawPixmap(0,0,self._snap); p.restore()
-            p.setPen(QPen(Qt.white, 1, Qt.DashLine)); p.drawPath(path)
-        p.end()
 
+        p = QPainter(self)
+        p.setRenderHint(QPainter.Antialiasing, True)
+        p.setRenderHint(QPainter.SmoothPixmapTransform, True)
+
+        # Vẽ ảnh nền
+        p.drawPixmap(0, 0, self._snap)
+
+        # Vẽ overlay tối
+        p.fillRect(self.rect(), QColor(0, 0, 0, 120))
+
+        if self.mode == "rect" and not self._rect.isNull():
+            # Fix: Chuyển đổi tọa độ virtual sang widget để vẽ đúng
+            widget_rect = QtCore.QRect(
+                self._virtual_to_widget(self._rect.topLeft()),
+                self._virtual_to_widget(self._rect.bottomRight())
+            )
+
+            # Vẽ vùng được chọn (không có overlay tối)
+            p.drawPixmap(widget_rect, self._snap, widget_rect)
+
+            # Vẽ khung viền
+            p.setPen(QPen(Qt.white, 2, Qt.DashLine))
+            p.setBrush(Qt.NoBrush)
+            p.drawRect(widget_rect)
+
+        if self.mode == "lasso" and self._lasso_pts:
+            # Fix: Chuyển đổi tọa độ lasso sang widget coordinates
+            widget_points = [self._virtual_to_widget(pt) for pt in self._lasso_pts]
+            path = QtGui.QPainterPath()
+            path.addPolygon(QtGui.QPolygonF([QtCore.QPointF(p) for p in widget_points]))
+
+            # Vẽ vùng được chọn
+            p.save()
+            p.setClipPath(path)
+            p.drawPixmap(0, 0, self._snap)
+            p.restore()
+
+            # Vẽ đường viền lasso
+            p.setPen(QPen(Qt.white, 2, Qt.DashLine))
+            p.drawPath(path)
+
+        p.end()
     def mousePressEvent(self, e: QtGui.QMouseEvent):
-        if e.button()!=Qt.LeftButton or self.mode=="full": return
-        pos = e.position().toPoint(); self._dragging = True
-        if self.mode=="rect": self._origin = pos; self._rect = QtCore.QRect(self._origin, self._origin)
-        else: self._lasso_pts = [pos]; self.update()
+        if e.button() != Qt.LeftButton or self.mode == "full": return
+        # Fix: Chuyển đổi tọa độ từ widget coordinates sang virtual coordinates
+        pos = self._widget_to_virtual(e.position().toPoint())
+        self._dragging = True
+        if self.mode == "rect":
+            self._origin = pos
+            self._rect = QtCore.QRect(self._origin, self._origin)
+        else:
+            self._lasso_pts = [pos]
+            self.update()
 
     def mouseMoveEvent(self, e: QtGui.QMouseEvent):
-        if not self._dragging or self.mode=="full": return
-        pos = e.position().toPoint()
-        if self.mode=="rect": self._rect = QtCore.QRect(self._origin, pos).normalized()
-        else: self._lasso_pts.append(pos)
+        if not self._dragging or self.mode == "full": return
+        # Fix: Chuyển đổi tọa độ từ widget coordinates sang virtual coordinates
+        pos = self._widget_to_virtual(e.position().toPoint())
+        if self.mode == "rect":
+            self._rect = QtCore.QRect(self._origin, pos).normalized()
+        else:
+            self._lasso_pts.append(pos)
         self.update()
 
     def mouseReleaseEvent(self, e: QtGui.QMouseEvent):
-        if e.button()!=Qt.LeftButton or not self._dragging or self.mode=="full": return
+        if e.button() != Qt.LeftButton or not self._dragging or self.mode == "full": return
         self._dragging = False
-        if self.mode=="rect":
+        if self.mode == "rect":
             self._rect = self._rect.normalized()
-            if self._rect.width()<3 or self._rect.height()<3: self.close(); return
-            self._finalize(e.globalPosition().toPoint())
+            if self._rect.width() < 3 or self._rect.height() < 3:
+                self.close()
+                return
+            # Fix: Sử dụng tọa độ global đã được mapping đúng
+            global_pt = self._virtual_to_global(self._rect.center())
+            self._finalize(global_pt)
         else:
-            if len(self._lasso_pts)<5: self.close(); return
-            self._finalize(e.globalPosition().toPoint())
-
+            if len(self._lasso_pts) < 5:
+                self.close()
+                return
+            # Fix: Tính global point từ tọa độ trung tâm của lasso
+            if self._lasso_pts:
+                center = self._calculate_lasso_center()
+                global_pt = self._virtual_to_global(center)
+            else:
+                global_pt = e.globalPosition().toPoint()
+            self._finalize(global_pt)
     def keyPressEvent(self, e: QtGui.QKeyEvent):
         if e.key() in (Qt.Key_Escape, Qt.Key_Q): self.close()
 
