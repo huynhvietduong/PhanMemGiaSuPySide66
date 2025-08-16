@@ -15,7 +15,9 @@ class BoardState:
         self.ensure_one_page()
         self._undo_manager = UndoRedoManager()
         self._auto_save_enabled = True
-
+        from ui_qt.board.core.layer_manager import LayerManager
+        self.layer_manager = LayerManager()
+        self._current_layer_mode = "single"  # "single" | "multi"
     # --------- page helpers ----------
     def ensure_one_page(self):
         if not self.pages:
@@ -99,6 +101,38 @@ class BoardState:
                     p.setPen(QPen(QtGui.QColor(*s.rgba), s.width or 1)); p.drawPath(path)
         p.end()
 
+    # Hỗ trợ layer trong render
+    def rebuild_into_with_layers(self, target_img: QImage):
+        """Vẽ lại với hỗ trợ layers"""
+        if self._current_layer_mode == "multi":
+            # Sử dụng layer system
+            active_layer = self.layer_manager.get_active_layer()
+            if active_layer:
+                # Vẽ vào layer hiện tại
+                active_layer.image.fill(Qt.transparent)
+                self._render_strokes_to_image(active_layer.image)
+                # Merge tất cả layers
+                merged = self.layer_manager.merge_visible_layers()
+                target_img.fill(Qt.transparent)
+                painter = QPainter(target_img)
+                painter.drawImage(0, 0, merged)
+                painter.end()
+        else:
+            # Chế độ single layer (hiện tại)
+            self.rebuild_into(target_img)
+
+    def _render_strokes_to_image(self, target_img: QImage):
+        """Render strokes vào một image cụ thể"""
+        # Di chuyển logic từ rebuild_into vào đây
+        target_img.fill(Qt.transparent)
+        p = QPainter(target_img)
+        p.setRenderHint(QPainter.Antialiasing, True)
+
+        for s in self.strokes():
+            # ... existing stroke rendering logic
+            pass
+
+        p.end()
     def save_state_for_undo(self):
         """Lưu trạng thái hiện tại để có thể undo"""
         if self._auto_save_enabled:

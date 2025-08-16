@@ -89,7 +89,8 @@ class DrawingBoardWindowQt(QtWidgets.QMainWindow):
         self.toolbar.pageDel.connect(self._page_del)
         self.toolbar.toggleFull.connect(self._toggle_fullscreen)
         self.toolbar.toggleMaxRestore.connect(self._toggle_max_restore)
-
+        # Kết nối brush effect signal
+        self.toolbar.brushEffectChanged.connect(self._on_brush_effect_changed)
         # Central canvas + scroll
         self.scroll = QtWidgets.QScrollArea(self); self.scroll_area = self.scroll
         self.scroll.setWidgetResizable(True)
@@ -138,6 +139,12 @@ class DrawingBoardWindowQt(QtWidgets.QMainWindow):
     def _on_color_picked(self, rgba: tuple):
         self.pen_rgba = rgba
 
+    def _on_brush_effect_changed(self, effect: str):
+        """Xử lý thay đổi brush effect"""
+        # Áp dụng cho pen tool
+        pen_tool = self._tools.get("pen")
+        if pen_tool and hasattr(pen_tool, 'set_brush_effect'):
+            pen_tool.set_brush_effect(effect)
     def _set_tool(self, name: str):
         if hasattr(self, "current_tool_obj") and self.current_tool_obj:
             try: self.current_tool_obj.on_deactivate()

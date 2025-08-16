@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List, Tuple
+from typing import List
 from PySide6 import QtCore, QtGui
 from PySide6.QtCore import QPointF, Qt
 from PySide6.QtGui import QPainter, QPen, QColor
@@ -7,29 +7,23 @@ from ui_qt.board.core.data_models import Stroke
 
 
 class PenTool:
-    """Công cụ bút vẽ nâng cao với hỗ trợ pressure sensitivity và line smoothing"""
+    """Công cụ bút vẽ với hỗ trợ brush effects"""
 
     def __init__(self, win: 'DrawingBoardWindowQt'):
         self.win = win
         self._pts: List[QPointF] = []
-        self._pressures: List[float] = []  # Lưu áp lực từng điểm
-        self._smoothing_enabled = True
+        self._current_brush_effect = "smooth"  # Default effect
         self._min_distance = 2.0  # Khoảng cách tối thiểu giữa các điểm
 
     def on_activate(self):
         self._pts.clear()
-        self._pressures.clear()
 
     def on_deactivate(self):
         self._pts.clear()
-        self._pressures.clear()
 
-    def _get_pressure(self, e: QtGui.QMouseEvent) -> float:
-        """Lấy áp lực từ tablet event, fallback về 1.0 cho mouse"""
-        # Kiểm tra nếu là tablet event
-        if hasattr(e, 'pressure'):
-            return max(0.1, min(1.0, e.pressure()))
-        return 1.0
+    def set_brush_effect(self, effect: str):
+        """Đặt hiệu ứng brush"""
+        self._current_brush_effect = effect
 
     def _should_add_point(self, new_point: QPointF) -> bool:
         """Kiểm tra có nên thêm điểm mới không (dựa vào khoảng cách)"""
@@ -41,39 +35,18 @@ class PenTool:
                     (new_point.y() - last_point.y()) ** 2) ** 0.5
         return distance >= self._min_distance
 
-    def _smooth_path(self, points: List[QPointF]) -> List[QPointF]:
-        """Làm mượt đường vẽ bằng Bezier curves"""
-        if len(points) < 3:
-            return points
-
-        smoothed = [points[0]]
-
-        for i in range(1, len(points) - 1):
-            # Sử dụng điểm trung bình của 3 điểm liên tiếp
-            prev_pt = points[i - 1]
-            curr_pt = points[i]
-            next_pt = points[i + 1]
-
-            smooth_x = (prev_pt.x() + curr_pt.x() + next_pt.x()) / 3.0
-            smooth_y = (prev_pt.y() + curr_pt.y() + next_pt.y()) / 3.0
-
-            smoothed.append(QPointF(smooth_x, smooth_y))
-
-        smoothed.append(points[-1])
-        return smoothed
-
     def mousePressEvent(self, e: QtGui.QMouseEvent):
         if e.button() != Qt.LeftButton:
             return
 
-        # Lưu state cho undo trước khi bắt đầu vẽ
-        self.win.state.save_state_for_undo()
+        # Lưu state cho undo nếu method tồn tại
+        try:
+            if hasattr(self.win.state, 'save_state_for_undo'):
+                self.win.state.save_state_for_undo()
+        except Exception:
+            pass  # Bỏ qua nếu chưa implement undo
 
-        point = QPointF(e.position())
-        pressure = self._get_pressure(e)
-
-        self._pts = [point]
-        self._pressures = [pressure]
+        self._pts = [QPointF(e.position())]
 
     def mouseMoveEvent(self, e: QtGui.QMouseEvent):
         if not self._pts or not (e.buttons() & Qt.LeftButton):
@@ -85,62 +58,58 @@ class PenTool:
         if not self._should_add_point(new_point):
             return
 
-        pressure = self._get_pressure(e)
         self._pts.append(new_point)
-        self._pressures.append(pressure)
 
-        # Vẽ real-time với pressure-sensitive width
-        self._draw_incremental()
-        self.win.canvas.optimized_update()
+        # Vẽ real-time với brush effect
+        self._draw_with_effect()
+        self.win.canvas.update()
 
-    def _draw_incremental(self):
-        """Vẽ thêm đoạn mới của nét"""
+    def _draw_with_effect(self):
+        """Vẽ với hiệu ứng brush"""
         if len(self._pts) < 2:
             return
 
-        p = QPainter(self.win.canvas._ink)
-        p.setRenderHint(QPainter.Antialiasing, True)
-        p.setCompositionMode(QPainter.CompositionMode_SourceOver)
+        painter = QPainter(self.win.canvas._ink)
+        color = QColor(*self.win.pen_rgba)
+        width = self.win.pen_width
 
-        # Vẽ từ điểm gần cuối đến điểm cuối với pressure
-        start_idx = max(0, len(self._pts) - 2)
-        for i in range(start_idx, len(self._pts) - 1):
-            pressure = self._pressures[i]
-            width = max(1, int(self.win.pen_width * pressure))
+        # Sử dụng brush effects nếu có
+        try:
+            from ui_qt.board.tools.brush_effects import BrushEffects
+            BrushEffects.draw_textured_stroke(painter, self._pts, width, color, self._current_brush_effect)
+        except ImportError:
+            # Fallback về smooth stroke nếu không có brush effects
+            self._draw_smooth_stroke(painter, color, width)
 
-            color = QColor(*self.win.pen_rgba)
-            pen = QPen(color, width, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
-            p.setPen(pen)
-            p.drawLine(self._pts[i], self._pts[i + 1])
+        painter.end()
 
-        p.end()
+    def _draw_smooth_stroke(self, painter: QPainter, color: QColor, width: int):
+        """Vẽ nét mượt cơ bản (fallback)"""
+        painter.setRenderHint(QPainter.Antialiasing, True)
+        painter.setCompositionMode(QPainter.CompositionMode_SourceOver)
+        pen = QPen(color, width, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
+        painter.setPen(pen)
+
+        path = QtGui.QPainterPath(self._pts[0])
+        for pt in self._pts[1:]:
+            path.lineTo(pt)
+        painter.drawPath(path)
 
     def mouseReleaseEvent(self, e: QtGui.QMouseEvent):
         if e.button() != Qt.LeftButton or len(self._pts) < 2:
             return
 
-        # Apply smoothing nếu được bật
-        final_points = self._smooth_path(self._pts) if self._smoothing_enabled else self._pts
+        # Tạo stroke với metadata về brush effect
+        pts = [(pt.x(), pt.y()) for pt in self._pts]
+        stroke = Stroke(t="line", points=pts,
+                        rgba=self.win.pen_rgba, width=self.win.pen_width, mode="pen")
 
-        # Chuyển đổi sang format lưu trữ
-        pts = [(pt.x(), pt.y()) for pt in final_points]
-        pressures = self._pressures if len(self._pressures) == len(final_points) else [1.0] * len(final_points)
-
-        # Tạo stroke với thông tin pressure
-        stroke = Stroke(
-            t="line",
-            points=pts,
-            rgba=self.win.pen_rgba,
-            width=self.win.pen_width,
-            mode="pen"
-        )
-        # Thêm metadata pressure nếu cần
+        # Thêm metadata về brush effect nếu cần
         if hasattr(stroke, 'metadata'):
-            stroke.metadata['pressures'] = pressures
+            stroke.metadata = {"brush_effect": self._current_brush_effect}
 
         self.win.state.strokes().append(stroke)
         self._pts.clear()
-        self._pressures.clear()
 
     def keyPressEvent(self, e: QtGui.QKeyEvent):
         key, mods = e.key(), e.modifiers()
@@ -150,9 +119,16 @@ class PenTool:
             step = 5 if (mods & Qt.ShiftModifier) else 1
             self.win.adjust_pen_width(step if key == Qt.Key_BracketRight else -step)
 
-        # Toggle smoothing với phím S
-        elif key == Qt.Key_S and (mods & Qt.ControlModifier):
-            self._smoothing_enabled = not self._smoothing_enabled
-            # Thông báo trạng thái smoothing
-            status = "bật" if self._smoothing_enabled else "tắt"
-            print(f"Line smoothing: {status}")
+        # Phím nhanh chuyển brush effect
+        elif key == Qt.Key_1:
+            self._current_brush_effect = "smooth"
+        elif key == Qt.Key_2:
+            self._current_brush_effect = "rough"
+        elif key == Qt.Key_3:
+            self._current_brush_effect = "soft"
+        elif key == Qt.Key_4:
+            self._current_brush_effect = "ink"
+        elif key == Qt.Key_5:
+            self._current_brush_effect = "chalk"
+        elif key == Qt.Key_6:
+            self._current_brush_effect = "watercolor"

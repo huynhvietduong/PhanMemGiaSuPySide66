@@ -12,6 +12,7 @@ class BoardToolbar(QtWidgets.QToolBar):
     colorPicked = Signal(tuple)             # (r,g,b,a)
     penWidthChanged = Signal(int)
     eraserWidthChanged = Signal(int)
+    brushEffectChanged = Signal(str)        # "smooth"|"rough"|"soft"|"ink"|"chalk"|"watercolor"
 
     requestInsertImage = Signal()
     requestPasteImage = Signal()
@@ -84,6 +85,31 @@ class BoardToolbar(QtWidgets.QToolBar):
         self.btn_color = QtWidgets.QToolButton(self); self.btn_color.setText("🎨 Màu")
         self.btn_color.clicked.connect(self._pick_color); self.addWidget(self.btn_color)
 
+        # Brush effects selector
+        self.btn_brush_effect = QtWidgets.QToolButton(self)
+        self.btn_brush_effect.setText("🖌️ Hiệu ứng: Mượt")
+        self.btn_brush_effect.setCheckable(False)
+        self.btn_brush_effect.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+
+        menu_brush = QtWidgets.QMenu(self)
+        brush_effects = [
+            ("smooth", "Mượt", "🖌️"),
+            ("rough", "Gồ ghề", "✏️"),
+            ("soft", "Mềm", "🌸"),
+            ("ink", "Mực", "🖋️"),
+            ("chalk", "Phấn", "🎨"),
+            ("watercolor", "Màu nước", "💧")
+        ]
+
+        for effect_id, effect_name, icon in brush_effects:
+            action = QAction(f"{icon} {effect_name}", self)
+            action.triggered.connect(lambda checked=False, eid=effect_id, name=effect_name, ic=icon:
+                                   self._choose_brush_effect(eid, name, ic))
+            menu_brush.addAction(action)
+
+        self.btn_brush_effect.setMenu(menu_brush)
+        self.addWidget(self.btn_brush_effect)
+
         # Width menus
         self.addWidget(QtWidgets.QLabel("｜"))
         self.btn_pen_w = QtWidgets.QToolButton(self); self.btn_pen_w.setPopupMode(QtWidgets.QToolButton.InstantPopup)
@@ -139,6 +165,11 @@ class BoardToolbar(QtWidgets.QToolBar):
     def _pick_color(self):
         c = QtWidgets.QColorDialog.getColor(parent=self)
         if c.isValid(): self.colorPicked.emit((c.red(), c.green(), c.blue(), 255))
+
+    def _choose_brush_effect(self, effect_id: str, effect_name: str, icon: str):
+        """Chọn hiệu ứng brush"""
+        self.btn_brush_effect.setText(f"{icon} Hiệu ứng: {effect_name}")
+        self.brushEffectChanged.emit(effect_id)
 
     def _sync_width_buttons(self, pen_w: int, eraser_w: int):
         self.btn_pen_w.setText(f"✏️ {pen_w}px")
