@@ -40,11 +40,14 @@ class DashboardWindowQt(QtWidgets.QMainWindow):
         lay = QtWidgets.QVBoxLayout(inner)
 
         # ==== Nhóm chức năng ====
+        # Nhóm chức năng quản lý học tập - thêm Gói học
         self._add_section(lay, "📂 Quản lý học tập", [
-            ("Học sinh",           "assets/icons/students.png",         self._open("ui_qt.windows.student_window_qt", "StudentWindowQt")),
-            ("Nhóm học",           "assets/icons/groups.png",           self._open("ui_qt.windows.group_window_qt", "GroupWindowQt")),
-            ("Chuyên cần",         "assets/icons/attendance.png",       self._open("ui_qt.windows.attendance_report_window_qt", "AttendanceReportWindowQt")),
-            ("Lịch dạy (Main)",    "assets/icons/calendar.png",         self._open_main_window),
+            ("Học sinh", "assets/icons/students.png", self._open("ui_qt.windows.student_window_qt", "StudentWindowQt")),
+            ("Nhóm học", "assets/icons/groups.png", self._open("ui_qt.windows.group_window_qt", "GroupWindowQt")),
+            ("Gói học", "assets/icons/students.png", self._open("ui_qt.windows.package_window_qt", "PackageWindowQt")),
+            ("Chuyên cần", "assets/icons/attendance.png",
+             self._open("ui_qt.windows.attendance_report_window_qt", "AttendanceReportWindowQt")),
+            ("Lịch dạy (Main)", "assets/icons/calendar.png", self._open_main_window),
         ])
 
         self._add_section(lay, "📝 Bài tập & Câu hỏi", [
@@ -82,10 +85,12 @@ class DashboardWindowQt(QtWidgets.QMainWindow):
         grid = QtWidgets.QGridLayout()
         parent_layout.addLayout(grid)
 
+        # Điều chỉnh số cột mỗi hàng (mặc định là 5, có thể đổi thành 4)
+        columns_per_row = 4  # Thay đổi từ 5 thành 4 nếu muốn
+
         for i, (text, icon_path, handler) in enumerate(items):
             w = self._make_card(text, icon_path, handler)
-            grid.addWidget(w, i // 5, i % 5)
-
+            grid.addWidget(w, i // columns_per_row, i % columns_per_row)
     def _make_card(self, text: str, icon_path: str, handler: callable) -> QtWidgets.QWidget:
         btn = QtWidgets.QToolButton()
         btn.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
@@ -93,12 +98,16 @@ class DashboardWindowQt(QtWidgets.QMainWindow):
         if os.path.exists(icon_path):
             btn.setIcon(QtGui.QIcon(icon_path))
             btn.setIconSize(QtCore.QSize(64, 64))
-        btn.setFixedSize(140, 120)
+
+        # Tùy chỉnh kích thước nếu có nhiều nút trong 1 hàng
+        btn.setFixedSize(140, 120)  # Hoặc điều chỉnh theo nhu cầu
+
         btn.clicked.connect(handler)
         wrap = QtWidgets.QWidget()
-        lay = QtWidgets.QVBoxLayout(wrap); lay.setContentsMargins(6,6,6,6); lay.addWidget(btn, 0, Qt.AlignLeft)
+        lay = QtWidgets.QVBoxLayout(wrap)
+        lay.setContentsMargins(6, 6, 6, 6)
+        lay.addWidget(btn, 0, Qt.AlignLeft)
         return wrap
-
     # ui_qt/windows/dashboard_window_qt.py
 
     def _open(self, module_path: str, class_name: str):

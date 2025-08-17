@@ -21,6 +21,41 @@ def _to_date_str(d) -> str:
     except Exception:
         return datetime.now().strftime("%Y-%m-%d")
 
+
+# Lớp controller xử lý logic nghiệp vụ
+class SessionController:
+    """Controller quản lý logic nghiệp vụ cho session"""
+
+    def __init__(self, db_manager):
+        self.db = db_manager
+
+    # Xử lý lưu điểm danh học sinh
+    def save_attendance_data(self, students_status: Dict, group_id: int, session_date: str, makeup_joiners: List):
+        """Lưu dữ liệu điểm danh học sinh"""
+        for sid, widget in students_status.items():
+            # Bỏ qua các em đã xử lý học bù
+            if any(s["student_id"] == sid for s in makeup_joiners):
+                continue
+
+            status = widget.currentText()
+            make_up_status = "Chưa sắp xếp" if "Nghỉ" in status else ""
+
+            self.db.execute_query(
+                "INSERT INTO attendance (student_id, group_id, session_date, status, make_up_status) "
+                "VALUES (?, ?, ?, ?, ?) "
+                "ON CONFLICT(student_id, group_id, session_date) DO UPDATE SET "
+                "status = excluded.status, make_up_status = excluded.make_up_status",
+                (sid, group_id, session_date, status, make_up_status)
+            )
+
+    # Xử lý lưu nhật ký buổi học
+    def save_session_log_data(self, group_id: int, session_date: str, topic: str, homework: str):
+        """Lưu nhật ký buổi học"""
+        self.db.execute_query(
+            "INSERT OR REPLACE INTO session_logs (group_id, session_date, topic, homework) "
+            "VALUES (?, ?, ?, ?)",
+            (group_id, session_date, topic, homework)
+        )
 class SessionDetailWindowQt(QDialog):
     """
     PySide6 port của SessionDetailWindow (Tkinter)
@@ -37,6 +72,7 @@ class SessionDetailWindowQt(QDialog):
         self.setModal(True)
 
         self.db = db_manager
+        self.controller = SessionController(db_manager)
         self.is_makeup_session = makeup_info is not None
         self.session_date = _to_date_str(session_date)
         self.group_id = group_id
@@ -184,20 +220,34 @@ class SessionDetailWindowQt(QDialog):
         self.att_rows.addWidget(wrap)
 
     def _get_makeup_joiners(self) -> List[Dict[str, Any]]:
+        """Lấy danh sách học sinh học bù với truy vấn tối ưu"""
         if not self.group_id:
             return []
-        q = ("SELECT m.attendance_id, m.student_id, s.name "
-             "FROM makeup_sessions m JOIN students s ON m.student_id = s.id "
-             "WHERE m.host_group_id = ? AND m.session_date = ?")
-        rows = self.db.execute_query(q, (self.group_id, self.session_date), fetch="all") or []
-        out = []
+
+        # Sử dụng INNER JOIN thay vì JOIN và thêm ORDER BY
+        query = """
+        SELECT m.attendance_id, m.student_id, s.name 
+        FROM makeup_sessions m 
+        INNER JOIN students s ON m.student_id = s.id 
+        WHERE m.host_group_id = ? AND m.session_date = ?
+        ORDER BY s.name ASC
+        """
+
+        rows = self.db.execute_query(query, (self.group_id, self.session_date), fetch="all") or []
+
+        # Xử lý kết quả một cách hiệu quả
+        result = []
         for r in rows:
             att_id = r[0] if isinstance(r, (list, tuple)) else r["attendance_id"]
             sid = r[1] if isinstance(r, (list, tuple)) else r["student_id"]
             name = r[2] if isinstance(r, (list, tuple)) else r["name"]
-            out.append({"attendance_id": att_id, "student_id": sid, "student_name": name})
-        return out
+            result.append({
+                "attendance_id": att_id,
+                "student_id": sid,
+                "student_name": name
+            })
 
+        return result
     # ---------- load / save ----------
 
     def _load_today_log(self):
@@ -231,6 +281,38 @@ class SessionDetailWindowQt(QDialog):
             self.topic_text.setPlainText(topic or "")
             self.homework_text.setPlainText(homework or "")
 
+    # Kiểm tra tính hợp lệ dữ liệu buổi học
+    def _validate_session_data(self) -> bool:
+        """Kiểm tra tính hợp lệ của dữ liệu buổi học trước khi lưu"""
+
+        # Kiểm tra có ít nhất 1 học sinh được điểm danh
+        if not self.student_status:
+            QMessageBox.warning(self, "Thiếu dữ liệu", "Chưa có học sinh nào được điểm danh.")
+            return False
+
+        # Kiểm tra độ dài topic không quá 500 ký tự
+        topic = self.topic_text.toPlainText().strip()
+        if len(topic) > 500:
+            QMessageBox.warning(self, "Dữ liệu quá dài", "Chủ đề không được vượt quá 500 ký tự.")
+            return False
+
+        # Kiểm tra độ dài homework không quá 1000 ký tự
+        homework = self.homework_text.toPlainText().strip()
+        if len(homework) > 1000:
+            QMessageBox.warning(self, "Dữ liệu quá dài", "Bài tập về nhà không được vượt quá 1000 ký tự.")
+            return False
+
+        # Kiểm tra ngày học hợp lệ
+        try:
+            session_date = datetime.strptime(self.session_date, "%Y-%m-%d")
+            if session_date > datetime.now():
+                QMessageBox.warning(self, "Ngày không hợp lệ", "Không thể tạo buổi học trong tương lai.")
+                return False
+        except ValueError:
+            QMessageBox.critical(self, "Lỗi ngày tháng", "Định dạng ngày không hợp lệ.")
+            return False
+
+        return True
     def _save_session(self, keep_open: bool = False) -> bool:
         """
         Lưu điểm danh + nhật ký buổi học.
@@ -239,6 +321,9 @@ class SessionDetailWindowQt(QDialog):
         Trả về True nếu lưu thành công, ngược lại False.
         """
         try:
+            # Validate dữ liệu trước khi lưu
+            if not self._validate_session_data():
+                return False
             # 1) Xử lý danh sách học bù (nếu là buổi bù hoặc buổi thường có học sinh học bù)
             list_to_process = self.makeup_list if self.is_makeup_session else self.makeup_joiners
             for mk in list_to_process:
@@ -309,7 +394,19 @@ class SessionDetailWindowQt(QDialog):
             return True
 
         except Exception as e:
-            QtWidgets.QMessageBox.critical(self, "Lỗi Lưu trữ", f"Đã có lỗi khi lưu dữ liệu:\n{e}")
+            # Xử lý lỗi chi tiết theo loại
+            if "UNIQUE constraint failed" in str(e):
+                QtWidgets.QMessageBox.warning(self, "Trùng lặp dữ liệu",
+                                              "Dữ liệu buổi học này đã tồn tại. Vui lòng kiểm tra lại.")
+            elif "database is locked" in str(e):
+                QtWidgets.QMessageBox.critical(self, "Lỗi cơ sở dữ liệu",
+                                               "Cơ sở dữ liệu đang bị khóa. Vui lòng thử lại sau.")
+            elif "no such table" in str(e):
+                QtWidgets.QMessageBox.critical(self, "Lỗi cấu trúc dữ liệu",
+                                               "Cơ sở dữ liệu chưa được khởi tạo đúng cách.")
+            else:
+                QtWidgets.QMessageBox.critical(self, "Lỗi không xác định",
+                                               f"Đã có lỗi khi lưu dữ liệu:\n{str(e)}\n\nVui lòng liên hệ hỗ trợ kỹ thuật.")
             return False
 
     # ---------- Lesson files ----------
@@ -325,15 +422,49 @@ class SessionDetailWindowQt(QDialog):
             self._save_lesson_file(file_path)
 
     def _save_lesson_file(self, file_path: str):
+        """Lưu file bài giảng với kiểm tra bảo mật và validation"""
         try:
+            # Kiểm tra file tồn tại và có thể đọc
+            if not os.path.exists(file_path):
+                raise FileNotFoundError("File không tồn tại")
+
+            if not os.access(file_path, os.R_OK):
+                raise PermissionError("Không có quyền đọc file")
+
+            # Kiểm tra định dạng file cho phép
+            allowed_extensions = {'.pdf', '.pptx', '.docx', '.enb', '.one', '.jpg', '.png', '.txt', '.ppt', '.xls',
+                                  '.xlsx'}
+            file_ext = Path(file_path).suffix.lower()
+            if file_ext not in allowed_extensions:
+                raise ValueError(f"Định dạng file {file_ext} không được hỗ trợ")
+
+            # Kiểm tra kích thước file (tối đa 50MB)
+            file_size = os.path.getsize(file_path)
+            max_size = 50 * 1024 * 1024  # 50MB
+            if file_size > max_size:
+                raise ValueError(f"File quá lớn (tối đa 50MB). Kích thước hiện tại: {file_size // 1024 // 1024}MB")
+
+            # Kiểm tra tên file hợp lệ
+            file_name = Path(file_path).name
+            if len(file_name) > 255:
+                raise ValueError("Tên file quá dài (tối đa 255 ký tự)")
+
             file_type = Path(file_path).suffix
             title = Path(file_path).stem
+
+            # Lưu vào database
             self.db.add_lesson_file(self.session_id, file_path, file_type, title, "")
             QMessageBox.information(self, "✅ Thành công", "Đã lưu file bài giảng vào CSDL.")
             self._render_lesson_files()
+
+        except FileNotFoundError as e:
+            QMessageBox.critical(self, "Lỗi file", f"File không tìm thấy: {str(e)}")
+        except PermissionError as e:
+            QMessageBox.critical(self, "Lỗi quyền truy cập", f"Không có quyền truy cập: {str(e)}")
+        except ValueError as e:
+            QMessageBox.warning(self, "Lỗi định dạng", str(e))
         except Exception as e:
             QMessageBox.critical(self, "Lỗi", f"Không thể lưu file bài giảng: {e}")
-
     def _render_lesson_files(self):
         # clear
         for i in reversed(range(self.files_l.count())):

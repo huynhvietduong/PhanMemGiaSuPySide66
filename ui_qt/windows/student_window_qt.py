@@ -5,8 +5,20 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt, QAbstractTableModel, QModelIndex
 from datetime import datetime
+# Import thư viện xử lý Excel
+try:
+    import pandas as pd
+    PANDAS_AVAILABLE = True
+except ImportError:
+    PANDAS_AVAILABLE = False
 
-
+from PySide6.QtWidgets import QFileDialog
+# Import thêm các widget cần thiết
+from PySide6.QtWidgets import (
+    QTabWidget, QFormLayout, QTextEdit, QGroupBox,
+    QGridLayout  # Thêm vào import hiện có
+)
+from datetime import datetime
 # ---- Table model thay cho ttk.Treeview ----
 class StudentsTableModel(QAbstractTableModel):
     HEADERS = ["ID", "Họ tên", "Lớp", "Nhóm"]
@@ -46,8 +58,6 @@ class StudentsTableModel(QAbstractTableModel):
         self.beginResetModel()
         self._rows = rows
         self.endResetModel()
-
-
 class StudentWindowQt(QWidget):
     """
     Quản lý Học sinh (PySide6) — chuyển đổi từ Tkinter Toplevel.
@@ -66,6 +76,7 @@ class StudentWindowQt(QWidget):
     # ---------- UI ----------
     def _build_ui(self):
         root = QHBoxLayout(self)
+
         # Left: table
         left = QVBoxLayout()
         title = QLabel("Danh sách học sinh")
@@ -73,6 +84,15 @@ class StudentWindowQt(QWidget):
         title.setStyleSheet("font-size:16px; font-weight:600;")
         left.addWidget(title)
 
+        # Thêm widget tìm kiếm vào layout trái
+        search_widget = self._build_search_widget()
+        left.addWidget(search_widget)
+
+        # Thêm widget thống kê vào layout trái
+        stats_widget = self._build_stats_widget()
+        left.addWidget(stats_widget)
+
+        # Bảng danh sách học sinh
         self.table = QTableView()
         self.model = StudentsTableModel([])
         self.table.setModel(self.model)
@@ -82,21 +102,26 @@ class StudentWindowQt(QWidget):
         self.table.clicked.connect(self.on_student_select)
         left.addWidget(self.table, 1)
 
-        # Right: form
+        # Right: form với tabs
         right = QVBoxLayout()
         right_title = QLabel("Hồ sơ học sinh")
         right_title.setStyleSheet("font-size:16px; font-weight:600;")
         right.addWidget(right_title)
 
+        # Tạo Tab Widget để chia nhóm thông tin
+        self.student_tabs = QTabWidget()
+
+        # Tab 1: Thông tin cơ bản
+        basic_tab = QWidget()
+        basic_layout = QVBoxLayout(basic_tab)
+
         # Thông tin cá nhân
         gb_info = QGroupBox("Thông tin cá nhân")
         ly_info = QVBoxLayout(gb_info)
-
         self.ed_name = self._labeled_line(ly_info, "Họ tên:")
         self.ed_grade = self._labeled_line(ly_info, "Khối lớp:")
         self.ed_phone = self._labeled_line(ly_info, "SĐT:")
-
-        right.addWidget(gb_info)
+        basic_layout.addWidget(gb_info)
 
         # Thông tin học tập
         gb_study = QGroupBox("Thông tin học tập")
@@ -120,8 +145,7 @@ class StudentWindowQt(QWidget):
         row_group.addWidget(self.lb_group)
         row_group.addWidget(self.cb_group, 1)
         ly_study.addLayout(row_group)
-
-        right.addWidget(gb_study)
+        basic_layout.addWidget(gb_study)
 
         # Thông tin học phí
         gb_fee = QGroupBox("Thông tin học phí")
@@ -139,10 +163,19 @@ class StudentWindowQt(QWidget):
         self.ed_cycle_date.setPlaceholderText("DD-MM-YYYY")
         row_date.addWidget(self.ed_cycle_date, 1)
         ly_fee.addLayout(row_date)
+        basic_layout.addWidget(gb_fee)
 
-        right.addWidget(gb_fee)
+        # Thêm tab cơ bản vào tab widget
+        self.student_tabs.addTab(basic_tab, "📝 Cơ bản")
 
-        # Buttons
+        # Tab 2: Thông tin phụ huynh
+        parent_tab = self._build_parent_info_widget()
+        self.student_tabs.addTab(parent_tab, "👨‍👩‍👧‍👦 Phụ huynh")
+
+        # Thêm tab widget vào layout phải
+        right.addWidget(self.student_tabs)
+
+        # Buttons chính
         row_btn = QHBoxLayout()
         row_btn.addStretch(1)
         self.btn_add = QPushButton("Thêm mới")
@@ -153,6 +186,17 @@ class StudentWindowQt(QWidget):
             row_btn.addWidget(b)
         right.addLayout(row_btn)
 
+        # Thêm nút Excel vào toolbar
+        excel_row = QHBoxLayout()
+        excel_row.addStretch(1)
+        btn_export = QPushButton("📤 Xuất Excel")
+        btn_export.clicked.connect(self.export_to_excel)
+        btn_import = QPushButton("📥 Nhập Excel")
+        btn_import.clicked.connect(self.import_from_excel)
+        excel_row.addWidget(btn_export)
+        excel_row.addWidget(btn_import)
+        right.addLayout(excel_row)
+
         # Wire actions
         self.btn_add.clicked.connect(self.add_student)
         self.btn_update.clicked.connect(self.update_student)
@@ -162,7 +206,6 @@ class StudentWindowQt(QWidget):
         # Layout to root
         root.addLayout(left, 2)
         root.addLayout(right, 3)
-
     def _labeled_line(self, parent_layout: QVBoxLayout, label: str) -> QLineEdit:
         row = QHBoxLayout()
         row.addWidget(QLabel(label))
@@ -192,7 +235,8 @@ class StudentWindowQt(QWidget):
         self.model.set_rows(students)
         if students:
             self.table.selectRow(0)
-
+        # Cập nhật thống kê sau khi load dữ liệu
+        self._update_student_stats()
     def on_student_select(self, index: QModelIndex):
         row = index.row()
         student_id = self.model.student_id_at(row)
@@ -345,3 +389,314 @@ class StudentWindowQt(QWidget):
         self.rb_private.setChecked(True)
         self.toggle_group_select()
         self.table.clearSelection()
+
+    # Widget tìm kiếm và lọc nâng cao
+    def _build_search_widget(self) -> QWidget:
+        """Tạo widget tìm kiếm và lọc học sinh"""
+        search_widget = QWidget()
+        layout = QVBoxLayout(search_widget)
+
+        # Tiêu đề
+        search_title = QLabel("🔍 Tìm kiếm & Lọc")
+        search_title.setStyleSheet("font-weight: 600; margin-bottom: 8px;")
+        layout.addWidget(search_title)
+
+        # Hàng 1: Tìm kiếm theo tên
+        row1 = QHBoxLayout()
+        row1.addWidget(QLabel("Tên:"))
+        self.search_name = QLineEdit()
+        self.search_name.setPlaceholderText("Nhập tên học sinh...")
+        self.search_name.textChanged.connect(self._filter_students)
+        row1.addWidget(self.search_name, 1)
+        layout.addLayout(row1)
+
+        # Hàng 2: Lọc theo lớp và trạng thái
+        row2 = QHBoxLayout()
+        row2.addWidget(QLabel("Lớp:"))
+        self.filter_grade = QComboBox()
+        self.filter_grade.addItems(["Tất cả", "6", "7", "8", "9", "10", "11", "12"])
+        self.filter_grade.currentTextChanged.connect(self._filter_students)
+        row2.addWidget(self.filter_grade)
+
+        row2.addWidget(QLabel("Trạng thái:"))
+        self.filter_status = QComboBox()
+        self.filter_status.addItems(["Tất cả", "Học nhóm", "Kèm riêng"])
+        self.filter_status.currentTextChanged.connect(self._filter_students)
+        row2.addWidget(self.filter_status)
+        layout.addLayout(row2)
+
+        return search_widget
+
+    # Phương thức lọc học sinh theo tiêu chí
+    # Phương thức lọc học sinh theo tiêu chí - ĐÃ SỬA LỖI
+    def _filter_students(self):
+        """Lọc danh sách học sinh theo các tiêu chí tìm kiếm"""
+        name_filter = self.search_name.text().strip().lower()
+        grade_filter = self.filter_grade.currentText()
+        status_filter = self.filter_status.currentText()
+
+        # Lọc dữ liệu từ model - SỬA CHÍNH TẠI ĐÂY
+        for row in range(self.model.rowCount()):
+            # Sử dụng model.data() thay vì model.item()
+            item_name = self.model.data(self.model.index(row, 1), Qt.DisplayRole) or ""
+            item_grade = self.model.data(self.model.index(row, 2), Qt.DisplayRole) or ""
+            item_group = self.model.data(self.model.index(row, 3), Qt.DisplayRole) or ""
+
+            # Chuyển tên thành chữ thường để so sánh
+            item_name = item_name.lower()
+
+            # Xác định trạng thái từ thông tin nhóm
+            if item_group and item_group != "Kèm riêng" and item_group.strip():
+                item_status = "Học nhóm"
+            else:
+                item_status = "Kèm riêng"
+
+            # Kiểm tra điều kiện lọc
+            name_match = name_filter in item_name if name_filter else True
+            grade_match = grade_filter == "Tất cả" or grade_filter == str(item_grade)
+            status_match = status_filter == "Tất cả" or status_filter == item_status
+
+            # Hiển thị/ẩn hàng
+            self.table.setRowHidden(row, not (name_match and grade_match and status_match))
+    # Xuất danh sách học sinh ra Excel
+    def export_to_excel(self):
+        """Xuất danh sách học sinh ra file Excel"""
+        try:
+            if not PANDAS_AVAILABLE:
+                QMessageBox.warning(self, "Thiếu thư viện",
+                                    "Cần cài đặt pandas để xuất Excel:\npip install pandas openpyxl")
+                return
+
+            # Chọn vị trí lưu file
+            file_path, _ = QFileDialog.getSaveFileName(
+                self, "Xuất danh sách học sinh",
+                f"DanhSachHocSinh_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
+                "Excel Files (*.xlsx)"
+            )
+
+            if not file_path:
+                return
+
+            # Lấy dữ liệu từ database
+            students = self.db.get_all_students_for_display() or []
+
+            # Chuyển đổi thành DataFrame
+            df_data = []
+            for student in students:
+                df_data.append({
+                    'ID': student.get('id', ''),
+                    'Họ tên': student.get('name', ''),
+                    'Lớp': student.get('grade', ''),
+                    'SĐT': student.get('phone', ''),
+                    'Nhóm': student.get('group_name', ''),
+                    'Trạng thái': student.get('status', ''),
+                    'Gói học': student.get('package_name', ''),
+                    'Ngày bắt đầu': student.get('cycle_start_date', '')
+                })
+
+            df = pd.DataFrame(df_data)
+            df.to_excel(file_path, index=False, sheet_name='Danh sách học sinh')
+
+            QMessageBox.information(self, "Thành công", f"Đã xuất {len(df_data)} học sinh ra:\n{file_path}")
+
+        except Exception as e:
+            QMessageBox.critical(self, "Lỗi xuất Excel", f"Không thể xuất file Excel:\n{str(e)}")
+
+    # Nhập danh sách học sinh từ Excel
+    def import_from_excel(self):
+        """Nhập danh sách học sinh từ file Excel"""
+        try:
+            if not PANDAS_AVAILABLE:
+                QMessageBox.warning(self, "Thiếu thư viện",
+                                    "Cần cài đặt pandas để nhập Excel:\npip install pandas openpyxl")
+                return
+
+            # Chọn file Excel
+            file_path, _ = QFileDialog.getOpenFileName(
+                self, "Nhập danh sách học sinh",
+                "", "Excel Files (*.xlsx *.xls)"
+            )
+
+            if not file_path:
+                return
+
+            # Đọc file Excel
+            df = pd.read_excel(file_path)
+
+            # Validation cột bắt buộc
+            required_columns = ['Họ tên', 'Lớp', 'SĐT']
+            missing_columns = [col for col in required_columns if col not in df.columns]
+
+            if missing_columns:
+                QMessageBox.critical(self, "Lỗi định dạng",
+                                     f"File Excel thiếu các cột: {', '.join(missing_columns)}")
+                return
+
+            # Xử lý từng dòng
+            success_count = 0
+            error_list = []
+
+            for index, row in df.iterrows():
+                try:
+                    # Chuẩn bị dữ liệu
+                    student_data = {
+                        'Họ tên': str(row.get('Họ tên', '')).strip(),
+                        'Khối lớp': str(row.get('Lớp', '')).strip(),
+                        'SĐT': str(row.get('SĐT', '')).strip(),
+                        'start_date': datetime.now().strftime('%Y-%m-%d'),
+                        'status': str(row.get('Trạng thái', 'Kèm riêng')).strip(),
+                        'group_id': None,  # Sẽ xử lý sau
+                        'package_id': None,  # Sẽ xử lý sau
+                        'cycle_start_date': ''
+                    }
+
+                    # Validation dữ liệu
+                    if not student_data['Họ tên']:
+                        error_list.append(f"Dòng {index + 2}: Thiếu họ tên")
+                        continue
+
+                    # Thêm vào database
+                    self.db.add_student(student_data)
+                    success_count += 1
+
+                except Exception as e:
+                    error_list.append(f"Dòng {index + 2}: {str(e)}")
+
+            # Thông báo kết quả
+            message = f"Đã nhập thành công {success_count} học sinh."
+            if error_list:
+                message += f"\n\nLỗi ({len(error_list)} dòng):\n" + "\n".join(error_list[:5])
+                if len(error_list) > 5:
+                    message += f"\n... và {len(error_list) - 5} lỗi khác"
+
+            QMessageBox.information(self, "Kết quả nhập Excel", message)
+
+            # Reload danh sách
+            if success_count > 0:
+                self.load_students()
+
+        except Exception as e:
+            QMessageBox.critical(self, "Lỗi nhập Excel", f"Không thể đọc file Excel:\n{str(e)}")
+
+    # Widget quản lý thông tin phụ huynh
+    def _build_parent_info_widget(self) -> QWidget:
+        """Tạo widget thông tin phụ huynh"""
+        parent_widget = QGroupBox("👨‍👩‍👧‍👦 Thông tin phụ huynh")
+        layout = QVBoxLayout(parent_widget)
+
+        # Thông tin bố
+        father_group = QGroupBox("Thông tin bố")
+        father_layout = QFormLayout(father_group)
+
+        self.father_name = QLineEdit()
+        self.father_phone = QLineEdit()
+        self.father_job = QLineEdit()
+
+        father_layout.addRow("Họ tên:", self.father_name)
+        father_layout.addRow("SĐT:", self.father_phone)
+        father_layout.addRow("Nghề nghiệp:", self.father_job)
+
+        # Thông tin mẹ
+        mother_group = QGroupBox("Thông tin mẹ")
+        mother_layout = QFormLayout(mother_group)
+
+        self.mother_name = QLineEdit()
+        self.mother_phone = QLineEdit()
+        self.mother_job = QLineEdit()
+
+        mother_layout.addRow("Họ tên:", self.mother_name)
+        mother_layout.addRow("SĐT:", self.mother_phone)
+        mother_layout.addRow("Nghề nghiệp:", self.mother_job)
+
+        # Thông tin chung
+        general_group = QGroupBox("Thông tin chung")
+        general_layout = QFormLayout(general_group)
+
+        self.family_address = QTextEdit()
+        self.family_address.setMaximumHeight(60)
+        self.emergency_contact = QLineEdit()
+
+        general_layout.addRow("Địa chỉ:", self.family_address)
+        general_layout.addRow("Liên hệ khẩn cấp:", self.emergency_contact)
+
+        layout.addWidget(father_group)
+        layout.addWidget(mother_group)
+        layout.addWidget(general_group)
+
+        return parent_widget
+
+    # Widget dashboard thống kê học sinh
+    def _build_stats_widget(self) -> QWidget:
+        """Tạo widget thống kê tổng quan học sinh"""
+        stats_widget = QGroupBox("📊 Thống kê tổng quan")
+        layout = QGridLayout(stats_widget)
+
+        # Thống kê số lượng
+        self.total_label = QLabel("Tổng: 0")
+        self.total_label.setStyleSheet("font-size: 14px; font-weight: bold; color: #2196F3;")
+
+        self.active_label = QLabel("Đang học: 0")
+        self.active_label.setStyleSheet("font-size: 12px; color: #4CAF50;")
+
+        self.group_label = QLabel("Học nhóm: 0")
+        self.group_label.setStyleSheet("font-size: 12px; color: #FF9800;")
+
+        self.private_label = QLabel("Kèm riêng: 0")
+        self.private_label.setStyleSheet("font-size: 12px; color: #9C27B0;")
+
+        # Phân bố theo lớp
+        self.grade_stats = QLabel("Phân bố theo lớp:")
+        self.grade_stats.setStyleSheet("font-size: 11px; color: #666;")
+
+        layout.addWidget(self.total_label, 0, 0, 1, 2)
+        layout.addWidget(self.active_label, 1, 0)
+        layout.addWidget(self.group_label, 1, 1)
+        layout.addWidget(self.private_label, 2, 0)
+        layout.addWidget(self.grade_stats, 3, 0, 1, 2)
+
+        return stats_widget
+
+    # Cập nhật thống kê học sinh
+    def _update_student_stats(self):
+        """Cập nhật các số liệu thống kê học sinh"""
+        try:
+            # Lấy dữ liệu thống kê từ database
+            total_query = "SELECT COUNT(*) as total FROM students"
+            total_result = self.db.execute_query(total_query, fetch='one')
+            total_count = total_result['total'] if total_result else 0
+
+            # Thống kê theo trạng thái
+            status_query = """
+                SELECT status, COUNT(*) as count 
+                FROM students 
+                GROUP BY status
+            """
+            status_results = self.db.execute_query(status_query, fetch='all') or []
+
+            group_count = 0
+            private_count = 0
+            for row in status_results:
+                if 'nhóm' in row['status'].lower():
+                    group_count = row['count']
+                else:
+                    private_count = row['count']
+
+            # Thống kê theo lớp
+            grade_query = """
+                SELECT grade, COUNT(*) as count 
+                FROM students 
+                GROUP BY grade 
+                ORDER BY grade
+            """
+            grade_results = self.db.execute_query(grade_query, fetch='all') or []
+            grade_text = "Phân bố: " + ", ".join([f"Lớp {row['grade']}: {row['count']}" for row in grade_results])
+
+            # Cập nhật UI
+            self.total_label.setText(f"Tổng: {total_count}")
+            self.active_label.setText(f"Đang học: {total_count}")
+            self.group_label.setText(f"Học nhóm: {group_count}")
+            self.private_label.setText(f"Kèm riêng: {private_count}")
+            self.grade_stats.setText(grade_text[:50] + "..." if len(grade_text) > 50 else grade_text)
+
+        except Exception as e:
+            print(f"Lỗi cập nhật thống kê: {e}")
