@@ -524,7 +524,7 @@ class StudentWindowQt(QWidget):
             df = pd.read_excel(file_path)
 
             # Validation cột bắt buộc
-            required_columns = ['Họ tên', 'Lớp', 'SĐT']
+            required_columns = ['Họ tên', 'Lớp']
             missing_columns = [col for col in required_columns if col not in df.columns]
 
             if missing_columns:

@@ -108,6 +108,15 @@ class DatabaseManager:
                 FOREIGN KEY (assignment_id) REFERENCES assigned_exercises(id) ON DELETE CASCADE
             )
             """)
+            c.execute("""
+                CREATE TABLE IF NOT EXISTS exercise_tree (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    parent_id INTEGER,
+                    name TEXT NOT NULL,
+                    level TEXT NOT NULL,
+                    UNIQUE(parent_id, name, level)
+                );
+            """)
 
             self.conn.commit()
         except sqlite3.Error as e:
