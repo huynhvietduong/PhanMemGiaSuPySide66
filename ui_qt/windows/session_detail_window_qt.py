@@ -534,15 +534,33 @@ class SessionDetailWindowQt(QDialog):
 
         # Fix: Xử lý khi đóng DrawingBoard - hiện lại SessionDetailWindow
         def on_board_closed():
-            self.show()
-            self.raise_()
-            self.activateWindow()
+            # Kiểm tra xem đối tượng còn tồn tại không trước khi gọi show()
+            try:
+                if not self.isVisible():
+                    self.show()
+                    self.raise_()
+                    self.activateWindow()
+            except RuntimeError:
+                # Đối tượng đã bị xóa, bỏ qua
+                pass
 
         win.destroyed.connect(on_board_closed)
         win.show()
         win.raise_()
         win.activateWindow()
 
+    # Phương thức khôi phục cửa sổ một cách an toàn
+    def _restore_window_safely(self):
+        """Khôi phục hiển thị cửa sổ SessionDetail một cách an toàn sau khi đóng DrawingBoard"""
+        try:
+            # Kiểm tra xem đối tượng còn hợp lệ không
+            if hasattr(self, 'isVisible') and not self.isVisible():
+                self.show()
+                self.raise_()
+                self.activateWindow()
+        except (RuntimeError, AttributeError):
+            # Đối tượng đã bị xóa hoặc không hợp lệ, bỏ qua
+            pass
     def _open_skill_rating(self):
         # lấy danh sách học sinh
         if self.is_makeup_session:
