@@ -6,6 +6,7 @@ class DatabaseManager:
         self.conn = self.create_connection()
         self._initialize_schema()
         self.upgrade_database_schema()
+        self.upgrade_exercise_tree_schema()
 
     def create_connection(self):
         try:
@@ -109,14 +110,16 @@ class DatabaseManager:
             )
             """)
             c.execute("""
-                CREATE TABLE IF NOT EXISTS exercise_tree (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    parent_id INTEGER,
-                    name TEXT NOT NULL,
-                    level TEXT NOT NULL,
-                    UNIQUE(parent_id, name, level)
-                );
-            """)
+                        CREATE TABLE IF NOT EXISTS exercise_tree (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            parent_id INTEGER,
+                            name TEXT NOT NULL,
+                            level TEXT NOT NULL,
+                            description TEXT DEFAULT '',
+                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                            FOREIGN KEY (parent_id) REFERENCES exercise_tree (id)
+                        )
+                    """)
 
             self.conn.commit()
         except sqlite3.Error as e:
@@ -352,3 +355,60 @@ class DatabaseManager:
             notes
         )
         return self.execute_query(query, params)
+
+    # GIẢI PHÁP SỬA LỖI SQLite VÀ RuntimeError
+
+    # ===================== BƯỚC 1: SỬA database.py =====================
+
+    # Vị trí: Trong file database.py, phương thức upgrade_exercise_tree_schema
+    # Hành động: THAY THẾ toàn bộ phương thức
+
+    def upgrade_exercise_tree_schema(self):
+        """Nâng cấp schema cho bảng exercise_tree"""
+        c = self.conn.cursor()
+        try:
+            # Kiểm tra xem bảng có tồn tại không
+            c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='exercise_tree'")
+            if not c.fetchone():
+                # Tạo bảng mới nếu chưa có
+                c.execute("""
+                    CREATE TABLE exercise_tree (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        parent_id INTEGER,
+                        name TEXT NOT NULL,
+                        level TEXT NOT NULL,
+                        description TEXT DEFAULT '',
+                        created_at TEXT DEFAULT '',
+                        FOREIGN KEY (parent_id) REFERENCES exercise_tree (id)
+                    )
+                """)
+                print("✅ Đã tạo bảng exercise_tree")
+            else:
+                # Kiểm tra và thêm các cột thiếu
+                c.execute("PRAGMA table_info(exercise_tree)")
+                columns = [column[1] for column in c.fetchall()]
+
+                if 'description' not in columns:
+                    # Thêm cột description với default value đơn giản
+                    c.execute("ALTER TABLE exercise_tree ADD COLUMN description TEXT DEFAULT ''")
+                    print("✅ Đã thêm cột description vào bảng exercise_tree")
+
+                if 'created_at' not in columns:
+                    # Thêm cột created_at với default value đơn giản
+                    c.execute("ALTER TABLE exercise_tree ADD COLUMN created_at TEXT DEFAULT ''")
+                    print("✅ Đã thêm cột created_at vào bảng exercise_tree")
+
+                    # Cập nhật created_at cho các record hiện có
+                    c.execute("""
+                        UPDATE exercise_tree 
+                        SET created_at = datetime('now') 
+                        WHERE created_at = '' OR created_at IS NULL
+                    """)
+                    print("✅ Đã cập nhật created_at cho dữ liệu hiện có")
+
+            self.conn.commit()
+            return True
+
+        except sqlite3.Error as e:
+            print(f"❌ Lỗi nâng cấp schema exercise_tree: {e}")
+            return False

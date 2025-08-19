@@ -107,13 +107,43 @@ class SessionDetailWindowQt(QDialog):
         # ====== Điểm danh ======
         box_att = QGroupBox("Điểm danh ✅")
         att_l = QVBoxLayout(box_att)
+        if self.is_makeup_session:
+            student_count = len(self.makeup_list)
+            header_text = f"Điểm danh buổi học bù ({student_count} học sinh)"
+        else:
+            students = self.db.execute_query(
+                "SELECT COUNT(*) as count FROM students WHERE group_id = ?",
+                (self.group_id,), fetch="one"
+            )
+            student_count = students["count"] if students else 0
+            header_text = f"Điểm danh nhóm {self.group_name} ({student_count} học sinh)"
+
+        header_label = QLabel(header_text)
+        header_label.setStyleSheet("font-weight: bold; color: #1976d2; padding: 5px;")
+        att_l.addWidget(header_label)
 
         # danh sách hàng điểm danh trong scroll
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
+        scroll.setMinimumHeight(200)  # Tối thiểu hiển thị 4-5 học sinh
+        scroll.setMaximumHeight(400)  # Tối đa không quá cao
+
+        # Style cho scroll area
+        scroll.setStyleSheet("""
+            QScrollArea {
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                background-color: #fafafa;
+            }
+            QScrollArea > QWidget > QWidget {
+                background-color: #fafafa;
+            }
+        """)
+
         att_container = QWidget()
         self.att_rows = QVBoxLayout(att_container)
-        self.att_rows.setContentsMargins(6, 6, 6, 6)
+        self.att_rows.setContentsMargins(8, 8, 8, 8)
+        self.att_rows.setSpacing(5)
         scroll.setWidget(att_container)
         att_l.addWidget(scroll)
 
@@ -129,15 +159,25 @@ class SessionDetailWindowQt(QDialog):
                 (self.group_id,), fetch="all"
             ) or []
             if not students and not self.makeup_joiners:
-                self.att_rows.addWidget(QLabel("Chưa có học sinh nào trong nhóm này."))
+                no_student_label = QLabel("⚠️ Chưa có học sinh nào trong nhóm này.")
+                no_student_label.setStyleSheet("color: #ff5722; font-style: italic; padding: 20px;")
+                self.att_rows.addWidget(no_student_label)
             else:
+                # Hiển thị học sinh chính
                 for sid, sname in students:
                     self._add_attendance_row(sid, sname)
+
+                # Separator và học sinh học bù
                 if self.makeup_joiners:
-                    self.att_rows.addWidget(self._hr())
+                    separator = self._create_separator("Học sinh học bù")
+                    self.att_rows.addWidget(separator)
                     for mk in self.makeup_joiners:
-                        self._add_attendance_row(mk["student_id"], f"[Bù] {mk['student_name']}")
-        root.addWidget(box_att, 1)
+                        self._add_attendance_row(mk["student_id"], f"🔄 {mk['student_name']}")
+
+            # Thêm stretch ở cuối để đẩy content lên trên
+            self.att_rows.addStretch(1)
+
+        root.addWidget(box_att, 3)
 
         # ====== Nhật ký buổi học ======
         box_log = QGroupBox("Nhật ký buổi dạy hôm nay ✍️")
@@ -203,22 +243,90 @@ class SessionDetailWindowQt(QDialog):
         line.setFrameShadow(QtWidgets.QFrame.Sunken)
         return line
 
+    # Tạo hàng điểm danh với style đẹp và UX tốt
     def _add_attendance_row(self, student_id: int, display_name: str):
-        row = QHBoxLayout()
-        lab = QLabel(display_name)
-        lab.setMinimumWidth(240)
-        row.addWidget(lab)
+        """Tạo hàng điểm danh với style đẹp hơn"""
+        row_widget = QWidget()
+        row_widget.setStyleSheet("""
+            QWidget {
+                background-color: white;
+                border: 1px solid #e0e0e0;
+                border-radius: 6px;
+                margin: 2px;
+            }
+            QWidget:hover {
+                border-color: #2196F3;
+                background-color: #f5f5f5;
+            }
+        """)
 
+        row = QHBoxLayout(row_widget)
+        row.setContentsMargins(10, 8, 10, 8)
+
+        # Tên học sinh với icon
+        name_label = QLabel(display_name)
+        name_label.setMinimumWidth(200)
+        name_label.setStyleSheet("font-weight: 500; color: #333;")
+
+        # Thêm màu cho học sinh học bù
+        if "🔄" in display_name:
+            name_label.setStyleSheet("font-weight: 500; color: #ff9800;")
+
+        row.addWidget(name_label)
+
+        # ComboBox trạng thái với style
         cb = QComboBox()
-        cb.addItems(["Có mặt", "Nghỉ có phép", "Nghỉ không phép"])
+        cb.addItems(["✅ Có mặt", "📝 Nghỉ có phép", "❌ Nghỉ không phép"])
         cb.setCurrentIndex(0)
+        cb.setMinimumWidth(150)
+        cb.setStyleSheet("""
+            QComboBox {
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                padding: 6px;
+                background: white;
+            }
+            QComboBox:focus {
+                border-color: #2196F3;
+            }
+        """)
+
         row.addWidget(cb)
+
+        # Lưu reference
         self.student_status[student_id] = cb
 
-        wrap = QWidget()
-        wrap.setLayout(row)
-        self.att_rows.addWidget(wrap)
+        # Thêm vào layout chính
+        self.att_rows.addWidget(row_widget)
 
+    # Tạo separator với title để phân chia các nhóm học sinh
+    def _create_separator(self, title: str) -> QWidget:
+        """Tạo separator với title"""
+        separator_widget = QWidget()
+        separator_layout = QHBoxLayout(separator_widget)
+        separator_layout.setContentsMargins(0, 10, 0, 5)
+
+        # Line trái
+        line1 = QtWidgets.QFrame()
+        line1.setFrameShape(QtWidgets.QFrame.HLine)
+        line1.setFrameShadow(QtWidgets.QFrame.Sunken)
+        line1.setStyleSheet("color: #bbb;")
+
+        # Title
+        title_label = QLabel(title)
+        title_label.setStyleSheet("font-weight: bold; color: #666; padding: 0 10px;")
+
+        # Line phải
+        line2 = QtWidgets.QFrame()
+        line2.setFrameShape(QtWidgets.QFrame.HLine)
+        line2.setFrameShadow(QtWidgets.QFrame.Sunken)
+        line2.setStyleSheet("color: #bbb;")
+
+        separator_layout.addWidget(line1, 1)
+        separator_layout.addWidget(title_label, 0)
+        separator_layout.addWidget(line2, 1)
+
+        return separator_widget
     def _get_makeup_joiners(self) -> List[Dict[str, Any]]:
         """Lấy danh sách học sinh học bù với truy vấn tối ưu"""
         if not self.group_id:

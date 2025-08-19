@@ -1,105 +1,213 @@
 # ui_qt/windows/question_bank_window_qt.py
+# Imports phải đúng thứ tự
 from __future__ import annotations
 import json
 import os
 import re
 from typing import List, Dict
 from datetime import datetime
-import json
-from typing import List, Dict
 from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QShortcut
+from PySide6.QtWidgets import QMenu
+from PySide6.QtGui import QKeySequence, QShortcut
+
+# Imports này có thể optional
+try:
+    from docx.oxml.text.paragraph import CT_P
+    from docx.oxml.table import CT_Tbl
+except ImportError:
+    # Bỏ qua nếu chưa cài python-docx
+    pass
 
 
-# Enhanced pattern matching cho import câu hỏi với nhiều format
+# Enhanced pattern matching cho định dạng câu hỏi của bạn
 class FlexiblePatternMatcher:
     def __init__(self):
-        self.question_patterns = [
-            # Tiếng Việt variants
-            r'^(?:câu\s*(?:hỏi)?\s*)?(\d+)\s*[:.)\-–—]\s*(.*)',  # Câu 1: / Câu hỏi 1. / 1) / 1-
-            r'^(?:bài\s*(?:tập)?\s*)?(\d+)\s*[:.)\-–—]\s*(.*)',  # Bài 1: / Bài tập 1.
-            r'^(?:question\s*)?(\d+)\s*[:.)\-–—]\s*(.*)',  # Question 1: / 1.
-            r'^\s*(\d+)\s*[:.)\-–—]\s*(.*)',  # 1. / 1) / 1-
-
-            # Không có số thứ tự
-            r'^(?:câu\s*hỏi|question)\s*[:.)\-–—]?\s*(.*)',  # Câu hỏi: / Question:
-            r'^(?:hỏi|ask)\s*[:.)\-–—]?\s*(.*)',  # Hỏi: / Ask:
+        # Patterns cho câu hỏi trắc nghiệm - định dạng: "1. Nội dung câu hỏi..."
+        self.multiple_choice_patterns = [
+            r'^(\d+)\.\s*(.*)',  # Định dạng chính: "1. Cho..."
+            r'^(?:câu\s*(?:hỏi)?\s*)?(\d+)\s*[:.)\-–—]\s*(.*)',
+            r'^(?:question\s*)?(\d+)\s*[:.)\-–—]\s*(.*)',
         ]
 
+        # Patterns cho phần header của câu đúng/sai
+        self.true_false_section_patterns = [
+            r'^PHẦN\s*II\.\s*Câu\s*trắc\s*nghiệm\s*đúng\s*sai',
+            r'^(\d+)\.\s*(.*)',  # Câu hỏi chính trong phần đúng/sai
+        ]
+
+        # Patterns cho các phần a), b), c), d) trong câu đúng/sai - có thể có dấu X
+        self.sub_question_patterns = [
+            r'^([a-e])\)\s*(.*?)\s*X?\s*$',  # a) Nội dung (có thể có X ở cuối)
+            r'^([a-e])\)\s*(.*)',
+        ]
+
+        # Patterns cho câu trả lời ngắn
+        self.short_answer_patterns = [
+            r'^PHẦN\s*III\.\s*Câu\s*trắc\s*nghiệm\s*trả\s*lời\s*ngắn',
+            r'^(\d+)\.\s*(.*)',  # Câu hỏi chính trong phần trả lời ngắn
+            r'^Kết\s*quả\s*[:.]?\s*(.+)',  # "Kết quả: 10"
+        ]
+
+        # Patterns cho options trắc nghiệm - định dạng: "A. Nội dung" với có thể có gạch chân
         self.option_patterns = [
-            r'^([A-E])\s*[:.)\-–—]\s*(.*)',  # A. / A) / A:
-            r'^([A-E])\s+(.*)',  # A text
-            r'^\s*([A-E])\s*[:.)\-–—]\s*(.*)',  # Với khoảng trắng đầu
+            r'^\*\*([A-E])\.\*\*\s*(.*)',  # **A.** Nội dung (định dạng bold)
+            r'^([A-E])\.\s*(.*)',  # A. Nội dung (định dạng thường)
+            r'^([A-E])\s+(.*)',
         ]
 
+        # Patterns cho đáp án đúng - nhận diện gạch chân hoặc bold
         self.answer_patterns = [
-            r'^(?:đáp\s*án|answer|key|correct)\s*[:.)\-–—]?\s*([A-E])',
-            r'^(?:kết\s*quả|result)\s*[:.)\-–—]?\s*([A-E])',
-            r'^([A-E])\s*(?:là\s*đáp\s*án\s*đúng)',
-            r'^\s*([A-E])\s*$',  # Chỉ có một chữ cái
+            r'^\*\*\[([A-E])\.\]\{\.underline\}\*\*',  # **[A.]{.underline}** (đáp án đúng)
+            r'^\[([A-E])\.\]\{\.underline\}',  # [A.]{.underline} (đáp án đúng)
+            r'^\*\*([A-E])\.\*\*.*\{\.mark\}',  # **A.** với {.mark} (đáp án đúng)
         ]
 
-    # Phát hiện câu hỏi với confidence score
-    def smart_detect_question(self, line):
-        """Phát hiện câu hỏi với confidence score"""
+    # Nhận diện câu hỏi trắc nghiệm 4 đáp án
+    def smart_detect_question(self, line, question_type='multiple_choice', context_lines=None, line_index=0):
+        """Phát hiện câu hỏi với confidence score theo loại"""
         line_clean = line.strip()
 
-        for pattern in self.question_patterns:
-            match = re.match(pattern, line_clean, re.IGNORECASE | re.UNICODE)
-            if match:
-                return {
-                    'is_question': True,
-                    'number': match.group(1) if len(match.groups()) > 1 else None,
-                    'content': match.group(2) if len(match.groups()) > 1 else match.group(1),
-                    'confidence': 0.9,
-                    'pattern_used': pattern
-                }
-
-        # Fallback: heuristic detection
-        if any(keyword in line_clean.lower() for keyword in ['tính', 'giải', 'tìm', 'chọn', 'xác định']):
-            return {
-                'is_question': True,
-                'number': None,
-                'content': line_clean,
-                'confidence': 0.6,
-                'pattern_used': 'heuristic'
-            }
+        if question_type == 'multiple_choice':
+            return self._detect_multiple_choice(line_clean)
+        elif question_type == 'true_false':
+            return self._detect_true_false_question(line_clean, context_lines, line_index)
+        elif question_type == 'short_answer':
+            return self._detect_short_answer(line_clean)
 
         return {'is_question': False, 'confidence': 0}
 
-    # Phát hiện đáp án với pattern linh hoạt
+    def _detect_multiple_choice(self, line):
+        """Phát hiện câu hỏi trắc nghiệm thông thường"""
+        for pattern in self.multiple_choice_patterns:
+            match = re.match(pattern, line, re.IGNORECASE | re.UNICODE)
+            if match:
+                return {
+                    'is_question': True,
+                    'question_type': 'multiple_choice',
+                    'number': match.group(1),
+                    'content': match.group(2),
+                    'confidence': 0.9,
+                    'pattern_used': pattern
+                }
+        return {'is_question': False, 'confidence': 0}
+
+    def _detect_true_false_question(self, line, context_lines=None, line_index=0):
+        """Phát hiện câu hỏi đúng/sai với các phần a), b), c), d)"""
+        # Kiểm tra xem có phải là câu hỏi chính
+        for pattern in self.true_false_section_patterns:
+            match = re.match(pattern, line, re.IGNORECASE | re.UNICODE)
+            if match:
+                return {
+                    'is_question': True,
+                    'question_type': 'true_false',
+                    'number': match.group(1) if len(match.groups()) > 0 else None,
+                    'content': match.group(2) if len(match.groups()) > 1 else line,
+                    'confidence': 0.9,
+                    'has_sub_parts': True,
+                    'pattern_used': pattern
+                }
+        return {'is_question': False, 'confidence': 0}
+
+    def _detect_short_answer(self, line):
+        """Phát hiện câu hỏi trả lời ngắn"""
+        for pattern in self.short_answer_patterns:
+            match = re.match(pattern, line, re.IGNORECASE | re.UNICODE)
+            if match:
+                return {
+                    'is_question': True,
+                    'question_type': 'short_answer',
+                    'number': match.group(1) if len(match.groups()) > 0 else None,
+                    'content': match.group(2) if len(match.groups()) > 1 else line,
+                    'confidence': 0.9,
+                    'pattern_used': pattern
+                }
+        return {'is_question': False, 'confidence': 0}
+
+    # Nhận diện các đáp án A, B, C, D
     def smart_detect_option(self, line):
-        """Phát hiện đáp án với confidence score"""
+        """Phát hiện đáp án A, B, C, D với xử lý gạch chân"""
         line_clean = line.strip()
 
         for pattern in self.option_patterns:
-            match = re.match(pattern, line_clean, re.IGNORECASE)
+            match = re.match(pattern, line_clean, re.IGNORECASE | re.UNICODE)
             if match:
                 return {
                     'is_option': True,
-                    'label': match.group(1).upper(),
-                    'text': match.group(2).strip(),
+                    'label': match.group(1),
+                    'text': match.group(2),
                     'confidence': 0.9
                 }
-
         return {'is_option': False, 'confidence': 0}
 
-    # Phát hiện đáp án đúng
-    def smart_detect_answer(self, line):
-        """Phát hiện đáp án đúng"""
-        line_clean = line.strip()
-
+    # Nhận diện đáp án đúng từ gạch chân hoặc bold
+    def detect_correct_answer_from_format(self, line):
+        """Phát hiện đáp án đúng từ định dạng gạch chân hoặc bold"""
         for pattern in self.answer_patterns:
-            match = re.match(pattern, line_clean, re.IGNORECASE)
+            match = re.search(pattern, line)
             if match:
                 return {
-                    'is_answer': True,
-                    'answer': match.group(1).upper(),
+                    'is_correct': True,
+                    'answer': match.group(1),
+                    'confidence': 0.95
+                }
+        return {'is_correct': False, 'confidence': 0}
+
+    # Nhận diện sub-question cho câu đúng/sai
+    def detect_sub_question(self, line):
+        """Phát hiện các phần a), b), c), d) và trạng thái Đúng/Sai"""
+        line_clean = line.strip()
+
+        for pattern in self.sub_question_patterns:
+            match = re.match(pattern, line_clean, re.IGNORECASE | re.UNICODE)
+            if match:
+                content = match.group(2).strip()
+
+                return {
+                    'is_sub_question': True,
+                    'label': match.group(1) + ')',
+                    'content': content,
                     'confidence': 0.9
                 }
+        return {'is_sub_question': False, 'confidence': 0}
 
-        return {'is_answer': False, 'confidence': 0}
+    # Nhận diện kết quả cho câu trả lời ngắn
+    def detect_short_answer_result(self, line):
+        """Phát hiện kết quả cho câu trả lời ngắn"""
+        line_clean = line.strip()
+
+        # Pattern "Kết quả: 10"
+        result_pattern = r'^Kết\s*quả\s*[:.]?\s*(.+)'
+        match = re.match(result_pattern, line_clean, re.IGNORECASE | re.UNICODE)
+        if match:
+            return {
+                'is_result': True,
+                'result': match.group(1).strip(),
+                'confidence': 0.95
+            }
+        return {'is_result': False, 'confidence': 0}
+
+    # Nhận diện phần header (PHẦN I, II, III)
+    def detect_section_header(self, line):
+        """Phát hiện các phần PHẦN I, II, III"""
+        section_patterns = [
+            r'^PHẦN\s*I\.\s*Câu\s*trắc\s*nghiệm\s*với\s*nhiều\s*phương\s*án',
+            r'^PHẦN\s*II\.\s*Câu\s*trắc\s*nghiệm\s*đúng\s*sai',
+            r'^PHẦN\s*III\.\s*Câu\s*trắc\s*nghiệm\s*trả\s*lời\s*ngắn'
+        ]
+
+        for i, pattern in enumerate(section_patterns):
+            if re.match(pattern, line.strip(), re.IGNORECASE | re.UNICODE):
+                section_types = ['multiple_choice', 'true_false', 'short_answer']
+                return {
+                    'is_section': True,
+                    'section_type': section_types[i],
+                    'section_number': i + 1,
+                    'confidence': 1.0
+                }
+        return {'is_section': False, 'confidence': 0}
+# Enhanced pattern matching cho 3 dạng câu hỏi khác nhau
+
 # Validation nâng cao với scoring system
 class AdvancedQuestionValidator:
     def __init__(self):
@@ -547,7 +655,7 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
         split.addWidget(mid)
         # Kết nối signal cho table selection
         self.q_table.itemSelectionChanged.connect(self.on_question_select)
-        self.q_table.itemClicked.connect(self.on_question_select)
+
         # --- Cột phải: Panel chi tiết với tabs ---
         right_tabs = QtWidgets.QTabWidget()
         right_tabs.setStyleSheet("""
@@ -614,40 +722,74 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
         self.grade_cb.currentIndexChanged.connect(self.load_available_topics)
         self.topic_cb.currentIndexChanged.connect(self.load_available_types)
         # Thêm keyboard shortcuts cho tăng năng suất
-        QtGui.QShortcut("Ctrl+N", self, self.new_question)
-        QtGui.QShortcut("Ctrl+S", self, self.save_question)
-        QtGui.QShortcut("Ctrl+F", self, self.focus_search)
-        QtGui.QShortcut("Ctrl+Shift+F", self, self.show_advanced_search_dialog)
-        QtGui.QShortcut("Delete", self, self.delete_question)
-        QtGui.QShortcut("Ctrl+D", self, self.duplicate_question)
-        QtGui.QShortcut("F5", self, self.refresh_all)
-        QtGui.QShortcut("Ctrl+E", self, self.export_to_word)
-        QtGui.QShortcut("Ctrl+I", self, self.import_from_word)
-        QtGui.QShortcut("Ctrl+T", self, self.show_template_dialog)
+        QShortcut("Ctrl+N", self, self.new_question)
+        QShortcut("Ctrl+S", self, self.save_question)
+        QShortcut("Ctrl+F", self, self.focus_search)
+        QShortcut("Ctrl+Shift+F", self, self.show_advanced_search_dialog)
+        QShortcut("Delete", self, self.delete_question)
+        QShortcut("Ctrl+D", self, self.duplicate_question)
+        QShortcut("F5", self, self.refresh_all)
+        QShortcut("Ctrl+E", self, self.export_to_word)
+        QShortcut("Ctrl+I", self, self.import_from_word)
+        QShortcut("Ctrl+T", self, self.show_template_dialog)
 
         # Kích hoạt drag & drop
         self.setAcceptDrops(True)
         self.q_table.setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
         self.q_table.itemSelectionChanged.connect(self.on_question_select)
         self.q_table.itemClicked.connect(self.on_question_select)
+        self._setup_tree_management()
     # ====================== DB helpers ======================
+    # Thêm sau dòng 790 (sau phương thức __init__)
+    def _get_row_value(self, row, key, default=""):
+        """Helper để lấy giá trị từ sqlite3.Row một cách an toàn"""
+        try:
+            value = row[key]
+            return value if value is not None else default
+        except (KeyError, IndexError):
+            return default
     def _ensure_tables(self):
-        self.db.execute_query("""
-            CREATE TABLE IF NOT EXISTS exercise_tree (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                parent_id INTEGER,
-                name TEXT NOT NULL,
-                level TEXT NOT NULL,
-                UNIQUE(parent_id, name, level)
-            );
-        """)
+
+        # Cập nhật cấu trúc bảng question_bank để hỗ trợ 3 dạng câu hỏi
         self.db.execute_query("""
             CREATE TABLE IF NOT EXISTS question_bank (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 content_text TEXT,
+                question_type TEXT DEFAULT 'multiple_choice',  -- 'multiple_choice', 'true_false', 'short_answer'
                 options TEXT,
                 correct TEXT,
-                tree_id INTEGER
+                tree_id INTEGER,
+                sub_questions TEXT,  -- JSON cho câu đúng/sai nhiều phần
+                answer_format TEXT,  -- 'single', 'multiple', 'numeric', 'text'
+                max_score REAL DEFAULT 1.0,
+                difficulty_level TEXT,
+                instruction TEXT,
+                created_date TEXT DEFAULT CURRENT_TIMESTAMP,
+                modified_date TEXT DEFAULT CURRENT_TIMESTAMP
+            );
+        """)
+
+        # Thêm bảng cho sub-questions của câu đúng/sai
+        self.db.execute_query("""
+            CREATE TABLE IF NOT EXISTS question_sub_parts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                question_id INTEGER,
+                part_label TEXT,  -- 'a)', 'b)', 'c)', 'd)'
+                part_content TEXT,
+                is_correct INTEGER DEFAULT 0,  -- 0: sai, 1: đúng
+                part_order INTEGER DEFAULT 0,
+                FOREIGN KEY (question_id) REFERENCES question_bank(id) ON DELETE CASCADE
+            );
+        """)
+
+        # Thêm bảng cho metadata của từng dạng câu hỏi
+        self.db.execute_query("""
+            CREATE TABLE IF NOT EXISTS question_metadata (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                question_id INTEGER,
+                metadata_key TEXT,
+                metadata_value TEXT,
+                FOREIGN KEY (question_id) REFERENCES question_bank(id) ON DELETE CASCADE
             );
         """)
         # Thêm bảng tags cho câu hỏi
@@ -749,7 +891,29 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
         # Toolbar cho text editor
         text_toolbar = QtWidgets.QToolBar()
         text_toolbar.setToolButtonStyle(Qt.ToolButtonIconOnly)
+        # Selector cho loại câu hỏi
+        question_type_group = QtWidgets.QGroupBox("🎯 Loại câu hỏi")
+        type_layout = QtWidgets.QHBoxLayout(question_type_group)
 
+        self.question_type_group = QtWidgets.QButtonGroup(self)
+
+        self.multiple_choice_rb = QtWidgets.QRadioButton("📝 Trắc nghiệm thông thường")
+        self.multiple_choice_rb.setChecked(True)
+        self.question_type_group.addButton(self.multiple_choice_rb, 0)
+        type_layout.addWidget(self.multiple_choice_rb)
+
+        self.true_false_rb = QtWidgets.QRadioButton("✅❌ Đúng/Sai")
+        self.question_type_group.addButton(self.true_false_rb, 1)
+        type_layout.addWidget(self.true_false_rb)
+
+        self.short_answer_rb = QtWidgets.QRadioButton("📝 Trả lời ngắn")
+        self.question_type_group.addButton(self.short_answer_rb, 2)
+        type_layout.addWidget(self.short_answer_rb)
+
+        # Kết nối signal để thay đổi UI
+        self.question_type_group.buttonClicked.connect(self.on_question_type_changed)
+
+        layout.addWidget(question_type_group)
         # Tạo font và action cho Bold
         bold_action = text_toolbar.addAction("B")
         bold_font = QtGui.QFont("Arial", 10)
@@ -784,6 +948,7 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
         # Đáp án với nhóm
         answers_group = QtWidgets.QGroupBox("Đáp án")
         answers_layout = QtWidgets.QVBoxLayout(answers_group)
+        self.answers_group = answers_group
 
         self.correct_group = QtWidgets.QButtonGroup(self)
         self.option_entries = {}
@@ -848,6 +1013,156 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
 
         layout.addLayout(buttons_layout)
 
+    # Xử lý thay đổi loại câu hỏi
+    def on_question_type_changed(self, button):
+        """Xử lý khi thay đổi loại câu hỏi"""
+        question_type = self.question_type_group.checkedId()
+
+        if question_type == 0:  # Multiple choice
+            self._setup_multiple_choice_ui()
+        elif question_type == 1:  # True/False
+            self._setup_true_false_ui()
+        elif question_type == 2:  # Short answer
+            self._setup_short_answer_ui()
+
+    # Setup UI cho trắc nghiệm thông thường
+    def _setup_multiple_choice_ui(self):
+        """Setup UI cho câu hỏi trắc nghiệm thông thường"""
+        # Hiện đáp án A-E
+        for label in ["A", "B", "C", "D", "E"]:
+            if label in self.option_entries:
+                self.option_entries[label].parent().setVisible(True)
+
+        # Ẩn sub-questions nếu có
+        if hasattr(self, 'sub_questions_widget'):
+            self.sub_questions_widget.setVisible(False)
+
+        # Ẩn short answer widget nếu có
+        if hasattr(self, 'short_answer_widget'):
+            self.short_answer_widget.setVisible(False)
+
+    # Setup UI cho câu đúng/sai
+    def _setup_true_false_ui(self):
+        """Setup UI cho câu hỏi đúng/sai"""
+        # Ẩn đáp án A-E
+        for label in ["A", "B", "C", "D", "E"]:
+            if label in self.option_entries:
+                entry = self.option_entries[label]
+                # Kiểm tra parent tồn tại
+                if entry.parent():
+                    entry.parent().setVisible(False)
+
+        # Hiện sub-questions
+        if not hasattr(self, 'sub_questions_widget'):
+            self._create_sub_questions_widget()
+        self.sub_questions_widget.setVisible(True)
+
+        # Ẩn short answer widget
+        if hasattr(self, 'short_answer_widget'):
+            self.short_answer_widget.setVisible(False)
+
+    # Setup UI cho trả lời ngắn
+    def _setup_short_answer_ui(self):
+        """Setup UI cho câu hỏi trả lời ngắn"""
+        # Ẩn đáp án A-E
+        for label in ["A", "B", "C", "D", "E"]:
+            if label in self.option_entries:
+                self.option_entries[label].parent().setVisible(False)
+
+        # Ẩn sub-questions
+        if hasattr(self, 'sub_questions_widget'):
+            self.sub_questions_widget.setVisible(False)
+
+        # Hiện short answer widget
+        if not hasattr(self, 'short_answer_widget'):
+            self._create_short_answer_widget()
+        self.short_answer_widget.setVisible(True)
+
+    # Tạo widget cho sub-questions (đúng/sai)
+    def _create_sub_questions_widget(self):
+        """Tạo widget cho các phần a), b), c), d) của câu đúng/sai"""
+        self.sub_questions_widget = QtWidgets.QGroupBox("📋 Các phần đúng/sai")
+        sub_layout = QtWidgets.QVBoxLayout(self.sub_questions_widget)
+
+        self.sub_question_entries = {}
+        self.sub_question_checkboxes = {}
+
+        for label in ["a)", "b)", "c)", "d)"]:
+            row_widget = QtWidgets.QWidget()
+            row_layout = QtWidgets.QHBoxLayout(row_widget)
+            row_layout.setContentsMargins(0, 0, 0, 0)
+
+            # Label
+            label_widget = QtWidgets.QLabel(label.upper())
+            label_widget.setMinimumWidth(30)
+            row_layout.addWidget(label_widget)
+
+            # Content
+            content_edit = QtWidgets.QLineEdit()
+            content_edit.setPlaceholderText(f"Nội dung phần {label}")
+            row_layout.addWidget(content_edit, 1)
+
+            # Đúng/Sai checkbox
+            correct_cb = QtWidgets.QCheckBox("Đúng")
+            row_layout.addWidget(correct_cb)
+
+            sub_layout.addWidget(row_widget)
+
+            self.sub_question_entries[label] = content_edit
+            self.sub_question_checkboxes[label] = correct_cb
+
+        # Thêm vào layout chính (cần tìm vị trí phù hợp)
+        parent_widget = self.content_text.parent()
+        if parent_widget and parent_widget.layout():
+            parent_widget.layout().addWidget(self.sub_questions_widget)
+        # Giả sử thêm sau answers_group
+        if hasattr(self, 'answers_group') and self.answers_group.parent():
+            parent_layout = self.answers_group.parent().layout()
+            if parent_layout:
+                index = parent_layout.indexOf(self.answers_group) + 1
+                parent_layout.insertWidget(index, self.sub_questions_widget)
+        else:
+            # Thêm trực tiếp vào layout chính nếu không tìm thấy answers_group
+            self.content_text.parent().layout().addWidget(self.sub_questions_widget)
+        if parent_layout:
+            index = parent_layout.indexOf(self.answers_group) + 1
+            parent_layout.insertWidget(index, self.sub_questions_widget)
+        self.sub_questions_widget.setVisible(False)
+    # Tạo widget cho câu trả lời ngắn
+    def _create_short_answer_widget(self):
+        """Tạo widget cho câu hỏi trả lời ngắn"""
+        self.short_answer_widget = QtWidgets.QGroupBox("📝 Đáp án trả lời ngắn")
+        short_layout = QtWidgets.QVBoxLayout(self.short_answer_widget)
+
+        # Loại đáp án
+        answer_type_layout = QtWidgets.QHBoxLayout()
+        answer_type_layout.addWidget(QtWidgets.QLabel("Loại đáp án:"))
+
+        self.answer_type_combo = QtWidgets.QComboBox()
+        self.answer_type_combo.addItems([
+            "Số nguyên", "Số thực", "Văn bản", "Biểu thức toán học"
+        ])
+        answer_type_layout.addWidget(self.answer_type_combo)
+
+        short_layout.addLayout(answer_type_layout)
+
+        # Đáp án
+        short_layout.addWidget(QtWidgets.QLabel("Đáp án đúng:"))
+        self.short_answer_edit = QtWidgets.QLineEdit()
+        self.short_answer_edit.setPlaceholderText("Nhập đáp án đúng")
+        short_layout.addWidget(self.short_answer_edit)
+        # Đáp án thay thế (nếu có)
+        short_layout.addWidget(QtWidgets.QLabel("Đáp án thay thế (tùy chọn):"))
+        self.alternative_answers_edit = QtWidgets.QTextEdit()
+        self.alternative_answers_edit.setMaximumHeight(80)
+        self.alternative_answers_edit.setPlaceholderText("Nhập các đáp án thay thế, mỗi đáp án một dòng")
+        short_layout.addWidget(self.alternative_answers_edit)
+
+        # Thêm vào layout chính
+        parent_layout = self.answers_group.parent().layout()
+        if parent_layout:
+            index = parent_layout.indexOf(self.answers_group) + 1
+            parent_layout.insertWidget(index, self.short_answer_widget)
     # Tạo nội dung tab preview
     def _create_preview_tab_content(self, layout):
         """Tạo nội dung cho tab preview"""
@@ -925,31 +1240,118 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
         return errors
     # ====================== Tree ======================
     def refresh_tree(self):
-        self.tree.clear()
-        self.tree_nodes.clear()
+        """Làm mới cây thư mục với xử lý lỗi tốt hơn"""
+        try:
+            self.tree.clear()
+            self.tree_nodes.clear()
 
-        rows = self.db.execute_query(
-            "SELECT id,parent_id,name,level FROM exercise_tree ORDER BY parent_id,level,name",
-            fetch='all'
-        ) or []
-        children: Dict[int | None, list] = {}
-        for r in rows:
-            children.setdefault(r["parent_id"], []).append(r)
+            # Đảm bảo bảng exercise_tree tồn tại
+            self._ensure_exercise_tree_table()
 
-        def build(parent_db_id: int | None, parent_item: QtWidgets.QTreeWidgetItem | None):
-            for node in children.get(parent_db_id, []):
-                item = QtWidgets.QTreeWidgetItem([node["name"]])
-                item.setData(0, Qt.UserRole, node["id"])
-                self.tree_nodes[str(id(item))] = node["id"]
-                if parent_item is None:
-                    self.tree.addTopLevelItem(item)
-                else:
-                    parent_item.addChild(item)
-                build(node["id"], item)
+            rows = self.db.execute_query(
+                "SELECT id,parent_id,name,level FROM exercise_tree ORDER BY parent_id,level,name",
+                fetch='all'
+            ) or []
 
-        build(None, None)
-        self.tree.expandAll()
+            if not rows:
+                # Nếu không có dữ liệu, thêm dữ liệu mẫu
+                self._insert_sample_tree_data()
+                rows = self.db.execute_query(
+                    "SELECT id,parent_id,name,level FROM exercise_tree ORDER BY parent_id,level,name",
+                    fetch='all'
+                ) or []
 
+            children: Dict[int | None, list] = {}
+            for r in rows:
+                children.setdefault(r["parent_id"], []).append(r)
+
+            def build(parent_db_id: int | None, parent_item: QtWidgets.QTreeWidgetItem | None):
+                for node in children.get(parent_db_id, []):
+                    # Tạo icon theo level
+                    icon_text = self._get_level_icon(node["level"])
+                    item_text = f"{icon_text} {node['name']}"
+
+                    item = QtWidgets.QTreeWidgetItem([item_text])
+                    item.setData(0, Qt.UserRole, node["id"])
+                    item.setToolTip(0, f"Level: {node['level']}\nID: {node['id']}")
+
+                    self.tree_nodes[str(id(item))] = node["id"]
+
+                    if parent_item is None:
+                        self.tree.addTopLevelItem(item)
+                    else:
+                        parent_item.addChild(item)
+                    build(node["id"], item)
+
+            build(None, None)
+            self.tree.expandAll()
+
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(
+                self, "Lỗi",
+                f"Không thể tải cây thư mục: {e}\n\nVui lòng kiểm tra kết nối database."
+            )
+
+    def _ensure_exercise_tree_table(self):
+        """Đảm bảo bảng exercise_tree tồn tại"""
+        self.db.execute_query("""
+            CREATE TABLE IF NOT EXISTS exercise_tree (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                parent_id INTEGER,
+                name TEXT NOT NULL,
+                level TEXT NOT NULL,
+                description TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (parent_id) REFERENCES exercise_tree (id)
+            )
+        """)
+
+    def _insert_sample_tree_data(self):
+        """Thêm dữ liệu mẫu cho cây thư mục"""
+        sample_data = [
+            # Môn học
+            (None, "Toán", "Môn", "Môn Toán học"),
+            (None, "Lý", "Môn", "Môn Vật lý"),
+            (None, "Hóa", "Môn", "Môn Hóa học"),
+
+            # Lớp (con của Toán - id=1)
+            (1, "Lớp 10", "Lớp", "Toán lớp 10"),
+            (1, "Lớp 11", "Lớp", "Toán lớp 11"),
+            (1, "Lớp 12", "Lớp", "Toán lớp 12"),
+
+            # Chủ đề (con của Lớp 10 - id=4)
+            (4, "Mệnh đề - Tập hợp", "Chủ đề", "Chương 1: Mệnh đề và tập hợp"),
+            (4, "Hàm số", "Chủ đề", "Chương 2: Hàm số"),
+            (4, "Phương trình", "Chủ đề", "Chương 3: Phương trình và bất phương trình"),
+
+            # Dạng (con của Mệnh đề - Tập hợp - id=7)
+            (7, "Mệnh đề", "Dạng", "Dạng bài về mệnh đề"),
+            (7, "Tập hợp", "Dạng", "Dạng bài về tập hợp"),
+            (7, "Phép toán tập hợp", "Dạng", "Giao, hợp, hiệu tập hợp"),
+
+            # Mức độ (con của Mệnh đề - id=10)
+            (10, "Nhận biết", "Mức độ", "Câu hỏi nhận biết cơ bản"),
+            (10, "Thông hiểu", "Mức độ", "Câu hỏi thông hiểu"),
+            (10, "Vận dụng", "Mức độ", "Câu hỏi vận dụng"),
+            (10, "Vận dụng cao", "Mức độ", "Câu hỏi vận dụng cao"),
+        ]
+
+        for parent_id, name, level, description in sample_data:
+            self.db.execute_query(
+                "INSERT INTO exercise_tree (parent_id, name, level, description) VALUES (?, ?, ?, ?)",
+                (parent_id, name, level, description)
+            )
+
+    def _get_level_icon(self, level: str) -> str:
+        """Trả về icon emoji cho từng level"""
+        icons = {
+            "Môn": "📚",
+            "Lớp": "🎓",
+            "Chủ đề": "📖",
+            "Dạng": "📝",
+            "Mức độ": "⭐"
+        }
+        return icons.get(level, "📁")
     def on_tree_select(self):
         items = self.tree.selectedItems()
         if not items:
@@ -960,7 +1362,62 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
 
         rows = self.db.execute_query("SELECT * FROM question_bank WHERE tree_id=?", (tree_id,), fetch="all") or []
         self._load_question_rows(rows)
+    # Nhiệm vụ: Phân tích bảng câu hỏi Đúng/Sai
+    def _process_true_false_table(self, table):
+        """
+        Xử lý một đối tượng bảng (table) từ docx để trích xuất các câu hỏi con
+        theo định dạng: Khẳng định | Đúng | Sai
+        """
+        sub_questions = []
+        if not table or len(table.rows) < 2:
+            return sub_questions  # Bảng không hợp lệ
 
+        # Bỏ qua hàng tiêu đề (hàng đầu tiên)
+        for row_index, row in enumerate(table.rows[1:], start=1):
+            try:
+                if len(row.cells) < 3:
+                    continue  # Bỏ qua hàng không đủ cột
+
+                # Cột 0: Nội dung, Cột 1: Đúng, Cột 2: Sai
+                content_cell = row.cells[0].text.strip()
+                true_cell = row.cells[1].text.strip()
+                false_cell = row.cells[2].text.strip()
+
+                if not content_cell:
+                    continue  # Bỏ qua hàng trống
+
+                # Tách label 'a)' ra khỏi nội dung
+                label_match = re.match(r'^([a-e])\)\s*(.*)', content_cell)
+                if label_match:
+                    label = label_match.group(1) + ')'
+                    content = label_match.group(2).strip()
+                else:
+                    # Nếu không có label, tự động tạo
+                    label = chr(ord('a') + row_index - 1) + ')'
+                    content = content_cell
+
+                # Kiểm tra dấu 'X' trong cột Đúng hoặc Sai
+                is_correct = None
+                if 'X' in true_cell.upper() or 'x' in true_cell:
+                    is_correct = True
+                elif 'X' in false_cell.upper() or 'x' in false_cell:
+                    is_correct = False
+                else:
+                    # Mặc định là đúng nếu không có dấu X rõ ràng
+                    is_correct = True
+
+                if content:
+                    sub_questions.append({
+                        'label': label,
+                        'content': content,
+                        'is_correct': is_correct
+                    })
+
+            except Exception as e:
+                print(f"Lỗi khi xử lý hàng {row_index} trong bảng đúng/sai: {e}")
+                continue  # Bỏ qua hàng bị lỗi và tiếp tục
+
+        return sub_questions
     # ====================== Questions list ======================
     def _load_question_rows(self, rows):
         # Clear các widget cũ để tránh memory leak
@@ -974,18 +1431,45 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
         if len(rows) > 100:
             self.q_table.setUpdatesEnabled(False)
 
+        # Cập nhật hiển thị cho 3 dạng câu hỏi trong bảng
         for r in rows:
             # Tạo checkbox cho mỗi dòng
             checkbox = QtWidgets.QCheckBox()
             checkbox.setChecked(False)
 
-            content_preview = (r["content_text"] or "")[:50].replace("\n", " ").strip()
-            opts = json.loads(r["options"] or "[]")
-            so_dapan = len(opts)
-            dap_an = r.get("correct", "-") if isinstance(r, dict) else "-"
+            # Lấy giá trị an toàn từ Row
+            content_preview = self._get_row_value(r, "content_text", "")[:50].replace("\n", " ").strip()
+            question_type = self._get_row_value(r, "question_type", "multiple_choice")
+            row_id = self._get_row_value(r, "id", 0)
+            tree_id = self._get_row_value(r, "tree_id", 0)
+
+            if question_type == "multiple_choice":
+                opts_json = self._get_row_value(r, "options", "[]")
+                opts = json.loads(opts_json) if opts_json else []
+                so_dapan = len(opts)
+                dap_an = self._get_row_value(r, "correct", "-")
+                type_icon = "📝"
+            elif question_type == "true_false":
+                # Đếm sub-questions
+                sub_parts = self.db.execute_query(
+                    "SELECT COUNT(*) as count FROM question_sub_parts WHERE question_id=?",
+                    (row_id,), fetch="one"
+                )
+                so_dapan = sub_parts["count"] if sub_parts else 0
+                dap_an = "Đ/S"
+                type_icon = "✅❌"
+            elif question_type == "short_answer":
+                so_dapan = 1
+                correct_value = self._get_row_value(r, "correct", "")
+                dap_an = correct_value[:10] + "..." if len(correct_value) > 10 else correct_value or "-"
+                type_icon = "📝"
+            else:
+                so_dapan = 0
+                dap_an = "-"
+                type_icon = "❓"
 
             # Lấy chuỗi dạng/mức độ từ path
-            path = self.get_tree_path(r["tree_id"])
+            path = self.get_tree_path(tree_id) if tree_id else []
             path_dict = {p["level"]: p["name"] for p in path}
             dang = path_dict.get("Dạng", "-")
             muc_do = path_dict.get("Mức độ", "-")
@@ -993,7 +1477,7 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
             # Lấy tags cho câu hỏi
             tags = self.db.execute_query(
                 "SELECT tag_name FROM question_tags WHERE question_id=?",
-                (r["id"],), fetch="all"
+                (row_id,), fetch="all"
             ) or []
             tags_text = ", ".join([tag["tag_name"] for tag in tags]) if tags else ""
 
@@ -1003,8 +1487,8 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
             # Set checkbox
             self.q_table.setCellWidget(row_idx, 0, checkbox)
 
-            # Set data
-            self.q_table.setItem(row_idx, 1, QtWidgets.QTableWidgetItem(str(r["id"])))
+            # Set data với icon loại câu hỏi
+            self.q_table.setItem(row_idx, 1, QtWidgets.QTableWidgetItem(f"{type_icon} {row_id}"))
             self.q_table.setItem(row_idx, 2, QtWidgets.QTableWidgetItem(content_preview))
             self.q_table.setItem(row_idx, 3, QtWidgets.QTableWidgetItem(str(so_dapan)))
             self.q_table.setItem(row_idx, 4, QtWidgets.QTableWidgetItem(dap_an or "-"))
@@ -1020,26 +1504,70 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
         # Bật lại update nếu đã tắt
         if len(rows) > 100:
             self.q_table.setUpdatesEnabled(True)
+    # Load câu hỏi với hỗ trợ 3 dạng
     def on_question_select(self):
+        """Load câu hỏi được chọn với hỗ trợ 3 dạng"""
         items = self.q_table.selectedItems()
         if not items:
             return
         row = items[0].row()
-        qid = int(self.q_table.item(row, 1).text())
+        item_text = self.q_table.item(row, 1).text()
+
+        # Trích xuất ID câu hỏi từ văn bản trong bảng (ví dụ: "📝 123" -> 123)
+        try:
+            qid = int(item_text.split()[-1])
+        except (ValueError, IndexError):
+            # Nếu không thể trích xuất ID, dừng xử lý để tránh lỗi
+            return
 
         q = self.db.execute_query("SELECT * FROM question_bank WHERE id=?", (qid,), fetch="one")
         if not q:
             return
 
+        self.current_question_id = qid
+
         # Load nội dung câu hỏi
         if hasattr(self, 'content_text'):
             self.content_text.blockSignals(True)
-            if hasattr(self.content_text, 'setPlainText'):
-                self.content_text.setPlainText(q["content_text"] or "")
-            else:
-                self.content_text.setPlainText(q["content_text"] or "")
+            self.content_text.setPlainText(q["content_text"] or "")
             self.content_text.blockSignals(False)
 
+        # Xác định loại câu hỏi và set UI
+        question_type = self._get_row_value(q, "question_type", "multiple_choice")
+
+        if hasattr(self, 'question_type_group'):
+            if question_type == 'multiple_choice':
+                self.multiple_choice_rb.setChecked(True)
+                self._setup_multiple_choice_ui()
+                self._load_multiple_choice_data(q)
+            elif question_type == 'true_false':
+                self.true_false_rb.setChecked(True)
+                self._setup_true_false_ui()
+                self._load_true_false_data(q)
+            elif question_type == 'short_answer':
+                self.short_answer_rb.setChecked(True)
+                self._setup_short_answer_ui()
+                self._load_short_answer_data(q)
+
+        # Load tags
+        if hasattr(self, 'tags_edit'):
+            tags = self.db.execute_query(
+                "SELECT tag_name FROM question_tags WHERE question_id=? ORDER BY tag_name",
+                (qid,), fetch="all"
+            ) or []
+            tags_text = ", ".join([tag["tag_name"] for tag in tags])
+            self.tags_edit.setText(tags_text)
+
+        # Load lịch sử
+        if hasattr(self, 'history_table'):
+            self._load_question_history(qid)
+
+        # Update preview
+        self.update_preview()
+
+    # Load dữ liệu cho câu hỏi trắc nghiệm
+    def _load_multiple_choice_data(self, question_data):
+        """Load dữ liệu cho câu hỏi trắc nghiệm thông thường"""
         # Reset đáp án
         self.correct_group.setExclusive(False)
         for b in self.correct_group.buttons():
@@ -1052,8 +1580,9 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
             ent.blockSignals(False)
 
         # Load đáp án
-        opts = json.loads(q["options"] or "[]")
-        correct = q["correct"] if q["correct"] else ""
+        opts_json = self._get_row_value(question_data, "options", "[]")
+        opts = json.loads(opts_json) if opts_json else []
+        correct = self._get_row_value(question_data, "correct", "")
 
         if correct and correct in [b.text() for b in self.correct_group.buttons()]:
             for b in self.correct_group.buttons():
@@ -1072,22 +1601,53 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
             if ent:
                 ent.setText(content.strip())
 
-        # Load tags
-        if hasattr(self, 'tags_edit'):
-            tags = self.db.execute_query(
-                "SELECT tag_name FROM question_tags WHERE question_id=? ORDER BY tag_name",
-                (qid,), fetch="all"
-            ) or []
-            tags_text = ", ".join([tag["tag_name"] for tag in tags])
-            self.tags_edit.setText(tags_text)
+    # Load dữ liệu cho câu hỏi đúng/sai
+    def _load_true_false_data(self, question_data):
+        """Load dữ liệu cho câu hỏi đúng/sai"""
+        if not hasattr(self, 'sub_question_entries'):
+            return
 
-        # Load lịch sử cho tab history
-        if hasattr(self, 'history_table'):
-            self._load_question_history(qid)
+        # Clear form
+        for label, entry in self.sub_question_entries.items():
+            entry.clear()
+            self.sub_question_checkboxes[label].setChecked(False)
 
-        # Update preview
-        self.update_preview()
+        # Load sub-questions từ database
+        sub_parts = self.db.execute_query(
+            "SELECT * FROM question_sub_parts WHERE question_id=? ORDER BY part_order",
+            (question_data["id"],), fetch="all"
+        ) or []
 
+        for part in sub_parts:
+            label = part["part_label"]
+            if label in self.sub_question_entries:
+                self.sub_question_entries[label].setText(part["part_content"])
+                self.sub_question_checkboxes[label].setChecked(bool(part["is_correct"]))
+
+    # Load dữ liệu cho câu hỏi trả lời ngắn
+    def _load_short_answer_data(self, question_data):
+        """Load dữ liệu cho câu hỏi trả lời ngắn"""
+        if not hasattr(self, 'short_answer_edit'):
+            return
+
+        # Load đáp án chính
+        self.short_answer_edit.setText(question_data["correct"] or "")
+
+        # Load metadata từ options
+        try:
+            answer_data = json.loads(question_data["options"] or "{}")
+
+            answer_type = answer_data.get("answer_type", "Số nguyên")
+            for i in range(self.answer_type_combo.count()):
+                if self.answer_type_combo.itemText(i) == answer_type:
+                    self.answer_type_combo.setCurrentIndex(i)
+                    break
+
+            alternative_answers = answer_data.get("alternative_answers", [])
+            self.alternative_answers_edit.setPlainText("\n".join(alternative_answers))
+
+        except json.JSONDecodeError:
+            pass
     # Load lịch sử câu hỏi
     def _load_question_history(self, question_id):
         """Load lịch sử thay đổi của câu hỏi"""
@@ -1106,7 +1666,7 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
             self.history_table.insertRow(row_idx)
 
             # Format thời gian
-            time_str = h.get("changed_date", "")
+            time_str = self._get_row_value(h, "changed_date", "")
             if time_str:
                 try:
                     from datetime import datetime
@@ -1119,16 +1679,20 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
 
             # Set data
             self.history_table.setItem(row_idx, 0, QtWidgets.QTableWidgetItem(formatted_time))
-            self.history_table.setItem(row_idx, 1, QtWidgets.QTableWidgetItem(h.get("action_type", "")))
+            self.history_table.setItem(row_idx, 1, QtWidgets.QTableWidgetItem(
+                self._get_row_value(h, "action_type", "")
+            ))
 
             # Truncate content cho display
-            old_content = (h.get("old_content", "") or "")[:100] + "..." if len(
-                h.get("old_content", "") or "") > 100 else h.get("old_content", "")
-            new_content = (h.get("new_content", "") or "")[:100] + "..." if len(
-                h.get("new_content", "") or "") > 100 else h.get("new_content", "")
+            # Lấy nội dung một cách an toàn và cắt bớt để hiển thị
+            old_content_full = self._get_row_value(h, "old_content", "")
+            new_content_full = self._get_row_value(h, "new_content", "")
 
-            self.history_table.setItem(row_idx, 2, QtWidgets.QTableWidgetItem(old_content))
-            self.history_table.setItem(row_idx, 3, QtWidgets.QTableWidgetItem(new_content))
+            old_content_display = (old_content_full[:100] + "...") if len(old_content_full) > 100 else old_content_full
+            new_content_display = (new_content_full[:100] + "...") if len(new_content_full) > 100 else new_content_full
+
+            self.history_table.setItem(row_idx, 2, QtWidgets.QTableWidgetItem(old_content_display))
+            self.history_table.setItem(row_idx, 3, QtWidgets.QTableWidgetItem(new_content_display))
     # ====================== Save/Update/Delete ======================
     def _current_tree_id(self) -> int | None:
         items = self.tree.selectedItems()
@@ -1136,15 +1700,66 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
             return None
         return items[0].data(0, Qt.UserRole)
 
+    # Lưu câu hỏi với hỗ trợ 3 dạng
     def save_question(self):
+        """Lưu câu hỏi với hỗ trợ 3 dạng câu hỏi"""
         tree_id = self._current_tree_id()
         if not tree_id:
             QtWidgets.QMessageBox.warning(self, "Chưa chọn thư mục", "Vui lòng chọn vị trí lưu trong cây.")
             return
 
-        content = self.content_text.toPlainText().strip() if hasattr(self, 'content_text') and hasattr(
-            self.content_text, 'toPlainText') else self.content_text.toPlainText().strip()
+        content = self.content_text.toPlainText().strip()
+        question_type = self._get_current_question_type()
 
+        # Validation cơ bản
+        if not content or len(content.strip()) < 10:
+            QtWidgets.QMessageBox.warning(self, "Lỗi dữ liệu", "Nội dung câu hỏi phải có ít nhất 10 ký tự")
+            return
+
+        try:
+            # Lưu nội dung cũ để ghi lịch sử
+            old_content = ""
+            if self.current_question_id:
+                old_q = self.db.execute_query("SELECT content_text FROM question_bank WHERE id=?",
+                                              (self.current_question_id,), fetch="one")
+                old_content = old_q["content_text"] if old_q else ""
+
+            if question_type == 'multiple_choice':
+                self._save_multiple_choice_question(content, tree_id, old_content)
+            elif question_type == 'true_false':
+                self._save_true_false_question(content, tree_id, old_content)
+            elif question_type == 'short_answer':
+                self._save_short_answer_question(content, tree_id, old_content)
+
+            # Reload danh sách
+            rows = self.db.execute_query("SELECT * FROM question_bank WHERE tree_id=?", (tree_id,), fetch="all") or []
+            self._load_question_rows(rows)
+
+            # Update preview và stats
+            self.update_preview()
+            self.update_statistics()
+
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Lỗi CSDL", f"{e}")
+
+    # Lấy loại câu hỏi hiện tại
+    def _get_current_question_type(self):
+        """Lấy loại câu hỏi hiện tại từ UI"""
+        if hasattr(self, 'question_type_group'):
+            selected_id = self.question_type_group.checkedId()
+            if selected_id == 0:
+                return 'multiple_choice'
+            elif selected_id == 1:
+                return 'true_false'
+            elif selected_id == 2:
+                return 'short_answer'
+        return 'multiple_choice'  # Mặc định
+
+    # Lưu câu hỏi trắc nghiệm thông thường
+    def _save_multiple_choice_question(self, content, tree_id, old_content):
+        """Lưu câu hỏi trắc nghiệm thông thường"""
+        if not hasattr(self, 'option_entries'):
+            raise ValueError("Chưa khởi tạo form đáp án")
         # Tìm radio đúng
         correct = ""
         for b in self.correct_group.buttons():
@@ -1158,61 +1773,127 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
             if t:
                 opts.append({"text": f"{label}. {t}", "is_correct": (label == correct)})
 
-        # Validation dữ liệu nâng cao
-        validation_errors = self.validate_question_data(content, correct, opts)
-        if validation_errors:
-            error_msg = "Dữ liệu không hợp lệ:\n" + "\n".join(validation_errors)
-            QtWidgets.QMessageBox.warning(self, "Lỗi dữ liệu", error_msg)
-            return
+        # Validation
+        if not correct:
+            raise ValueError("Phải chọn đáp án đúng")
+        if len(opts) < 2:
+            raise ValueError("Phải có ít nhất 2 đáp án")
 
-        try:
-            # Lưu nội dung cũ để ghi lịch sử
-            old_content = ""
-            if self.current_question_id:
-                old_q = self.db.execute_query("SELECT content_text FROM question_bank WHERE id=?",
-                                              (self.current_question_id,), fetch="one")
-                old_content = old_q["content_text"] if old_q else ""
+        if self.current_question_id:
+            # Cập nhật
+            self.db.execute_query(
+                "UPDATE question_bank SET content_text=?, options=?, correct=?, question_type=?, tree_id=? WHERE id=?",
+                (content, json.dumps(opts, ensure_ascii=False), correct, 'multiple_choice', tree_id,
+                 self.current_question_id)
+            )
+            self._save_question_history(self.current_question_id, "UPDATE", old_content, content)
+            QtWidgets.QMessageBox.information(self, "Cập nhật", "Đã cập nhật câu hỏi.")
+        else:
+            # Thêm mới
+            new_id = self.db.execute_query(
+                "INSERT INTO question_bank(content_text, options, correct, question_type, tree_id) VALUES (?,?,?,?,?)",
+                (content, json.dumps(opts, ensure_ascii=False), correct, 'multiple_choice', tree_id)
+            )
+            self.current_question_id = new_id
+            self._save_question_history(new_id, "CREATE", "", content)
+            QtWidgets.QMessageBox.information(self, "Thêm mới", "Đã lưu câu hỏi mới.")
 
-            if self.current_question_id:
-                # Cập nhật câu hỏi
+    # Lưu câu hỏi đúng/sai
+    def _save_true_false_question(self, content, tree_id, old_content):
+        """Lưu câu hỏi đúng/sai với sub-questions"""
+        if not hasattr(self, 'sub_question_entries'):
+            raise ValueError("Chưa có giao diện cho câu hỏi đúng/sai")
+
+        sub_questions = []
+        for label, entry in self.sub_question_entries.items():
+            sub_content = entry.text().strip()
+            if sub_content:
+                is_correct = self.sub_question_checkboxes[label].isChecked()
+                sub_questions.append({
+                    "label": label,
+                    "content": sub_content,
+                    "is_correct": is_correct
+                })
+
+        if len(sub_questions) < 2:
+            raise ValueError("Câu hỏi đúng/sai phải có ít nhất 2 phần")
+
+        if self.current_question_id:
+            # Cập nhật câu hỏi chính
+            self.db.execute_query(
+                "UPDATE question_bank SET content_text=?, question_type=?, sub_questions=?, tree_id=? WHERE id=?",
+                (content, 'true_false', json.dumps(sub_questions, ensure_ascii=False), tree_id,
+                 self.current_question_id)
+            )
+
+            # Xóa sub-parts cũ
+            self.db.execute_query("DELETE FROM question_sub_parts WHERE question_id=?", (self.current_question_id,))
+
+            # Thêm sub-parts mới
+            for i, sub in enumerate(sub_questions):
                 self.db.execute_query(
-                    "UPDATE question_bank SET content_text=?, options=?, correct=?, tree_id=? WHERE id=?",
-                    (content, json.dumps(opts, ensure_ascii=False), correct, tree_id, self.current_question_id)
+                    "INSERT INTO question_sub_parts(question_id, part_label, part_content, is_correct, part_order) VALUES (?,?,?,?,?)",
+                    (self.current_question_id, sub["label"], sub["content"], int(sub["is_correct"]), i)
                 )
 
-                # Ghi lịch sử chỉnh sửa
-                self._save_question_history(self.current_question_id, "UPDATE", old_content, content)
+            self._save_question_history(self.current_question_id, "UPDATE", old_content, content)
+            QtWidgets.QMessageBox.information(self, "Cập nhật", "Đã cập nhật câu hỏi đúng/sai.")
+        else:
+            # Thêm mới
+            new_id = self.db.execute_query(
+                "INSERT INTO question_bank(content_text, question_type, sub_questions, tree_id) VALUES (?,?,?,?)",
+                (content, 'true_false', json.dumps(sub_questions, ensure_ascii=False), tree_id)
+            )
 
-                QtWidgets.QMessageBox.information(self, "Cập nhật", "Đã cập nhật câu hỏi.")
-            else:
-                # Thêm câu hỏi mới
-                new_id = self.db.execute_query(
-                    "INSERT INTO question_bank(content_text, options, correct, tree_id) VALUES (?,?,?,?)",
-                    (content, json.dumps(opts, ensure_ascii=False), correct, tree_id)
+            # Thêm sub-parts
+            for i, sub in enumerate(sub_questions):
+                self.db.execute_query(
+                    "INSERT INTO question_sub_parts(question_id, part_label, part_content, is_correct, part_order) VALUES (?,?,?,?,?)",
+                    (new_id, sub["label"], sub["content"], int(sub["is_correct"]), i)
                 )
 
-                self.current_question_id = new_id
+            self.current_question_id = new_id
+            self._save_question_history(new_id, "CREATE", "", content)
+            QtWidgets.QMessageBox.information(self, "Thêm mới", "Đã lưu câu hỏi đúng/sai mới.")
 
-                # Ghi lịch sử tạo mới
-                self._save_question_history(new_id, "CREATE", "", content)
+    # Lưu câu hỏi trả lời ngắn
+    def _save_short_answer_question(self, content, tree_id, old_content):
+        """Lưu câu hỏi trả lời ngắn"""
+        if not hasattr(self, 'short_answer_edit'):
+            raise ValueError("Chưa có giao diện cho câu hỏi trả lời ngắn")
 
-                QtWidgets.QMessageBox.information(self, "Thêm mới", "Đã lưu câu hỏi mới.")
+        answer = self.short_answer_edit.text().strip()
+        answer_type = self.answer_type_combo.currentText()
+        alternative_answers = self.alternative_answers_edit.toPlainText().strip()
 
-            # Lưu tags nếu có
-            if hasattr(self, 'tags_edit') and self.tags_edit.text().strip():
-                self._save_question_tags()
+        if not answer:
+            raise ValueError("Phải có đáp án cho câu hỏi trả lời ngắn")
 
-            # Reload danh sách
-            rows = self.db.execute_query("SELECT * FROM question_bank WHERE tree_id=?", (tree_id,), fetch="all") or []
-            self._load_question_rows(rows)
+        # Chuẩn bị dữ liệu
+        answer_data = {
+            "main_answer": answer,
+            "answer_type": answer_type,
+            "alternative_answers": [alt.strip() for alt in alternative_answers.split('\n') if alt.strip()]
+        }
 
-            # Update preview và stats
-            self.update_preview()
-            self.update_statistics()
-
-        except Exception as e:
-            QtWidgets.QMessageBox.critical(self, "Lỗi CSDL", f"{e}")
-
+        if self.current_question_id:
+            # Cập nhật
+            self.db.execute_query(
+                "UPDATE question_bank SET content_text=?, correct=?, question_type=?, options=?, tree_id=? WHERE id=?",
+                (content, answer, 'short_answer', json.dumps(answer_data, ensure_ascii=False), tree_id,
+                 self.current_question_id)
+            )
+            self._save_question_history(self.current_question_id, "UPDATE", old_content, content)
+            QtWidgets.QMessageBox.information(self, "Cập nhật", "Đã cập nhật câu hỏi trả lời ngắn.")
+        else:
+            # Thêm mới
+            new_id = self.db.execute_query(
+                "INSERT INTO question_bank(content_text, correct, question_type, options, tree_id) VALUES (?,?,?,?,?)",
+                (content, answer, 'short_answer', json.dumps(answer_data, ensure_ascii=False), tree_id)
+            )
+            self.current_question_id = new_id
+            self._save_question_history(new_id, "CREATE", "", content)
+            QtWidgets.QMessageBox.information(self, "Thêm mới", "Đã lưu câu hỏi trả lời ngắn mới.")
     # Lưu lịch sử thay đổi câu hỏi
     def _save_question_history(self, question_id, action_type, old_content, new_content):
         """Lưu lịch sử thay đổi câu hỏi"""
@@ -1486,125 +2167,299 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
         self._load_question_rows(rows)
 
     # ====================== Import from Word ======================
-    # Import Word với pattern matching nâng cao và progress tracking
     def import_from_word(self):
-        """Import Word với pattern matching nâng cao"""
+        """
+        Import Word với logic nâng cao, tự động nhận diện loại câu hỏi
+        dựa trên cấu trúc (văn bản, gạch chân, bảng).
+        """
         try:
             from docx import Document
-        except Exception:
+            from docx.text.paragraph import Paragraph
+            from docx.table import Table
+            # Thêm 2 dòng import này ở đầu file nếu chưa có
+            from docx.oxml.text.paragraph import CT_P
+            from docx.oxml.table import CT_Tbl
+        except ImportError:
             QtWidgets.QMessageBox.critical(self, "Thiếu thư viện",
-                                           "Vui lòng cài đặt python-docx (pip install python-docx).")
+                                           "Vui lòng cài đặt python-docx: pip install python-docx")
             return
 
         file_path, _ = QtWidgets.QFileDialog.getOpenFileName(
-            self, "Chọn file Word chứa câu hỏi", "", "Word files (*.docx)"
-        )
+            self, "Chọn file Word chứa câu hỏi", "", "Word files (*.docx)")
         if not file_path:
             return
 
         tree_id = self._current_tree_id()
         if not tree_id:
-            QtWidgets.QMessageBox.warning(self, "Thiếu thư mục", "Vui lòng chọn nơi lưu câu hỏi (trong cây bên trái).")
+            QtWidgets.QMessageBox.warning(self, "Thiếu thư mục", "Vui lòng chọn nơi lưu câu hỏi.")
             return
 
-        # Show template selection dialog
-        template_choice = self.show_import_template_choice()
-        if not template_choice:
-            return
-
-        # Initialize enhanced tools
+        # Khởi tạo pattern matcher và danh sách câu hỏi
         pattern_matcher = FlexiblePatternMatcher()
-        validator = AdvancedQuestionValidator()
+        all_questions = []
+        errors = []
+        current_section = 'multiple_choice'  # Mặc định bắt đầu với trắc nghiệm
 
         try:
             doc = Document(file_path)
-            questions = []
-            errors = []
-            warnings = []
-            current = None
+            current_question = None
 
-            total_paragraphs = len(doc.paragraphs)
-
-            # Create progress dialog
-            progress_dialog = QtWidgets.QProgressDialog("Đang xử lý file Word...", "Hủy", 0, total_paragraphs, self)
-            progress_dialog.setWindowModality(Qt.WindowModal)
-            progress_dialog.setAutoClose(True)
-            progress_dialog.setAutoReset(True)
-
-            # Process each paragraph with enhanced pattern matching
-            for i, para in enumerate(doc.paragraphs):
-                if progress_dialog.wasCanceled():
-                    return
-
-                progress_dialog.setValue(i)
-                progress_dialog.setLabelText(f"Xử lý dòng {i + 1}/{total_paragraphs}")
-                QtWidgets.QApplication.processEvents()
-
-                line = para.text.strip()
-                if not line:
-                    continue
-
-                # Smart question detection
-                q_result = pattern_matcher.smart_detect_question(line)
-
-                if q_result['is_question'] and q_result['confidence'] > 0.7:
-                    # Process previous question
-                    if current:
-                        validation_result = validator.comprehensive_validate(current, current['line_number'])
-                        if validation_result['valid']:
-                            questions.append(current)
-                        else:
-                            errors.extend(validation_result['errors'])
-                        warnings.extend(validation_result.get('warnings', []))
-
-                    # Start new question
-                    current = {
-                        'content': q_result['content'],
-                        'options': [],
-                        'answer': '',
-                        'line_number': i + 1,
-                        'confidence': q_result['confidence']
-                    }
-                    continue
-
-                # Smart option detection
-                if current:
-                    o_result = pattern_matcher.smart_detect_option(line)
-                    if o_result['is_option'] and o_result['confidence'] > 0.8:
-                        current['options'].append({
-                            'text': f"{o_result['label']}. {o_result['text']}",
-                            'label': o_result['label']
-                        })
+            # Duyệt qua từng khối trong tài liệu (văn bản hoặc bảng)
+            for block in doc.element.body:
+                if isinstance(block, CT_P):  # Nếu khối là một Paragraph (văn bản)
+                    para = Paragraph(block, doc)
+                    line = para.text.strip()
+                    if not line:
                         continue
 
-                    # Smart answer detection
-                    a_result = pattern_matcher.smart_detect_answer(line)
-                    if a_result['is_answer'] and a_result['confidence'] > 0.8:
-                        current['answer'] = a_result['answer']
+                    # 1. Kiểm tra phần header (PHẦN I, II, III)
+                    section_result = pattern_matcher.detect_section_header(line)
+                    if section_result.get('is_section'):
+                        current_section = section_result['section_type']
                         continue
 
-            # Process last question
-            if current:
-                validation_result = validator.comprehensive_validate(current, len(doc.paragraphs))
-                if validation_result['valid']:
-                    questions.append(current)
-                else:
-                    errors.extend(validation_result['errors'])
-                warnings.extend(validation_result.get('warnings', []))
+                    # 2. Kiểm tra câu hỏi mới
+                    q_result = pattern_matcher.smart_detect_question(line, current_section)
+                    if q_result.get('is_question'):
+                        # Lưu câu hỏi cũ nếu có
+                        if current_question:
+                            all_questions.append(current_question)
 
-            progress_dialog.close()
+                        # Bắt đầu câu hỏi mới
+                        current_question = {
+                            'question_type': q_result['question_type'],
+                            'content': q_result['content'],
+                            'options': [],
+                            'sub_questions': [],
+                            'answer': None,
+                            'number': q_result.get('number')
+                        }
+                        continue
 
-            # Show results summary
-            self.show_import_results_dialog(questions, errors, warnings)
+                    # 3. Xử lý nội dung theo loại câu hỏi hiện tại
+                    if current_question:
+                        if current_section == 'multiple_choice':
+                            # Xử lý đáp án trắc nghiệm
+                            option_result = pattern_matcher.smart_detect_option(line)
+                            if option_result.get('is_option'):
+                                current_question['options'].append({
+                                    'text': f"{option_result['label']}. {option_result['text']}",
+                                    'label': option_result['label']
+                                })
 
-            # Process valid questions
-            if questions:
-                self._process_enhanced_imported_questions(questions, tree_id)
+                                # Kiểm tra đáp án đúng từ định dạng
+                                correct_result = pattern_matcher.detect_correct_answer_from_format(line)
+                                if correct_result.get('is_correct'):
+                                    current_question['answer'] = correct_result['answer']
 
-        except ImportError:
-            QtWidgets.QMessageBox.critical(self, "Thiếu thư viện", "Cần cài đặt python-docx: pip install python-docx")
+                                # Kiểm tra gạch chân trong runs
+                                is_underlined = any(run.underline for run in para.runs if run.underline)
+                                if is_underlined:
+                                    current_question['answer'] = option_result['label']
+                                continue
+
+                        elif current_section == 'true_false':
+                            # Xử lý sub-question cho đúng/sai
+                            sub_result = pattern_matcher.detect_sub_question(line)
+                            if sub_result.get('is_sub_question'):
+                                current_question['sub_questions'].append({
+                                    'label': sub_result['label'],
+                                    'content': sub_result['content'],
+                                    'is_correct': True  # Mặc định, sẽ được cập nhật từ bảng
+                                })
+                                continue
+
+                        elif current_section == 'short_answer':
+                            # Xử lý kết quả cho câu trả lời ngắn
+                            result = pattern_matcher.detect_short_answer_result(line)
+                            if result.get('is_result'):
+                                current_question['answer'] = result['result']
+                                continue
+
+                elif isinstance(block, CT_Tbl):  # Nếu khối là bảng
+                    table = Table(block, doc)
+
+                    # Chỉ xử lý bảng cho câu đúng/sai
+                    if current_section == 'true_false' and current_question:
+                        sub_questions = self._process_true_false_table(table)
+                        if sub_questions:
+                            current_question['sub_questions'] = sub_questions
+
+            # Lưu câu hỏi cuối cùng
+            if current_question:
+                all_questions.append(current_question)
+
         except Exception as e:
-            QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể xử lý file: {e}")
+            errors.append(f"Lỗi khi đọc file: {str(e)}")
+            QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể đọc file Word: {e}")
+            return
+
+    # Lưu câu hỏi trả lời ngắn import
+    def _save_imported_short_answer(self, question_data, tree_id):
+        """Lưu câu hỏi trả lời ngắn được import"""
+        content = question_data["content"]
+        answer = question_data.get("answer", "")
+
+        if not answer:
+            return None
+
+        # Lưu câu hỏi chính
+        new_id = self.db.execute_query(
+            "INSERT INTO question_bank(content_text, correct, question_type, tree_id) VALUES (?,?,?,?)",
+            (content, answer, 'short_answer', tree_id)
+        )
+
+        return new_id
+    def _process_multiple_choice_question(self, lines, start_index, pattern_matcher, validator):
+        """
+        Xử lý câu hỏi trắc nghiệm, hỗ trợ nội dung và đáp án trên nhiều dòng.
+        """
+        i = start_index
+        q_result = pattern_matcher.smart_detect_question(lines[i], 'multiple_choice')
+        if not q_result.get('is_question'):
+            return None, i + 1
+
+        question = {
+            'question_type': 'multiple_choice',
+            'content': q_result['content'],
+            'options': [],
+            'answer': None,
+            'line_number': i + 1,
+            'errors': []
+        }
+
+        i += 1
+        current_option = None
+
+        # Vòng lặp chính để gom nội dung câu hỏi, đáp án và tìm câu trả lời
+        while i < len(lines):
+            line = lines[i]
+
+            # Kiểm tra xem dòng hiện tại có phải là một thành phần mới không
+            next_q = pattern_matcher.smart_detect_question(line, 'multiple_choice')
+            next_o = pattern_matcher.smart_detect_option(line)
+            next_a = pattern_matcher.smart_detect_answer(line)
+
+            if next_q.get('is_question'):
+                # Gặp câu hỏi mới, kết thúc câu hỏi hiện tại
+                break
+
+            if next_o.get('is_option'):
+                # Gặp đáp án mới
+                current_option = {
+                    'text': f"{next_o['label']}. {next_o['text']}",
+                    'label': next_o['label']
+                }
+                question['options'].append(current_option)
+            elif next_a.get('is_answer'):
+                # Gặp dòng đáp án
+                question['answer'] = next_a['answer']
+                i += 1
+                break  # Kết thúc khi tìm thấy đáp án
+            elif current_option:
+                # Nếu đang trong một đáp án, ghép nội dung vào đáp án đó
+                current_option['text'] += " " + line
+            else:
+                # Nếu chưa gặp đáp án nào, ghép nội dung vào câu hỏi
+                question['content'] += " " + line
+
+            i += 1
+
+        # Kiểm tra lỗi sau khi xử lý xong một câu hỏi
+        if not question['options']:
+            question['errors'].append(f"Dòng {question['line_number']}: Câu hỏi không có đáp án nào.")
+        if not question['answer']:
+            question['errors'].append(
+                f"Dòng {question['line_number']}: Không tìm thấy đáp án đúng (ví dụ: 'Đáp án: A').")
+
+        return question, i
+    # Xử lý câu hỏi đúng/sai
+    def _process_true_false_question(self, lines, start_index, pattern_matcher, validator):
+        """Xử lý câu hỏi đúng/sai với sub-questions"""
+        i = start_index
+        line = lines[i] if i < len(lines) else ""
+
+        # Phát hiện câu hỏi chính
+        q_result = pattern_matcher.smart_detect_question(line, 'true_false')
+
+        if not q_result.get('is_question'):
+            return None, i + 1
+
+        question = {
+            'question_type': 'true_false',
+            'content': q_result['content'],
+            'sub_questions': [],
+            'line_number': i + 1,
+            'confidence': q_result['confidence']
+        }
+
+        i += 1
+
+        # Đọc các sub-questions a), b), c), d)
+        while i < len(lines):
+            line = lines[i]
+
+            # Kiểm tra sub-question
+            sub_result = pattern_matcher.detect_sub_question(line)
+            if sub_result.get('is_sub_question'):
+                question['sub_questions'].append({
+                    'label': sub_result['label'],
+                    'content': sub_result['content'],
+                    'is_correct': None  # Sẽ được xác định sau hoặc mặc định
+                })
+                i += 1
+                continue
+
+            # Nếu gặp câu hỏi khác thì dừng
+            next_q = pattern_matcher.smart_detect_question(line, 'true_false')
+            if next_q.get('is_question'):
+                break
+
+            i += 1
+
+        return question, i
+
+    # Xử lý câu hỏi trả lời ngắn
+    def _process_short_answer_question(self, lines, start_index, pattern_matcher, validator):
+        """Xử lý câu hỏi trả lời ngắn"""
+        i = start_index
+        line = lines[i] if i < len(lines) else ""
+
+        # Phát hiện câu hỏi
+        q_result = pattern_matcher.smart_detect_question(line, 'short_answer')
+
+        if not q_result.get('is_question'):
+            return None, i + 1
+
+        question = {
+            'question_type': 'short_answer',
+            'content': q_result['content'],
+            'answer': '',
+            'line_number': i + 1,
+            'confidence': q_result['confidence']
+        }
+
+        i += 1
+
+        # Tìm kết quả
+        while i < len(lines):
+            line = lines[i]
+
+            # Kiểm tra kết quả
+            result = pattern_matcher.detect_short_answer_result(line)
+            if result.get('is_result'):
+                question['answer'] = result['result']
+                i += 1
+                break
+
+            # Nếu gặp câu hỏi khác thì dừng
+            next_q = pattern_matcher.smart_detect_question(line, 'short_answer')
+            if next_q.get('is_question'):
+                break
+
+            i += 1
+
+        return question, i
 
     # Hiển thị dialog chọn template import
     def show_import_template_choice(self):
@@ -1725,34 +2580,26 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
 
         return dialog.exec() == QtWidgets.QDialog.Accepted
 
-    # Xử lý câu hỏi đã được validate nâng cao
+    # Xử lý câu hỏi import với 3 dạng
     def _process_enhanced_imported_questions(self, questions, tree_id):
-        """Xử lý và lưu câu hỏi với enhanced validation"""
+        """Xử lý và lưu câu hỏi với enhanced validation cho 3 dạng"""
         inserted = 0
 
         for q in questions:
             try:
+                question_type = q.get("question_type", "multiple_choice")
                 content = q["content"]
-                answer = q["answer"]
-                raw_options = q["options"]
 
-                opts_data = []
-                for opt in raw_options:
-                    label = opt.get('label', '')
-                    text = opt.get('text', '')
-                    if label and text:
-                        is_correct = (label == answer)
-                        opts_data.append({
-                            "text": text,
-                            "is_correct": is_correct
-                        })
+                if question_type == "multiple_choice":
+                    new_id = self._save_imported_multiple_choice(q, tree_id)
+                elif question_type == "true_false":
+                    new_id = self._save_imported_true_false(q, tree_id)
+                elif question_type == "short_answer":
+                    new_id = self._save_imported_short_answer(q, tree_id)
+                else:
+                    continue
 
-                if opts_data:
-                    new_id = self.db.execute_query(
-                        "INSERT INTO question_bank(content_text, options, correct, tree_id) VALUES (?,?,?,?)",
-                        (content, json.dumps(opts_data, ensure_ascii=False), answer, tree_id)
-                    )
-
+                if new_id:
                     # Save import history
                     self._save_question_history(new_id, "IMPORT", "", content)
                     inserted += 1
@@ -1764,6 +2611,79 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
         rows = self.db.execute_query("SELECT * FROM question_bank WHERE tree_id=?", (tree_id,), fetch="all") or []
         self._load_question_rows(rows)
         QtWidgets.QMessageBox.information(self, "Thành công", f"Đã thêm {inserted} câu hỏi từ file Word.")
+
+    # Lưu câu hỏi trắc nghiệm import
+    def _save_imported_multiple_choice(self, question_data, tree_id):
+        """Lưu câu hỏi trắc nghiệm được import"""
+        content = question_data["content"]
+        answer = question_data["answer"]
+        raw_options = question_data["options"]
+
+        opts_data = []
+        for opt in raw_options:
+            label = opt.get('label', '')
+            text = opt.get('text', '')
+            if label and text:
+                is_correct = (label == answer)
+                opts_data.append({
+                    "text": text,
+                    "is_correct": is_correct
+                })
+
+        if opts_data:
+            return self.db.execute_query(
+                "INSERT INTO question_bank(content_text, options, correct, question_type, tree_id) VALUES (?,?,?,?,?)",
+                (content, json.dumps(opts_data, ensure_ascii=False), answer, 'multiple_choice', tree_id)
+            )
+        return None
+
+    # Lưu câu hỏi đúng/sai import
+    def _save_imported_true_false(self, question_data, tree_id):
+        """Lưu câu hỏi đúng/sai được import"""
+        content = question_data["content"]
+        sub_questions = question_data.get("sub_questions", [])
+
+        if len(sub_questions) < 2:
+            return None
+
+        # Lưu câu hỏi chính
+        new_id = self.db.execute_query(
+            "INSERT INTO question_bank(content_text, question_type, sub_questions, tree_id) VALUES (?,?,?,?)",
+            (content, 'true_false', json.dumps(sub_questions, ensure_ascii=False), tree_id)
+        )
+
+        # Lưu sub-parts
+        for i, sub in enumerate(sub_questions):
+            # Mặc định tất cả là đúng nếu không có thông tin
+            is_correct = sub.get("is_correct", True)
+            self.db.execute_query(
+                "INSERT INTO question_sub_parts(question_id, part_label, part_content, is_correct, part_order) VALUES (?,?,?,?,?)",
+                (new_id, sub["label"], sub["content"], int(is_correct), i)
+            )
+
+        return new_id
+
+    # Lưu câu hỏi trả lời ngắn import
+    def _save_imported_short_answer(self, question_data, tree_id):
+        """Lưu câu hỏi trả lời ngắn được import"""
+        content = question_data["content"]
+        answer = question_data.get("answer", "")
+
+        if not answer:
+            return None
+
+        # Chuẩn bị answer data
+        answer_data = {
+            "main_answer": answer,
+            "answer_type": "Số nguyên",  # Mặc định
+            "alternative_answers": []
+        }
+
+        return self.db.execute_query(
+            "INSERT INTO question_bank(content_text, correct, question_type, options, tree_id) VALUES (?,?,?,?,?)",
+            (content, answer, 'short_answer', json.dumps(answer_data, ensure_ascii=False), tree_id)
+        )
+
     # ====================== Misc ======================
     def toggle_tree_panel(self):
         # ẩn/hiện panel trái
@@ -1815,9 +2735,10 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
         self._load_question_rows(rows)
 
         QtWidgets.QMessageBox.information(self, "Kết quả tìm kiếm", f"Tìm thấy {len(rows)} câu hỏi.")
-    # Xuất câu hỏi ra file Word
+
+    # Export với hỗ trợ 3 dạng câu hỏi
     def export_to_word(self):
-        """Xuất danh sách câu hỏi ra file Word"""
+        """Xuất danh sách câu hỏi ra file Word với hỗ trợ 3 dạng"""
         tree_id = self._current_tree_id()
         if not tree_id:
             QtWidgets.QMessageBox.warning(self, "Chưa chọn thư mục", "Vui lòng chọn thư mục để xuất.")
@@ -1829,9 +2750,10 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
 
         try:
             from docx import Document
+            from docx.shared import Inches
 
             doc = Document()
-            doc.add_heading('Ngân hàng câu hỏi', 0)
+            doc.add_heading('NGÂN HÀNG CÂU HỎI', 0)
 
             # Thêm thông tin đường dẫn thư mục
             path_info = self.get_tree_path(tree_id)
@@ -1839,32 +2761,97 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
                 path_text = " > ".join([p["name"] for p in path_info])
                 doc.add_paragraph(f"Đường dẫn: {path_text}")
 
-            # Lấy và xuất câu hỏi
-            rows = self.db.execute_query("SELECT * FROM question_bank WHERE tree_id=?", (tree_id,), fetch="all") or []
+            # Lấy và phân loại câu hỏi
+            rows = self.db.execute_query("SELECT * FROM question_bank WHERE tree_id=? ORDER BY question_type, id",
+                                         (tree_id,), fetch="all") or []
 
-            for i, row in enumerate(rows, 1):
-                doc.add_heading(f'Câu hỏi {i}:', level=2)
-                doc.add_paragraph(row["content_text"])
+            # Phân loại theo dạng
+            questions_by_type = {
+                'multiple_choice': [],
+                'true_false': [],
+                'short_answer': []
+            }
 
-                # Parse và xuất các đáp án
-                try:
-                    options = json.loads(row["options"] or "[]")
-                    for opt in options:
-                        doc.add_paragraph(opt["text"], style='List Bullet')
+            for row in rows:
+                q_type = row.get("question_type", "multiple_choice")
+                questions_by_type[q_type].append(row)
 
-                    doc.add_paragraph(f"Đáp án: {row['correct']}")
+            # Export từng phần
+            section_num = 1
+
+            # PHẦN I: Trắc nghiệm thông thường
+            if questions_by_type['multiple_choice']:
+                doc.add_heading(f'PHẦN {section_num}. Câu trắc nghiệm với nhiều phương án lựa chọn', level=1)
+                doc.add_paragraph(
+                    f'Thí sinh trả lời từ câu 1 đến câu {len(questions_by_type["multiple_choice"])}. Mỗi câu hỏi, thí sinh chỉ chọn một phương án.')
+
+                for i, row in enumerate(questions_by_type['multiple_choice'], 1):
+                    doc.add_paragraph(f'Câu {i}. {row["content_text"]}', style='Heading 3')
+
+                    try:
+                        options = json.loads(row["options"] or "[]")
+                        for opt in options:
+                            doc.add_paragraph(opt["text"], style='List Bullet')
+                    except json.JSONDecodeError:
+                        doc.add_paragraph("Lỗi: Không thể đọc đáp án")
+
+                    doc.add_paragraph("")  # Dòng trống
+                section_num += 1
+
+            # PHẦN II: Đúng/Sai
+            if questions_by_type['true_false']:
+                doc.add_heading(f'PHẦN {section_num}. Câu trắc nghiệm đúng sai', level=1)
+                doc.add_paragraph(
+                    f'Thí sinh trả lời từ câu 1 đến câu {len(questions_by_type["true_false"])}. Trong mỗi ý a), b), c), d) ở mỗi câu, thí sinh chọn đúng hoặc sai (điền dấu X vào ô chọn)')
+
+                for i, row in enumerate(questions_by_type['true_false'], 1):
+                    doc.add_paragraph(f'Câu {i}. {row["content_text"]}', style='Heading 3')
+
+                    # Tạo bảng cho đúng/sai
+                    table = doc.add_table(rows=1, cols=3)
+                    table.style = 'Table Grid'
+
+                    # Header
+                    header_cells = table.rows[0].cells
+                    header_cells[0].text = 'Khẳng định'
+                    header_cells[1].text = 'Đúng'
+                    header_cells[2].text = 'Sai'
+
+                    # Lấy sub-questions
+                    sub_parts = self.db.execute_query(
+                        "SELECT * FROM question_sub_parts WHERE question_id=? ORDER BY part_order",
+                        (row["id"],), fetch="all"
+                    ) or []
+
+                    for sub in sub_parts:
+                        row_cells = table.add_row().cells
+                        row_cells[0].text = f'{sub["part_label"]} {sub["part_content"]}'
+                        row_cells[1].text = 'X' if sub["is_correct"] else ''
+                        row_cells[2].text = '' if sub["is_correct"] else 'X'
+
+                    doc.add_paragraph("")  # Dòng trống
+                section_num += 1
+
+            # PHẦN III: Trả lời ngắn
+            if questions_by_type['short_answer']:
+                doc.add_heading(f'PHẦN {section_num}. Câu trắc nghiệm trả lời ngắn', level=1)
+                doc.add_paragraph(f'Thí sinh trả lời từ câu 1 đến câu {len(questions_by_type["short_answer"])}.')
+
+                for i, row in enumerate(questions_by_type['short_answer'], 1):
+                    doc.add_paragraph(f'Câu {i}. {row["content_text"]}', style='Heading 3')
+                    doc.add_paragraph(f'Kết quả: {row["correct"]}')
                     doc.add_paragraph("")  # Dòng trống
 
-                except json.JSONDecodeError:
-                    doc.add_paragraph("Lỗi: Không thể đọc đáp án")
-
             doc.save(file_path)
-            QtWidgets.QMessageBox.information(self, "Thành công", f"Đã xuất {len(rows)} câu hỏi ra file Word.")
+            total_questions = sum(len(questions_by_type[key]) for key in questions_by_type)
+            QtWidgets.QMessageBox.information(self, "Thành công",
+                                              f"Đã xuất {total_questions} câu hỏi ra file Word với {section_num - 1} phần.")
 
         except ImportError:
             QtWidgets.QMessageBox.critical(self, "Thiếu thư viện", "Cần cài đặt python-docx: pip install python-docx")
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể xuất file: {e}")
+
     # Kiểm tra tính hợp lệ của câu hỏi được import
     def _validate_imported_question(self, question, line_num):
         """Kiểm tra tính hợp lệ của câu hỏi import"""
@@ -2174,32 +3161,55 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
 
         # Cập nhật preview real-time
 
+    # Preview với hỗ trợ 3 dạng câu hỏi
     def update_preview(self):
-        """Cập nhật preview câu hỏi"""
+        """Cập nhật preview câu hỏi cho 3 dạng"""
         if not hasattr(self, 'preview_widget'):
             return
 
         content = self.content_text.toPlainText() if hasattr(self, 'content_text') else ""
+        question_type = self._get_current_question_type()
 
-        # Tạo HTML preview
+        # Base HTML
         html = f"""
-           <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-               <h3 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;">
-                   📝 Câu hỏi
-               </h3>
-               <p style="background: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;">
-                   {content or '<em>Chưa có nội dung câu hỏi...</em>'}
-               </p>
+        <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+            <h3 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;">
+                📝 {self._get_question_type_display_name(question_type)}
+            </h3>
+            <p style="background: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;">
+                {content or '<em>Chưa có nội dung câu hỏi...</em>'}
+            </p>
+        """
 
-               <h4 style="color: #2c3e50; margin-top: 20px;">🔘 Đáp án:</h4>
-           """
+        if question_type == 'multiple_choice':
+            html += self._generate_multiple_choice_preview()
+        elif question_type == 'true_false':
+            html += self._generate_true_false_preview()
+        elif question_type == 'short_answer':
+            html += self._generate_short_answer_preview()
 
-        # Thêm các đáp án
+        html += "</div>"
+        self.preview_widget.setHtml(html)
+
+    # Lấy tên hiển thị cho loại câu hỏi
+    def _get_question_type_display_name(self, question_type):
+        """Lấy tên hiển thị cho loại câu hỏi"""
+        names = {
+            'multiple_choice': 'Câu hỏi Trắc nghiệm',
+            'true_false': 'Câu hỏi Đúng/Sai',
+            'short_answer': 'Câu hỏi Trả lời ngắn'
+        }
+        return names.get(question_type, 'Câu hỏi')
+
+    # Preview cho trắc nghiệm
+    def _generate_multiple_choice_preview(self):
+        """Tạo preview cho câu hỏi trắc nghiệm"""
+        html = "<h4 style='color: #2c3e50; margin-top: 20px;'>📘 Đáp án:</h4>"
+
         if hasattr(self, 'option_entries'):
             for label, entry in self.option_entries.items():
                 text = entry.text().strip() if entry.text() else f"<em>Chưa có đáp án {label}</em>"
 
-                # Kiểm tra xem có phải đáp án đúng không
                 is_correct = False
                 if hasattr(self, 'correct_group'):
                     for btn in self.correct_group.buttons():
@@ -2209,17 +3219,66 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
 
                 style = "background: #d4edda; border-left: 4px solid #28a745;" if is_correct else "background: #f8f9fa;"
                 html += f"""
-                   <div style="{style} padding: 10px; margin: 5px 0; border-radius: 4px;">
-                       <strong>{label}.</strong> {text}
-                       {'<span style="color: #28a745; font-weight: bold;"> ✓ (Đáp án đúng)</span>' if is_correct else ''}
-                   </div>
-                   """
+                <div style="{style} padding: 10px; margin: 5px 0; border-radius: 4px;">
+                    <strong>{label}.</strong> {text}
+                    {'<span style="color: #28a745; font-weight: bold;"> ✓ (Đáp án đúng)</span>' if is_correct else ''}
+                </div>
+                """
 
-        html += "</div>"
-        self.preview_widget.setHtml(html)
+        return html
 
-        # Cập nhật thống kê
+    # Preview cho đúng/sai
+    def _generate_true_false_preview(self):
+        """Tạo preview cho câu hỏi đúng/sai"""
+        html = "<h4 style='color: #2c3e50; margin-top: 20px;'>✅❌ Các phần đánh giá:</h4>"
 
+        if hasattr(self, 'sub_question_entries'):
+            for label, entry in self.sub_question_entries.items():
+                text = entry.text().strip() if entry.text() else f"<em>Chưa có nội dung phần {label}</em>"
+
+                is_correct = self.sub_question_checkboxes[label].isChecked()
+
+                style = "background: #d4edda; border-left: 4px solid #28a745;" if is_correct else "background: #f8d7da; border-left: 4px solid #dc3545;"
+                icon = "✅" if is_correct else "❌"
+                status = "ĐÚNG" if is_correct else "SAI"
+
+                html += f"""
+                <div style="{style} padding: 10px; margin: 5px 0; border-radius: 4px;">
+                    <strong>{label.upper()}</strong> {text}
+                    <span style="float: right; font-weight: bold;">{icon} {status}</span>
+                </div>
+                """
+
+        return html
+
+    # Preview cho trả lời ngắn
+    def _generate_short_answer_preview(self):
+        """Tạo preview cho câu hỏi trả lời ngắn"""
+        html = "<h4 style='color: #2c3e50; margin-top: 20px;'>📝 Đáp án:</h4>"
+
+        if hasattr(self, 'short_answer_edit'):
+            answer = self.short_answer_edit.text().strip() or "<em>Chưa có đáp án</em>"
+            answer_type = self.answer_type_combo.currentText() if hasattr(self, 'answer_type_combo') else "Văn bản"
+
+            html += f"""
+            <div style="background: #e3f2fd; padding: 15px; border-radius: 4px; margin: 10px 0;">
+                <p><strong>Loại đáp án:</strong> {answer_type}</p>
+                <p><strong>Đáp án chính:</strong> <span style="background: #fff; padding: 5px 10px; border-radius: 3px; font-family: monospace;">{answer}</span></p>
+            """
+
+            if hasattr(self, 'alternative_answers_edit'):
+                alt_answers = self.alternative_answers_edit.toPlainText().strip()
+                if alt_answers:
+                    alt_list = [alt.strip() for alt in alt_answers.split('\n') if alt.strip()]
+                    if alt_list:
+                        html += "<p><strong>Đáp án thay thế:</strong></p><ul>"
+                        for alt in alt_list:
+                            html += f"<li><span style='background: #f8f9fa; padding: 2px 6px; border-radius: 3px; font-family: monospace;'>{alt}</span></li>"
+                        html += "</ul>"
+
+            html += "</div>"
+
+        return html
     def update_statistics(self):
         """Cập nhật thống kê câu hỏi"""
         if not hasattr(self, 'stats_widget'):
@@ -2356,7 +3415,8 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
                </div>
                """
             self.stats_widget.setHtml(error_html)
-
+        from datetime import datetime
+        self._stats_cache_time = datetime.now()
         # Xóa lịch sử
 
     def clear_history(self):
@@ -3230,3 +4290,860 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
         if reply == QtWidgets.QMessageBox.Yes:
             template_list.takeItem(template_list.row(current))
             QtWidgets.QMessageBox.information(self, "Thành công", "Đã xóa template.")
+
+    # Helper methods cho 3 dạng câu hỏi
+    def get_question_type_statistics(self):
+        """Lấy thống kê theo loại câu hỏi"""
+        try:
+            stats = {}
+
+            # Thống kê tổng quan
+            total = self.db.execute_query("SELECT COUNT(*) as count FROM question_bank", fetch="one")["count"]
+            stats['total'] = total
+
+            # Thống kê theo loại
+            type_stats = self.db.execute_query("""
+                SELECT 
+                    question_type,
+                    COUNT(*) as count
+                FROM question_bank 
+                GROUP BY question_type
+                ORDER BY count DESC
+            """, fetch="all") or []
+
+            stats['by_type'] = {}
+            for stat in type_stats:
+                q_type = stat["question_type"] or "multiple_choice"
+                stats['by_type'][q_type] = stat["count"]
+
+            return stats
+        except Exception as e:
+            print(f"Lỗi lấy thống kê: {e}")
+            return {'total': 0, 'by_type': {}}
+
+    # Validate dữ liệu cho từng loại câu hỏi
+    def validate_question_by_type(self, question_type, data):
+        """Validate dữ liệu theo loại câu hỏi"""
+        errors = []
+
+        if question_type == 'multiple_choice':
+            if not data.get('options') or len(data['options']) < 2:
+                errors.append("Câu hỏi trắc nghiệm phải có ít nhất 2 đáp án")
+            if not data.get('correct'):
+                errors.append("Phải chọn đáp án đúng")
+
+        elif question_type == 'true_false':
+            if not data.get('sub_questions') or len(data['sub_questions']) < 2:
+                errors.append("Câu hỏi đúng/sai phải có ít nhất 2 phần")
+            for sub in data.get('sub_questions', []):
+                if not sub.get('content', '').strip():
+                    errors.append(f"Phần {sub.get('label', '')} không được để trống")
+
+        elif question_type == 'short_answer':
+            if not data.get('answer', '').strip():
+                errors.append("Câu hỏi trả lời ngắn phải có đáp án")
+
+        return errors
+
+    # Export template cho import
+    def export_question_template(self):
+        """Xuất template mẫu cho việc import"""
+        file_path, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self, "Lưu file template", "question_template.docx", "Word files (*.docx)"
+        )
+        if not file_path:
+            return
+
+        try:
+            from docx import Document
+
+            doc = Document()
+            doc.add_heading('TEMPLATE NGÂN HÀNG CÂU HỎI', 0)
+
+            # PHẦN I: Mẫu trắc nghiệm
+            doc.add_heading('PHẦN I. Câu trắc nghiệm với nhiều phương án lựa chọn', level=1)
+            doc.add_paragraph('Thí sinh trả lời từ câu 1 đến câu 12. Mỗi câu hỏi, thí sinh chỉ chọn một phương án.')
+
+            doc.add_paragraph('Câu 1. Nội dung câu hỏi trắc nghiệm mẫu?')
+            doc.add_paragraph('A. Đáp án A')
+            doc.add_paragraph('B. Đáp án B')
+            doc.add_paragraph('C. Đáp án C')
+            doc.add_paragraph('D. Đáp án D')
+            doc.add_paragraph('Đáp án: A')
+            doc.add_paragraph('')
+
+            # PHẦN II: Mẫu đúng/sai
+            doc.add_heading('PHẦN II. Câu trắc nghiệm đúng sai', level=1)
+            doc.add_paragraph(
+                'Thí sinh trả lời từ câu 1 đến câu 4. Trong mỗi ý a), b), c), d) ở mỗi câu, thí sinh chọn đúng hoặc sai (điền dấu X vào ô chọn)')
+
+            doc.add_paragraph('Câu 1. Xét tính đúng sai của các khẳng định sau:')
+            doc.add_paragraph('a) Khẳng định thứ nhất')
+            doc.add_paragraph('b) Khẳng định thứ hai')
+            doc.add_paragraph('c) Khẳng định thứ ba')
+            doc.add_paragraph('d) Khẳng định thứ tư')
+            doc.add_paragraph('')
+
+            # PHẦN III: Mẫu trả lời ngắn
+            doc.add_heading('PHẦN III. Câu trắc nghiệm trả lời ngắn', level=1)
+            doc.add_paragraph('Thí sinh trả lời từ câu 1 đến câu 6.')
+
+            doc.add_paragraph('Câu 1. Nội dung câu hỏi trả lời ngắn mẫu?')
+            doc.add_paragraph('Kết quả: 10')
+            doc.add_paragraph('')
+
+            doc.save(file_path)
+            QtWidgets.QMessageBox.information(self, "Thành công", "Đã xuất file template mẫu.")
+
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể xuất template: {e}")
+
+    # Clear form cho tất cả loại câu hỏi
+    def clear_all_question_forms(self):
+        """Clear form cho tất cả loại câu hỏi"""
+        self.current_question_id = None
+        self.content_text.clear()
+
+        # Clear multiple choice
+        self.correct_group.setExclusive(False)
+        for b in self.correct_group.buttons():
+            b.setChecked(False)
+        self.correct_group.setExclusive(True)
+        for ent in self.option_entries.values():
+            ent.clear()
+
+        # Clear true/false
+        if hasattr(self, 'sub_question_entries'):
+            for entry in self.sub_question_entries.values():
+                entry.clear()
+            for cb in self.sub_question_checkboxes.values():
+                cb.setChecked(False)
+
+        # Clear short answer
+        if hasattr(self, 'short_answer_edit'):
+            self.short_answer_edit.clear()
+        if hasattr(self, 'alternative_answers_edit'):
+            self.alternative_answers_edit.clear()
+
+    # Thêm phương thức setup tree management
+    def _setup_tree_management(self):
+        """Thiết lập chức năng quản lý cây thư mục"""
+
+        # Thêm context menu cho tree
+        self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.tree.customContextMenuRequested.connect(self._show_tree_context_menu)
+
+        # Thêm double-click để edit
+        self.tree.itemDoubleClicked.connect(self._edit_tree_node)
+
+        # Thêm keyboard shortcuts
+        self._setup_tree_shortcuts()
+
+    # Thêm phương thức context menu
+    def _show_tree_context_menu(self, position):
+        """Hiển thị context menu cho tree"""
+        item = self.tree.itemAt(position)
+
+        menu = QtWidgets.QMenu(self)
+
+        # Thêm node mới
+        add_action = menu.addAction("➕ Thêm nhánh mới")
+        add_action.triggered.connect(lambda: self._add_tree_node(item))
+
+        if item:  # Nếu click vào node
+            menu.addSeparator()
+
+            # Thêm node con
+            add_child_action = menu.addAction("📁 Thêm nhánh con")
+            add_child_action.triggered.connect(lambda: self._add_child_node(item))
+
+            # Sửa node
+            edit_action = menu.addAction("✏️ Sửa tên nhánh")
+            edit_action.triggered.connect(lambda: self._edit_tree_node(item))
+
+            # Sao chép node
+            copy_action = menu.addAction("📋 Sao chép nhánh")
+            copy_action.triggered.connect(lambda: self._copy_tree_node(item))
+
+            menu.addSeparator()
+
+            # Xóa node
+            delete_action = menu.addAction("🗑️ Xóa nhánh")
+            delete_action.triggered.connect(lambda: self._delete_tree_node(item))
+
+        # Hiển thị menu
+        menu.exec(self.tree.mapToGlobal(position))
+
+    # Thêm phương thức keyboard shortcuts
+    def _setup_tree_shortcuts(self):
+        """Thiết lập keyboard shortcuts cho tree"""
+        # F2 để edit node được chọn
+        edit_shortcut = QShortcut(QKeySequence("F2"), self.tree)
+        edit_shortcut.activated.connect(self._edit_selected_tree_node)
+
+        # Delete để xóa node
+        delete_shortcut = QShortcut(QKeySequence("Delete"), self.tree)
+        delete_shortcut.activated.connect(self._delete_selected_tree_node)
+
+        # Ctrl+N để thêm node mới
+        add_shortcut = QShortcut(QKeySequence("Ctrl+N"), self.tree)
+        add_shortcut.activated.connect(self._add_tree_node)
+    # Thêm phương thức thêm node
+    def _add_tree_node(self, parent_item=None):
+        """Thêm node mới"""
+        try:
+            dialog = TreeNodeDialog(self.db, mode="add", parent=self)
+
+            # Nếu có parent item, set làm parent
+            parent_id = None
+            if parent_item:
+                parent_id = parent_item.data(0, Qt.UserRole)
+                if parent_id:
+                    dialog.set_parent_id(parent_id)
+
+            if dialog.exec() == QtWidgets.QDialog.Accepted:
+                # Refresh tree sau khi thêm
+                self.refresh_tree()
+
+                # Tìm lại parent item sau khi refresh (vì tree đã được rebuild)
+                if parent_id:
+                    self._expand_node_by_id(parent_id)
+
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể thêm node: {e}")
+    # Thêm phương thức thêm node con
+    def _add_child_node(self, parent_item):
+        """Thêm node con"""
+        if not parent_item:
+            return
+
+        parent_id = parent_item.data(0, Qt.UserRole)
+        if not parent_id:
+            return
+
+        try:
+            dialog = TreeNodeDialog(self.db, mode="add", parent=self)
+            dialog.set_parent_id(parent_id)
+
+            if dialog.exec() == QtWidgets.QDialog.Accepted:
+                self.refresh_tree()
+                # Tìm lại và expand parent sau khi refresh
+                self._expand_node_by_id(parent_id)
+
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể thêm node con: {e}")
+
+    # Thêm phương thức sửa node
+    def _edit_tree_node(self, item):
+        """Sửa node"""
+        if not item:
+            return
+
+        node_id = item.data(0, Qt.UserRole)
+        if not node_id:
+            return
+
+        try:
+            dialog = TreeNodeDialog(self.db, mode="edit", node_id=node_id, parent=self)
+
+            if dialog.exec() == QtWidgets.QDialog.Accepted:
+                self.refresh_tree()
+                # Tìm lại và select node sau khi refresh
+                self._select_node_by_id(node_id)
+
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể sửa node: {e}")
+    # Thêm phương thức sửa node được chọn
+    def _edit_selected_tree_node(self):
+        """Sửa node được chọn"""
+        selected_items = self.tree.selectedItems()
+        if selected_items:
+            self._edit_tree_node(selected_items[0])
+
+    # Thêm phương thức sao chép node
+    def _copy_tree_node(self, item):
+        """Sao chép node"""
+        if not item:
+            return
+
+        node_id = item.data(0, Qt.UserRole)
+        if not node_id:
+            return
+
+        try:
+            # Lấy thông tin node gốc
+            row = self.db.execute_query(
+                "SELECT name, level, description, parent_id FROM exercise_tree WHERE id = ?",
+                (node_id,), fetch="one"
+            )
+
+            if row:
+                new_name = f"{row['name']} (Sao chép)"
+
+                # Tạo node mới
+                description = row.get('description', '') if row.get('description') else ''
+
+                self.db.execute_query(
+                    "INSERT INTO exercise_tree (parent_id, name, level, description) VALUES (?, ?, ?, ?)",
+                    (row['parent_id'], new_name, row['level'], description)
+                )
+
+                self.refresh_tree()
+                QtWidgets.QMessageBox.information(self, "Thành công", f"Đã sao chép '{new_name}'")
+
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể sao chép node: {e}")
+    # Thêm phương thức xóa node
+    def _delete_tree_node(self, item):
+        """Xóa node với xác nhận"""
+        if not item:
+            return
+
+        node_id = item.data(0, Qt.UserRole)
+        node_name = item.text(0)
+
+        if not node_id:
+            return
+
+        try:
+            # Kiểm tra node con
+            children_count = self.db.execute_query(
+                "SELECT COUNT(*) as count FROM exercise_tree WHERE parent_id = ?",
+                (node_id,), fetch="one"
+            )
+
+            if children_count and children_count["count"] > 0:
+                reply = QtWidgets.QMessageBox.question(
+                    self, "Xác nhận xóa",
+                    f"Nhánh '{node_name}' có {children_count['count']} nhánh con.\n"
+                    f"Bạn có muốn xóa tất cả không?",
+                    QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                    QtWidgets.QMessageBox.No
+                )
+            else:
+                reply = QtWidgets.QMessageBox.question(
+                    self, "Xác nhận xóa",
+                    f"Bạn có chắc muốn xóa nhánh '{node_name}'?",
+                    QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                    QtWidgets.QMessageBox.No
+                )
+
+            if reply == QtWidgets.QMessageBox.Yes:
+                # Xóa node và tất cả con
+                self.db.execute_query("DELETE FROM exercise_tree WHERE id = ?", (node_id,))
+                self.refresh_tree()
+                QtWidgets.QMessageBox.information(self, "Thành công", f"Đã xóa nhánh '{node_name}'")
+
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể xóa node: {e}")
+    # Thêm phương thức xóa node được chọn
+    def _delete_selected_tree_node(self):
+        """Xóa node được chọn"""
+        selected_items = self.tree.selectedItems()
+        if selected_items:
+            self._delete_tree_node(selected_items[0])
+
+    def _expand_node_by_id(self, node_id):
+        """Tìm và expand node theo ID"""
+        try:
+            root = self.tree.invisibleRootItem()
+            self._find_and_expand_recursive(root, node_id)
+        except Exception:
+            pass  # Bỏ qua lỗi nếu không tìm thấy
+
+    def _find_and_expand_recursive(self, parent_item, target_id):
+        """Đệ quy tìm và expand node"""
+        for i in range(parent_item.childCount()):
+            child = parent_item.child(i)
+            if child and child.data(0, Qt.UserRole) == target_id:
+                child.setExpanded(True)
+                return True
+
+            if self._find_and_expand_recursive(child, target_id):
+                return True
+
+        return False
+
+    def _select_node_by_id(self, node_id):
+        """Tìm và select node theo ID"""
+        try:
+            root = self.tree.invisibleRootItem()
+            self._find_and_select_recursive(root, node_id)
+        except Exception:
+            pass  # Bỏ qua lỗi nếu không tìm thấy
+
+    def _find_and_select_recursive(self, parent_item, target_id):
+        """Đệ quy tìm và select node"""
+        for i in range(parent_item.childCount()):
+            child = parent_item.child(i)
+            if child and child.data(0, Qt.UserRole) == target_id:
+                self.tree.setCurrentItem(child)
+                return True
+
+            if self._find_and_select_recursive(child, target_id):
+                return True
+
+        return False
+
+
+class TreeNodeDialog(QtWidgets.QDialog):
+    """Dialog để thêm/sửa node trong cây thư mục"""
+
+    def __init__(self, db_manager, mode="add", node_id=None, parent=None):
+        super().__init__(parent)
+        self.db = db_manager
+        self.mode = mode  # "add" hoặc "edit"
+        self.node_id = node_id
+        self.parent_id = None
+
+        self._setup_dialog()
+        self._build_ui()
+        self._load_data()
+
+    def _setup_dialog(self):
+        """Thiết lập dialog"""
+        if self.mode == "add":
+            self.setWindowTitle("➕ Thêm nhánh mới")
+        else:
+            self.setWindowTitle("✏️ Sửa nhánh")
+
+        self.setModal(True)
+        self.resize(450, 400)
+
+        # Đặt icon cho dialog
+        self.setWindowIcon(self.style().standardIcon(QtWidgets.QStyle.SP_DirIcon))
+
+    def _build_ui(self):
+        """Xây dựng giao diện"""
+        layout = QtWidgets.QVBoxLayout(self)
+        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
+
+        # Header
+        header = QtWidgets.QLabel()
+        if self.mode == "add":
+            header.setText("➕ Thêm nhánh mới vào cây thư mục")
+        else:
+            header.setText("✏️ Chỉnh sửa thông tin nhánh")
+
+        header.setStyleSheet("""
+            QLabel {
+                font-size: 16px;
+                font-weight: bold;
+                color: #2E86AB;
+                padding: 15px;
+                background-color: #f8f9fa;
+                border-radius: 8px;
+                border: 1px solid #dee2e6;
+                margin-bottom: 10px;
+            }
+        """)
+        layout.addWidget(header)
+
+        # Form container
+        form_container = QtWidgets.QWidget()
+        form_container.setStyleSheet("""
+            QWidget {
+                background-color: white;
+                border-radius: 8px;
+                border: 1px solid #e1e5e9;
+            }
+        """)
+
+        form_layout = QtWidgets.QFormLayout(form_container)
+        form_layout.setSpacing(12)
+        form_layout.setContentsMargins(20, 20, 20, 20)
+
+        # Parent selection (chỉ hiện khi thêm)
+        if self.mode == "add":
+            self.parent_combo = QtWidgets.QComboBox()
+            self.parent_combo.addItem("(Không có parent - Cấp gốc)", None)
+            self._load_parent_options()
+
+            parent_label = QtWidgets.QLabel("📁 Nhánh cha:")
+            parent_label.setStyleSheet("font-weight: 500; color: #495057;")
+            form_layout.addRow(parent_label, self.parent_combo)
+
+        # Tên nhánh
+        self.name_edit = QtWidgets.QLineEdit()
+        self.name_edit.setPlaceholderText("Nhập tên nhánh...")
+
+        name_label = QtWidgets.QLabel("📝 Tên nhánh:")
+        name_label.setStyleSheet("font-weight: 500; color: #495057;")
+        form_layout.addRow(name_label, self.name_edit)
+
+        # Cấp độ
+        self.level_combo = QtWidgets.QComboBox()
+        self.level_combo.addItems(["Môn", "Lớp", "Chủ đề", "Dạng", "Mức độ"])
+
+        level_label = QtWidgets.QLabel("📊 Cấp độ:")
+        level_label.setStyleSheet("font-weight: 500; color: #495057;")
+        form_layout.addRow(level_label, self.level_combo)
+
+        # Mô tả
+        self.description_edit = QtWidgets.QTextEdit()
+        self.description_edit.setMaximumHeight(100)
+        self.description_edit.setPlaceholderText("Nhập mô tả chi tiết...")
+
+        desc_label = QtWidgets.QLabel("📄 Mô tả:")
+        desc_label.setStyleSheet("font-weight: 500; color: #495057;")
+        form_layout.addRow(desc_label, self.description_edit)
+
+        # Style cho form inputs
+        input_style = """
+            QLineEdit, QComboBox, QTextEdit {
+                padding: 10px;
+                border: 2px solid #e1e5e9;
+                border-radius: 6px;
+                font-size: 13px;
+                background-color: white;
+            }
+            QLineEdit:focus, QComboBox:focus, QTextEdit:focus {
+                border-color: #2E86AB;
+                outline: none;
+                background-color: #f8fbff;
+            }
+            QComboBox::drop-down {
+                border: none;
+                background-color: transparent;
+            }
+            QComboBox::down-arrow {
+                image: none;
+                border: none;
+                width: 12px;
+                height: 12px;
+            }
+        """
+
+        self.name_edit.setStyleSheet(input_style)
+        self.level_combo.setStyleSheet(input_style)
+        self.description_edit.setStyleSheet(input_style)
+
+        if hasattr(self, 'parent_combo'):
+            self.parent_combo.setStyleSheet(input_style)
+
+        layout.addWidget(form_container)
+
+        # Buttons container
+        button_container = QtWidgets.QWidget()
+        button_layout = QtWidgets.QHBoxLayout(button_container)
+        button_layout.setContentsMargins(0, 10, 0, 0)
+
+        # Cancel button
+        cancel_btn = QtWidgets.QPushButton("❌ Hủy")
+        cancel_btn.setFixedSize(100, 40)
+        cancel_btn.clicked.connect(self.reject)
+        cancel_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #6c757d;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 6px;
+                font-weight: 600;
+                font-size: 13px;
+            }
+            QPushButton:hover {
+                background-color: #5a6268;
+            }
+            QPushButton:pressed {
+                background-color: #545b62;
+            }
+        """)
+
+        # Save button
+        if self.mode == "add":
+            save_btn = QtWidgets.QPushButton("➕ Thêm")
+            save_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: #28a745;
+                    color: white;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 6px;
+                    font-weight: 600;
+                    font-size: 13px;
+                }
+                QPushButton:hover {
+                    background-color: #218838;
+                }
+                QPushButton:pressed {
+                    background-color: #1e7e34;
+                }
+            """)
+        else:
+            save_btn = QtWidgets.QPushButton("💾 Lưu")
+            save_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: #007bff;
+                    color: white;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 6px;
+                    font-weight: 600;
+                    font-size: 13px;
+                }
+                QPushButton:hover {
+                    background-color: #0056b3;
+                }
+                QPushButton:pressed {
+                    background-color: #004085;
+                }
+            """)
+
+        save_btn.setFixedSize(100, 40)
+        save_btn.clicked.connect(self.accept)
+        save_btn.setDefault(True)
+
+        # Add buttons to layout
+        button_layout.addStretch()
+        button_layout.addWidget(cancel_btn)
+        button_layout.addSpacing(10)
+        button_layout.addWidget(save_btn)
+
+        layout.addWidget(button_container)
+
+        # Focus vào name edit
+        self.name_edit.setFocus()
+
+        # Enter để submit
+        self.name_edit.returnPressed.connect(save_btn.click)
+
+    def _load_parent_options(self):
+        """Load danh sách parent có thể chọn"""
+        if self.mode != "add":
+            return
+
+        try:
+            rows = self.db.execute_query(
+                "SELECT id, name, level FROM exercise_tree ORDER BY level, name",
+                fetch="all"
+            ) or []
+
+            for row in rows:
+                # Nếu đang edit, không cho chọn chính nó làm parent
+                if self.mode == "edit" and row["id"] == self.node_id:
+                    continue
+
+                display_text = f"{row['name']} ({row['level']})"
+                self.parent_combo.addItem(display_text, row["id"])
+
+        except Exception as e:
+            print(f"Lỗi load parent options: {e}")
+
+    def set_parent_id(self, parent_id):
+        """Đặt parent được chọn"""
+        self.parent_id = parent_id
+
+        if self.mode == "add" and hasattr(self, 'parent_combo'):
+            # Tìm và chọn parent trong combo
+            for i in range(self.parent_combo.count()):
+                if self.parent_combo.itemData(i) == parent_id:
+                    self.parent_combo.setCurrentIndex(i)
+                    break
+
+    def _load_data(self):
+        """Load dữ liệu nếu đang edit"""
+        if self.mode != "edit" or not self.node_id:
+            return
+
+        try:
+            # Thử query với description trước
+            row = self.db.execute_query(
+                "SELECT name, level, description FROM exercise_tree WHERE id = ?",
+                (self.node_id,), fetch="one"
+            )
+
+            if row:
+                self.name_edit.setText(row["name"] or "")
+
+                # Set level
+                level = row["level"] or "Môn"
+                index = self.level_combo.findText(level)
+                if index >= 0:
+                    self.level_combo.setCurrentIndex(index)
+
+                # Kiểm tra description
+                description = ""
+                if 'description' in row.keys() and row['description']:
+                    description = row['description']
+
+                self.description_edit.setPlainText(description)
+
+        except Exception as e:
+            # Nếu lỗi do thiếu cột description, thử query không có description
+            try:
+                row = self.db.execute_query(
+                    "SELECT name, level FROM exercise_tree WHERE id = ?",
+                    (self.node_id,), fetch="one"
+                )
+
+                if row:
+                    self.name_edit.setText(row["name"] or "")
+                    level = row["level"] or "Môn"
+                    index = self.level_combo.findText(level)
+                    if index >= 0:
+                        self.level_combo.setCurrentIndex(index)
+                    self.description_edit.setPlainText("")
+
+            except Exception as e2:
+                QtWidgets.QMessageBox.critical(
+                    self, "Lỗi",
+                    f"Không thể tải dữ liệu node: {e2}")
+    def _validate_input(self):
+        """Validate dữ liệu đầu vào"""
+        name = self.name_edit.text().strip()
+
+        if not name:
+            QtWidgets.QMessageBox.warning(
+                self, "Lỗi",
+                "Tên nhánh không được để trống!"
+            )
+            self.name_edit.setFocus()
+            return False
+
+        if len(name) > 100:
+            QtWidgets.QMessageBox.warning(
+                self, "Lỗi",
+                "Tên nhánh không được quá 100 ký tự!"
+            )
+            self.name_edit.setFocus()
+            return False
+
+        # Kiểm tra tên không bị trùng trong cùng parent
+        if self.mode == "add":
+            parent_id = None
+            if hasattr(self, 'parent_combo'):
+                parent_id = self.parent_combo.currentData()
+            elif self.parent_id:
+                parent_id = self.parent_id
+
+            existing = self.db.execute_query(
+                "SELECT id FROM exercise_tree WHERE parent_id = ? AND name = ?",
+                (parent_id, name), fetch="one"
+            )
+
+            if existing:
+                QtWidgets.QMessageBox.warning(
+                    self, "Lỗi",
+                    "Đã tồn tại nhánh với tên này trong cùng cấp!"
+                )
+                self.name_edit.setFocus()
+                return False
+        else:
+            # Khi edit, kiểm tra trùng tên nhưng loại trừ chính nó
+            existing = self.db.execute_query(
+                "SELECT id FROM exercise_tree WHERE name = ? AND id != ?",
+                (name, self.node_id), fetch="one"
+            )
+
+            if existing:
+                reply = QtWidgets.QMessageBox.question(
+                    self, "Cảnh báo",
+                    "Đã tồn tại nhánh khác với tên này. Bạn có muốn tiếp tục?",
+                    QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                    QtWidgets.QMessageBox.No
+                )
+
+                if reply != QtWidgets.QMessageBox.Yes:
+                    self.name_edit.setFocus()
+                    return False
+
+        return True
+
+    def accept(self):
+        """Xử lý khi người dùng nhấn Save/Add"""
+        if not self._validate_input():
+            return
+
+        # Lấy dữ liệu từ form
+        name = self.name_edit.text().strip()
+        level = self.level_combo.currentText()
+        description = self.description_edit.toPlainText().strip()
+
+        try:
+            if self.mode == "add":
+                # Thêm node mới
+                parent_id = None
+                if hasattr(self, 'parent_combo'):
+                    parent_id = self.parent_combo.currentData()
+                elif self.parent_id:
+                    parent_id = self.parent_id
+
+                # Thử insert với description trước
+                try:
+                    self.db.execute_query(
+                        "INSERT INTO exercise_tree (parent_id, name, level, description) VALUES (?, ?, ?, ?)",
+                        (parent_id, name, level, description)
+                    )
+                except Exception:
+                    # Nếu lỗi, thử insert không có description
+                    self.db.execute_query(
+                        "INSERT INTO exercise_tree (parent_id, name, level) VALUES (?, ?, ?)",
+                        (parent_id, name, level)
+                    )
+
+                QtWidgets.QMessageBox.information(
+                    self, "Thành công",
+                    f"Đã thêm nhánh '{name}' thành công!"
+                )
+
+            else:
+                # Cập nhật node
+                try:
+                    self.db.execute_query(
+                        "UPDATE exercise_tree SET name = ?, level = ?, description = ? WHERE id = ?",
+                        (name, level, description, self.node_id)
+                    )
+                except Exception:
+                    # Nếu lỗi, thử update không có description
+                    self.db.execute_query(
+                        "UPDATE exercise_tree SET name = ?, level = ? WHERE id = ?",
+                        (name, level, self.node_id)
+                    )
+
+                QtWidgets.QMessageBox.information(
+                    self, "Thành công",
+                    f"Đã cập nhật nhánh '{name}' thành công!"
+                )
+
+            super().accept()
+
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(
+                self, "Lỗi database",
+                f"Không thể lưu dữ liệu:\n{str(e)}"
+            )
+
+    def reject(self):
+        """Xử lý khi người dùng hủy"""
+        # Kiểm tra xem có thay đổi gì không
+        if self.mode == "edit" and self.node_id:
+            try:
+                row = self.db.execute_query(
+                    "SELECT name, level, description FROM exercise_tree WHERE id = ?",
+                    (self.node_id,), fetch="one"
+                )
+
+                if row:
+                    current_name = self.name_edit.text().strip()
+                    current_level = self.level_combo.currentText()
+                    current_desc = self.description_edit.toPlainText().strip()
+
+                    if (current_name != (row["name"] or "") or
+                            current_level != (row["level"] or "Môn") or
+                            current_desc != (row["description"] or "")):
+
+                        reply = QtWidgets.QMessageBox.question(
+                            self, "Xác nhận",
+                            "Bạn có thay đổi chưa lưu. Bạn có muốn thoát?",
+                            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                            QtWidgets.QMessageBox.No
+                        )
+
+                        if reply != QtWidgets.QMessageBox.Yes:
+                            return
+            except:
+                pass
+
+        super().reject()

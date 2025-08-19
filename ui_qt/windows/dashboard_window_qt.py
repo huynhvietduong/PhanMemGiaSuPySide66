@@ -10,9 +10,12 @@ def _safe_import(path: str, class_name: str):
     try:
         mod = __import__(path, fromlist=[class_name])
         return getattr(mod, class_name)
-    except Exception:
+    except Exception as e:
+        # In ra lỗi chi tiết để debug
+        print(f"❌ Lỗi import {path}.{class_name}: {e}")
+        import traceback
+        traceback.print_exc()
         return None
-
 class DashboardWindowQt(QtWidgets.QMainWindow):
     def __init__(self, db_manager, parent=None):
         super().__init__(parent)
