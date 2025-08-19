@@ -412,3 +412,35 @@ class DatabaseManager:
         except sqlite3.Error as e:
             print(f"❌ Lỗi nâng cấp schema exercise_tree: {e}")
             return False
+
+    def get_table_columns(self, table_name):
+        """Lấy danh sách tên cột của bảng"""
+        try:
+            c = self.conn.cursor()
+            c.execute(f"PRAGMA table_info({table_name})")
+            columns = [row[1] for row in c.fetchall()]  # row[1] là tên cột
+            return columns
+        except sqlite3.Error as e:
+            print(f"Lỗi lấy thông tin cột: {e}")
+            return []
+
+    def column_exists(self, table_name, column_name):
+        """Kiểm tra cột có tồn tại trong bảng không"""
+        columns = self.get_table_columns(table_name)
+        return column_name in columns
+
+    def add_column_safely(self, table_name, column_name, column_type):
+        """Thêm cột một cách an toàn (kiểm tra trước)"""
+        if not self.column_exists(table_name, column_name):
+            try:
+                query = f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_type}"
+                self.execute_query(query)
+                print(f"✅ Đã thêm cột {column_name} vào bảng {table_name}")
+                return True
+            except sqlite3.Error as e:
+                if "duplicate column name" not in str(e).lower():
+                    print(f"❌ Lỗi thêm cột {column_name}: {e}")
+                return False
+        else:
+            print(f"✅ Cột {column_name} đã tồn tại trong bảng {table_name}")
+            return True
