@@ -804,6 +804,7 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
         mid_l.addWidget(QtWidgets.QLabel("Danh sách câu hỏi"))
         # Bảng câu hỏi với nhiều tính năng cải tiến
         self.q_table = QtWidgets.QTableWidget(0, 8)  # Thêm cột checkbox và actions
+        self.question_table = self.q_table
         headers = ["☑️", "ID", "Nội dung", "Số đáp án", "Đáp án đúng", "Dạng", "Mức độ", "🏷️"]
         self.q_table.setHorizontalHeaderLabels(headers)
 
@@ -942,10 +943,24 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
         try:
             value = row[key]
             return value if value is not None else default
-        except (KeyError, IndexError):
+        except (KeyError, TypeError, IndexError):
             return default
 
-    # THAY THẾ phương thức _ensure_tables() trong class QuestionBankWindowQt
+    def _get_row_int(self, row, key, default=0):
+        """Helper để lấy giá trị integer từ sqlite3.Row"""
+        try:
+            value = row[key]
+            return int(value) if value is not None else default
+        except (KeyError, TypeError, IndexError, ValueError):
+            return default
+
+    def _get_row_bool(self, row, key, default=False):
+        """Helper để lấy giá trị boolean từ sqlite3.Row"""
+        try:
+            value = row[key]
+            return bool(value) if value is not None else default
+        except (KeyError, TypeError, IndexError):
+            return default
     def _ensure_tables(self):
         """Tạo các bảng cần thiết cho hệ thống câu hỏi mới - SỬA LỖI"""
 
@@ -1015,6 +1030,48 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
 
         # === SỬA LỖI: KIỂM TRA CỘT ĐÃ TỒN TẠI TRƯỚC KHI THÊM ===
         self._add_columns_safely()
+        self._ensure_question_bank_columns()  # Đảm bảo các cột cần thiết
+    def _ensure_question_bank_columns(self):
+        """Đảm bảo bảng question_bank có đầy đủ các cột cần thiết"""
+        try:
+            # Lấy thông tin cột hiện tại
+            columns_info = self.db.execute_query("PRAGMA table_info(question_bank)", fetch="all")
+            existing_columns = [col[1] for col in columns_info] if columns_info else []
+
+            # Danh sách cột cần thiết
+            required_columns = [
+                ('question_type', 'TEXT DEFAULT "multiple_choice"'),
+                ('option_a', 'TEXT DEFAULT ""'),
+                ('option_b', 'TEXT DEFAULT ""'),
+                ('option_c', 'TEXT DEFAULT ""'),
+                ('option_d', 'TEXT DEFAULT ""'),
+                ('correct_answer', 'TEXT DEFAULT ""'),
+                ('show_correct_answer', 'INTEGER DEFAULT 0'),
+                ('detailed_answer', 'TEXT DEFAULT ""'),
+                ('created_date', 'TEXT DEFAULT ""'),
+                ('modified_date', 'TEXT DEFAULT ""')
+            ]
+
+            # Thêm từng cột nếu chưa tồn tại
+            for column_name, column_definition in required_columns:
+                if column_name not in existing_columns:
+                    try:
+                        query = f"ALTER TABLE question_bank ADD COLUMN {column_name} {column_definition}"
+                        self.db.execute_query(query)
+                        print(f"✅ Đã thêm cột {column_name} vào question_bank")
+
+                        # Cập nhật giá trị thời gian cho các cột date nếu cần
+                        if column_name in ['created_date', 'modified_date']:
+                            self.db.execute_query(f"""
+                                UPDATE question_bank 
+                                SET {column_name} = datetime('now') 
+                                WHERE {column_name} = '' OR {column_name} IS NULL
+                            """)
+
+                    except Exception as e:
+                        print(f"⚠️ Không thể thêm cột {column_name}: {e}")
+        except Exception as e:
+            print(f"❌ Lỗi khi kiểm tra cột question_bank: {e}")
 
     def _add_columns_safely(self):
         """Thêm cột mới một cách an toàn - kiểm tra trước khi thêm"""
@@ -1024,13 +1081,13 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
 
             # Danh sách cột cần thêm
             columns_to_add = [
-                ('option_a', 'TEXT'),
-                ('option_b', 'TEXT'),
-                ('option_c', 'TEXT'),
-                ('option_d', 'TEXT'),
-                ('correct_answer', 'TEXT'),
+                ('option_a', 'TEXT DEFAULT ""'),
+                ('option_b', 'TEXT DEFAULT ""'),
+                ('option_c', 'TEXT DEFAULT ""'),
+                ('option_d', 'TEXT DEFAULT ""'),
+                ('correct_answer', 'TEXT DEFAULT ""'),
                 ('show_correct_answer', 'INTEGER DEFAULT 0'),
-                ('detailed_answer', 'TEXT')
+                ('detailed_answer', 'TEXT DEFAULT ""')
             ]
 
             # Thêm từng cột nếu chưa tồn tại
@@ -1047,7 +1104,6 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
 
         except Exception as e:
             print(f"⚠️ Lỗi kiểm tra cột: {e}")
-
     def _get_table_columns(self, table_name):
         """Lấy danh sách tên cột của bảng"""
         try:
@@ -2040,16 +2096,21 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
             "Mức độ": "⭐"
         }
         return icons.get(level, "📁")
+
     def on_tree_select(self):
+        """Xử lý khi chọn node trên cây"""
         items = self.tree.selectedItems()
         if not items:
-            return
-        tree_id = items[0].data(0, Qt.UserRole)
-        if not tree_id:
+            self._load_question_rows([])  # Clear bảng nếu không chọn gì
             return
 
-        rows = self.db.execute_query("SELECT * FROM question_bank WHERE tree_id=?", (tree_id,), fetch="all") or []
-        self._load_question_rows(rows)
+        tree_id = items[0].data(0, Qt.UserRole)
+        if not tree_id:
+            self._load_question_rows([])
+            return
+
+        # Load câu hỏi cho tree_id được chọn
+        self.load_questions_by_tree(tree_id)
     # Nhiệm vụ: Phân tích bảng câu hỏi Đúng/Sai
     def _process_true_false_table(self, table):
         """
@@ -2107,69 +2168,131 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
 
         return sub_questions
     # ====================== Questions list ======================
-    # TÌM và THAY THẾ phương thức _load_question_rows()
+
     def _load_question_rows(self, rows):
-        """Load danh sách câu hỏi vào bảng - CẬP NHẬT CHO CẤU TRÚC MỚI"""
-        if not hasattr(self, 'question_table'):
-            return
+        """Load danh sách câu hỏi vào bảng - SỬA LỖI sqlite3.Row"""
+        # Clear bảng trước
+        self.q_table.setRowCount(0)
 
-        self.question_table.setRowCount(len(rows))
+        for row_data in rows:
+            row_idx = self.q_table.rowCount()
+            self.q_table.insertRow(row_idx)
 
-        # Cập nhật header
-        headers = ["ID", "Loại", "Nội dung", "Đáp án", "Tags", "Ngày tạo"]
-        self.question_table.setColumnCount(len(headers))
-        self.question_table.setHorizontalHeaderLabels(headers)
+            # Checkbox cột 0
+            checkbox = QtWidgets.QCheckBox()
+            self.q_table.setCellWidget(row_idx, 0, checkbox)
 
-        for row_idx, row in enumerate(rows):
-            # ID
-            self.question_table.setItem(row_idx, 0, QtWidgets.QTableWidgetItem(str(row["id"])))
+            # ID cột 1 - Sử dụng row_data["key"] thay vì .get()
+            try:
+                id_val = row_data["id"] if row_data["id"] is not None else ""
+            except (KeyError, TypeError):
+                id_val = ""
+            id_item = QtWidgets.QTableWidgetItem(str(id_val))
+            id_item.setTextAlignment(Qt.AlignCenter)
+            self.q_table.setItem(row_idx, 1, id_item)
 
-            # Loại câu hỏi với icon
-            question_type = row.get("question_type", "multiple_choice")
-            type_text = ""
-            if question_type == "multiple_choice":
-                type_text = "🔘 Trắc nghiệm"
-            elif question_type == "true_false":
-                type_text = "✅ Đúng/Sai"
-            elif question_type == "essay":
-                type_text = "📝 Tự luận"
-            else:
-                type_text = question_type
-
-            self.question_table.setItem(row_idx, 1, QtWidgets.QTableWidgetItem(type_text))
-
-            # Nội dung (cắt ngắn)
-            content = row.get("content_text", "")
+            # Nội dung cột 2 (rút gọn)
+            try:
+                content = row_data["content_text"] if row_data["content_text"] else ""
+            except (KeyError, TypeError):
+                content = ""
             if len(content) > 100:
                 content = content[:100] + "..."
-            self.question_table.setItem(row_idx, 2, QtWidgets.QTableWidgetItem(content))
+            self.q_table.setItem(row_idx, 2, QtWidgets.QTableWidgetItem(content))
 
-            # Đáp án (tùy theo loại)
-            answer_summary = self._get_answer_summary(row)
-            self.question_table.setItem(row_idx, 3, QtWidgets.QTableWidgetItem(answer_summary))
+            # Số đáp án cột 3
+            try:
+                question_type = row_data["question_type"] if row_data["question_type"] else "multiple_choice"
+            except (KeyError, TypeError):
+                question_type = "multiple_choice"
 
-            # Tags
-            tags = self.db.execute_query(
-                "SELECT tag_name FROM question_tags WHERE question_id=?",
-                (row["id"],), fetch="all"
-            ) or []
-            tags_text = ", ".join([tag["tag_name"] for tag in tags])
-            if len(tags_text) > 50:
-                tags_text = tags_text[:50] + "..."
-            self.question_table.setItem(row_idx, 4, QtWidgets.QTableWidgetItem(tags_text))
+            if question_type == "multiple_choice":
+                num_options = 0
+                for opt in ['option_a', 'option_b', 'option_c', 'option_d']:
+                    try:
+                        if row_data[opt]:
+                            num_options += 1
+                    except (KeyError, TypeError):
+                        pass
+                self.q_table.setItem(row_idx, 3, QtWidgets.QTableWidgetItem(str(num_options)))
+            else:
+                self.q_table.setItem(row_idx, 3, QtWidgets.QTableWidgetItem("-"))
 
-            # Ngày tạo
-            created_date = row.get("created_date", "")
-            if created_date:
-                # Chỉ lấy ngày, bỏ giờ
-                created_date = created_date.split(" ")[0] if " " in created_date else created_date
-            self.question_table.setItem(row_idx, 5, QtWidgets.QTableWidgetItem(created_date))
+            # Đáp án đúng cột 4
+            if question_type == "multiple_choice":
+                try:
+                    correct = row_data["correct_answer"] if row_data["correct_answer"] else ""
+                except (KeyError, TypeError):
+                    correct = ""
+                self.q_table.setItem(row_idx, 4, QtWidgets.QTableWidgetItem(correct))
+            else:
+                self.q_table.setItem(row_idx, 4, QtWidgets.QTableWidgetItem("-"))
 
-        # Điều chỉnh kích thước cột
-        self.question_table.resizeColumnsToContents()
-        self.question_table.setColumnWidth(2, 300)  # Nội dung rộng hơn
+            # Dạng câu hỏi cột 5
+            type_display = {
+                'multiple_choice': 'Trắc nghiệm',
+                'true_false': 'Đúng/Sai',
+                'essay': 'Tự luận',
+                'short_answer': 'Điền đáp án'
+            }
+            display_type = type_display.get(question_type, question_type)
+            self.q_table.setItem(row_idx, 5, QtWidgets.QTableWidgetItem(display_type))
 
-    # THÊM phương thức helper mới
+            # Mức độ cột 6
+            try:
+                level = str(row_data["do_kho"]) if row_data["do_kho"] else ""
+            except (KeyError, TypeError):
+                level = ""
+            self.q_table.setItem(row_idx, 6, QtWidgets.QTableWidgetItem(level))
+
+            # Tags cột 7
+            self.q_table.setItem(row_idx, 7, QtWidgets.QTableWidgetItem(""))
+
+        # Resize columns
+        self.q_table.resizeColumnsToContents()
+    def refresh_question_list(self):
+        """Refresh lại danh sách câu hỏi hiện tại"""
+        tree_id = self._current_tree_id()
+        if tree_id:
+            self.load_questions_by_tree(tree_id)
+        else:
+            self._load_question_rows([])
+    def _get_answer_display(self, question_data):
+        """Lấy text hiển thị cho cột đáp án"""
+        question_type = question_data.get("question_type", "")
+
+        if question_type == "multiple_choice":
+            # Hiển thị đáp án đúng nếu có
+            correct = question_data.get("correct_answer", "")
+            if correct:
+                return f"Đáp án: {correct}"
+            return "Chưa có đáp án"
+
+        elif question_type == "true_false":
+            # Đếm số mệnh đề đúng/sai
+            parts = self.db.execute_query("""
+                SELECT COUNT(*) as total,
+                       SUM(CASE WHEN is_correct = 1 THEN 1 ELSE 0 END) as correct_count
+                FROM question_true_false_parts
+                WHERE question_id = ?
+            """, (question_data["id"],), fetch="one")
+
+            if parts:
+                total = parts["total"] or 0
+                correct = parts["correct_count"] or 0
+                false = total - correct
+                return f"{correct}Đ, {false}S"
+            return "Chưa có mệnh đề"
+
+        elif question_type == "essay":
+            # Kiểm tra có đáp án chi tiết không
+            detailed = question_data.get("detailed_answer", "")
+            if detailed and detailed.strip():
+                return "Có đáp án"
+            return "Chưa có đáp án"
+
+        return ""
+
     def _get_answer_summary(self, question_data):
         """Tạo tóm tắt đáp án cho hiển thị trong bảng"""
         question_type = question_data.get("question_type", "multiple_choice")
@@ -2230,42 +2353,53 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
             self.multiple_choice_rb.setChecked(True)
             self._setup_multiple_choice_ui()
 
-    # THÊM phương thức helper reload
+
     def _reload_question_list(self):
         """Reload danh sách câu hỏi sau khi thay đổi"""
         tree_id = self._current_tree_id()
         if tree_id:
             self.load_questions_by_tree(tree_id)
+        else:
+            self._load_question_rows([])
     # Load câu hỏi với hỗ trợ 3 dạng
     def on_question_select(self):
-        """Load câu hỏi được chọn với hỗ trợ 3 dạng"""
-        items = self.q_table.selectedItems()
-        if not items:
+        """Load câu hỏi được chọn từ bảng - SỬA LỖI sqlite3.Row"""
+        current_row = self.q_table.currentRow()
+        if current_row < 0:
             return
-        row = items[0].row()
-        item_text = self.q_table.item(row, 1).text()
 
-        # Trích xuất ID câu hỏi từ văn bản trong bảng (ví dụ: "📝 123" -> 123)
+        # Lấy ID từ cột 1
+        id_item = self.q_table.item(current_row, 1)
+        if not id_item:
+            return
+
         try:
-            qid = int(item_text.split()[-1])
-        except (ValueError, IndexError):
-            # Nếu không thể trích xuất ID, dừng xử lý để tránh lỗi
+            qid = int(id_item.text())
+        except (ValueError, TypeError):
             return
 
+        # Load câu hỏi từ database
         q = self.db.execute_query("SELECT * FROM question_bank WHERE id=?", (qid,), fetch="one")
         if not q:
             return
 
         self.current_question_id = qid
 
-        # Load nội dung câu hỏi
+        # Load nội dung chung
         if hasattr(self, 'content_text'):
             self.content_text.blockSignals(True)
-            self.content_text.setPlainText(q["content_text"] or "")
+            try:
+                content = q["content_text"] if q["content_text"] else ""
+            except (KeyError, TypeError):
+                content = ""
+            self.content_text.setPlainText(content)
             self.content_text.blockSignals(False)
 
-        # Xác định loại câu hỏi và set UI
-        question_type = self._get_row_value(q, "question_type", "multiple_choice")
+        # Xác định loại câu hỏi - SỬA cách truy cập
+        try:
+            question_type = q["question_type"] if q["question_type"] else "multiple_choice"
+        except (KeyError, TypeError):
+            question_type = "multiple_choice"
 
         if hasattr(self, 'question_type_group'):
             if question_type == 'multiple_choice':
@@ -2276,42 +2410,37 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
                 self.true_false_rb.setChecked(True)
                 self._setup_true_false_ui()
                 self._load_true_false_data(q)
-            elif question_type == 'short_answer':
-                self.short_answer_rb.setChecked(True)
-                self._setup_short_answer_ui()
-                self._load_short_answer_data(q)
-
-        # Load tags
-        if hasattr(self, 'tags_edit'):
-            tags = self.db.execute_query(
-                "SELECT tag_name FROM question_tags WHERE question_id=? ORDER BY tag_name",
-                (qid,), fetch="all"
-            ) or []
-            tags_text = ", ".join([tag["tag_name"] for tag in tags])
-            self.tags_edit.setText(tags_text)
-
-        # Load lịch sử
-        if hasattr(self, 'history_table'):
-            self._load_question_history(qid)
+            elif question_type == 'essay':
+                self.essay_rb.setChecked(True)
+                self._setup_essay_ui()
+                self._load_essay_data(q)
 
         # Update preview
-        self.update_preview()
+        if hasattr(self, 'update_preview'):
+            self.update_preview()
 
-    # THAY THẾ phương thức _load_multiple_choice_data()
+    def _get_row_value(self, row, key, default=""):
+        """Helper để lấy giá trị từ sqlite3.Row một cách an toàn"""
+        try:
+            value = row[key]
+            return value if value is not None else default
+        except (KeyError, TypeError, IndexError):
+            return default
+
     def _load_multiple_choice_data(self, question_data):
-        """Load dữ liệu cho câu hỏi trắc nghiệm 4 đáp án - SỬA ĐỂ TƯƠNG THÍCH QTEXTEDIT"""
+        """Load dữ liệu cho câu hỏi trắc nghiệm - SỬA sqlite3.Row"""
         if not hasattr(self, 'option_entries'):
             return
 
-        # Load các đáp án - SỬA ĐỂ DÙNG setPlainText THAY VÌ setText
-        self.option_entries['A'].setPlainText(question_data.get("option_a", "") or "")
-        self.option_entries['B'].setPlainText(question_data.get("option_b", "") or "")
-        self.option_entries['C'].setPlainText(question_data.get("option_c", "") or "")
-        self.option_entries['D'].setPlainText(question_data.get("option_d", "") or "")
+        # Load các đáp án - Sử dụng helper
+        self.option_entries['A'].setPlainText(self._get_row_value(question_data, "option_a", ""))
+        self.option_entries['B'].setPlainText(self._get_row_value(question_data, "option_b", ""))
+        self.option_entries['C'].setPlainText(self._get_row_value(question_data, "option_c", ""))
+        self.option_entries['D'].setPlainText(self._get_row_value(question_data, "option_d", ""))
 
         # Load đáp án đúng
-        correct_answer = question_data.get("correct_answer")
-        show_correct = bool(question_data.get("show_correct_answer", 0))
+        correct_answer = self._get_row_value(question_data, "correct_answer", "")
+        show_correct = bool(self._get_row_value(question_data, "show_correct_answer", 0))
 
         # Thiết lập trạng thái hiển thị
         self.show_correct_btn.setChecked(show_correct)
@@ -2329,54 +2458,95 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
                 if button.text() == "Không chọn":
                     button.setChecked(True)
                     break
-    # THAY THẾ phương thức _load_true_false_data()
+
     def _load_true_false_data(self, question_data):
-        """Load dữ liệu cho câu hỏi đúng/sai - SỬA ĐỂ TƯƠNG THÍCH QTEXTEDIT"""
+        """Load dữ liệu cho câu hỏi đúng/sai - VERSION với helper"""
         if not hasattr(self, 'statement_entries'):
             return
 
         # Clear form trước
         for i in range(1, 5):
-            self.statement_entries[i].clear()
-            self.statement_checkboxes[i].setChecked(False)
-            self.explanation_entries[i].clear()
-            self.show_explanation_btns[i].setChecked(False)
-            self.explanation_widgets[i].setVisible(False)
+            if i in self.statement_entries:
+                self.statement_entries[i].clear()
+            if i in self.statement_checkboxes:
+                self.statement_checkboxes[i].setChecked(False)
+            if i in self.explanation_entries:
+                self.explanation_entries[i].clear()
+            if i in self.show_explanation_btns:
+                self.show_explanation_btns[i].setChecked(False)
+            if i in self.explanation_widgets:
+                self.explanation_widgets[i].setVisible(False)
+
+        # Lấy question_id
+        question_id = self._get_row_value(question_data, "id", None)
+        if not question_id:
+            return
 
         # Load dữ liệu từ database
         parts = self.db.execute_query("""
             SELECT * FROM question_true_false_parts 
-            WHERE question_id=? ORDER BY part_number
-        """, (question_data["id"],), fetch="all") or []
+            WHERE question_id=?
+            ORDER BY part_number
+        """, (question_id,), fetch="all") or []
 
         for part in parts:
-            part_num = part["part_number"]
-            if 1 <= part_num <= 4:
-                # Load mệnh đề - SỬA ĐỂ DÙNG setPlainText
-                self.statement_entries[part_num].setPlainText(part["statement_text"] or "")
+            part_num = self._get_row_int(part, "part_number", 1)
+            if part_num < 1 or part_num > 4:
+                continue
 
-                # Load đúng/sai
-                self.statement_checkboxes[part_num].setChecked(bool(part["is_correct"]))
+            # Load các trường
+            if part_num in self.statement_entries:
+                self.statement_entries[part_num].setPlainText(
+                    self._get_row_value(part, "statement_text", "")
+                )
 
-                # Load lời giải
-                explanation = part.get("explanation", "") or ""
-                self.explanation_entries[part_num].setPlainText(explanation)
+            if part_num in self.statement_checkboxes:
+                self.statement_checkboxes[part_num].setChecked(
+                    self._get_row_bool(part, "is_correct", False)
+                )
 
-                # Load trạng thái hiển thị lời giải
-                show_explanation = bool(part.get("show_explanation", 0))
+            if part_num in self.explanation_entries:
+                self.explanation_entries[part_num].setPlainText(
+                    self._get_row_value(part, "explanation", "")
+                )
+
+            show_explanation = self._get_row_bool(part, "show_explanation", False)
+            if part_num in self.show_explanation_btns:
                 self.show_explanation_btns[part_num].setChecked(show_explanation)
-                self._toggle_explanation_visibility(part_num - 1, show_explanation)
-    # THAY THẾ phương thức _load_short_answer_data() thành _load_essay_data()
+
+            if part_num in self.explanation_widgets:
+                self.explanation_widgets[part_num].setVisible(show_explanation)
+
     def _load_essay_data(self, question_data):
-        """Load dữ liệu cho câu hỏi tự luận - CẤU TRÚC MỚI"""
-        if not hasattr(self, 'detailed_answer'):
+        """Load dữ liệu cho câu hỏi tự luận - VERSION với helper"""
+        if not hasattr(self, 'detailed_answer_text'):
             return
 
-        # Load đáp án chi tiết
-        detailed_answer = question_data.get("detailed_answer", "") or ""
-        self.detailed_answer.setPlainText(detailed_answer)
+        # Load các trường với helper
+        self.detailed_answer_text.setPlainText(
+            self._get_row_value(question_data, "detailed_answer", "")
+        )
 
-    # CẬP NHẬT phương thức load_question() chính
+        if hasattr(self, 'rubric_text'):
+            self.rubric_text.setPlainText(
+                self._get_row_value(question_data, "rubric", "")
+            )
+
+        if hasattr(self, 'max_score_spin'):
+            self.max_score_spin.setValue(
+                self._get_row_int(question_data, "max_score", 10)
+            )
+
+        if hasattr(self, 'keywords_edit'):
+            self.keywords_edit.setText(
+                self._get_row_value(question_data, "keywords", "")
+            )
+
+        if hasattr(self, 'show_answer_checkbox'):
+            self.show_answer_checkbox.setChecked(
+                self._get_row_bool(question_data, "show_answer", False)
+            )
+
     def load_question(self, qid):
         """Load câu hỏi theo ID - LOGIC MỚI"""
         if not qid:
@@ -2479,48 +2649,6 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
             return None
         return items[0].data(0, Qt.UserRole)
 
-    # Lưu câu hỏi với hỗ trợ 3 dạng
-    def save_question(self):
-        """Lưu câu hỏi với hỗ trợ 3 dạng câu hỏi"""
-        tree_id = self._current_tree_id()
-        if not tree_id:
-            QtWidgets.QMessageBox.warning(self, "Chưa chọn thư mục", "Vui lòng chọn vị trí lưu trong cây.")
-            return
-
-        content = self.content_text.toPlainText().strip()
-        question_type = self._get_current_question_type()
-
-        # Validation cơ bản
-        if not content or len(content.strip()) < 10:
-            QtWidgets.QMessageBox.warning(self, "Lỗi dữ liệu", "Nội dung câu hỏi phải có ít nhất 10 ký tự")
-            return
-
-        try:
-            # Lưu nội dung cũ để ghi lịch sử
-            old_content = ""
-            if self.current_question_id:
-                old_q = self.db.execute_query("SELECT content_text FROM question_bank WHERE id=?",
-                                              (self.current_question_id,), fetch="one")
-                old_content = old_q["content_text"] if old_q else ""
-
-            if question_type == 'multiple_choice':
-                self._save_multiple_choice_question(content, tree_id, old_content)
-            elif question_type == 'true_false':
-                self._save_true_false_question(content, tree_id, old_content)
-            elif question_type == 'short_answer':
-                self._save_short_answer_question(content, tree_id, old_content)
-
-            # Reload danh sách
-            rows = self.db.execute_query("SELECT * FROM question_bank WHERE tree_id=?", (tree_id,), fetch="all") or []
-            self._load_question_rows(rows)
-
-            # Update preview và stats
-            self.update_preview()
-            self.update_statistics()
-
-        except Exception as e:
-            QtWidgets.QMessageBox.critical(self, "Lỗi CSDL", f"{e}")
-
     # Lấy loại câu hỏi hiện tại
     def _get_current_question_type(self):
         """Lấy loại câu hỏi hiện tại từ UI - CẬP NHẬT"""
@@ -2544,60 +2672,49 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
         except Exception as e:
             print(f"Lỗi lưu lịch sử: {e}")
 
-    # THAY THẾ phương thức _save_multiple_choice_question()
     def _save_multiple_choice_question(self, content, tree_id, old_content):
-        """Lưu câu hỏi trắc nghiệm 4 đáp án - SỬA ĐỂ TƯƠNG THÍCH QTEXTEDIT"""
-        # Lấy dữ liệu từ form - SỬA ĐỂ DÙNG toPlainText() THAY VÌ text()
+        """Lưu câu hỏi trắc nghiệm 4 đáp án - CẬP NHẬT"""
+        # Lấy dữ liệu đáp án
         option_a = self.option_entries['A'].toPlainText().strip()
         option_b = self.option_entries['B'].toPlainText().strip()
         option_c = self.option_entries['C'].toPlainText().strip()
         option_d = self.option_entries['D'].toPlainText().strip()
 
-        # Lấy đáp án đúng (có thể null)
+        # Lấy đáp án đúng
         correct_answer = None
         show_correct = self.show_correct_btn.isChecked()
 
         if show_correct:
             for button in self.correct_group.buttons():
-                if button.isChecked() and button.text() in ['A', 'B', 'C', 'D']:
+                if button.isChecked() and button.text() != "Không chọn":
                     correct_answer = button.text()
                     break
 
-        # Validation cơ bản
-        if not content.strip():
-            raise ValueError("Nội dung câu hỏi không được trống")
-
-        # Ít nhất 2 đáp án phải có nội dung
-        filled_options = sum(1 for opt in [option_a, option_b, option_c, option_d] if opt.strip())
-        if filled_options < 2:
-            raise ValueError("Phải có ít nhất 2 đáp án")
+        # Cập nhật thời gian
+        from datetime import datetime
+        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         if self.current_question_id:
-            # Cập nhật câu hỏi hiện có
+            # Cập nhật - set modified_date với giá trị cụ thể
             self.db.execute_query("""
-                UPDATE question_bank SET 
-                    content_text=?, question_type=?, option_a=?, option_b=?, 
-                    option_c=?, option_d=?, correct_answer=?, show_correct_answer=?,
-                    tree_id=?, modified_date=CURRENT_TIMESTAMP
-                WHERE id=?
-            """, (content, 'multiple_choice', option_a, option_b, option_c, option_d,
-                  correct_answer, int(show_correct), tree_id, self.current_question_id))
-
-            self._save_question_history(self.current_question_id, "UPDATE", old_content, content)
-            QtWidgets.QMessageBox.information(self, "Cập nhật", "Đã cập nhật câu hỏi trắc nghiệm.")
+                    UPDATE question_bank SET 
+                        content_text=?, question_type=?, option_a=?, option_b=?, option_c=?, option_d=?,
+                        correct_answer=?, show_correct_answer=?, tree_id=?, modified_date=?
+                    WHERE id=?
+                """, (content, 'multiple_choice', option_a, option_b, option_c, option_d,
+                      correct_answer, int(show_correct), tree_id, current_time, self.current_question_id))
         else:
-            # Thêm câu hỏi mới
+            # Thêm mới - set cả created_date và modified_date
             new_id = self.db.execute_query("""
                 INSERT INTO question_bank(
                     content_text, question_type, option_a, option_b, option_c, option_d,
-                    correct_answer, show_correct_answer, tree_id
-                ) VALUES (?,?,?,?,?,?,?,?,?)
+                    correct_answer, show_correct_answer, tree_id, created_date, modified_date
+                ) VALUES (?,?,?,?,?,?,?,?,?,?,?)
             """, (content, 'multiple_choice', option_a, option_b, option_c, option_d,
-                  correct_answer, int(show_correct), tree_id))
+                  correct_answer, int(show_correct), tree_id, current_time, current_time))
 
             self.current_question_id = new_id
             self._save_question_history(new_id, "CREATE", "", content)
-            QtWidgets.QMessageBox.information(self, "Thêm mới", "Đã lưu câu hỏi trắc nghiệm mới.")
     # THAY THẾ phương thức _save_true_false_question()
     def _save_true_false_question(self, content, tree_id, old_content):
         """Lưu câu hỏi đúng/sai - SỬA ĐỂ TƯƠNG THÍCH QTEXTEDIT"""
@@ -2616,11 +2733,14 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
 
         if self.current_question_id:
             # Cập nhật câu hỏi chính
+            from datetime import datetime
+            current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
             self.db.execute_query("""
                 UPDATE question_bank SET 
-                    content_text=?, question_type=?, tree_id=?, modified_date=CURRENT_TIMESTAMP
+                    content_text=?, question_type=?, tree_id=?, modified_date=?
                 WHERE id=?
-            """, (content, 'true_false', tree_id, self.current_question_id))
+            """, (content, 'true_false', tree_id, current_time, self.current_question_id))
 
             # Xóa các parts cũ
             self.db.execute_query(
@@ -2699,7 +2819,7 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
 
     # CẬP NHẬT phương thức save_question() chính
     def save_question(self):
-        """Lưu câu hỏi - LOGIC MỚI"""
+        """Lưu câu hỏi - PHIÊN BẢN HOÀN CHỈNH"""
         try:
             # Lấy nội dung và tree_id
             content = self.content_text.toPlainText().strip()
@@ -2707,6 +2827,11 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
 
             if not tree_id:
                 QtWidgets.QMessageBox.warning(self, "Lỗi", "Vui lòng chọn chủ đề trước khi lưu.")
+                return
+
+            # Validation nội dung
+            if not content or len(content) < 10:
+                QtWidgets.QMessageBox.warning(self, "Lỗi", "Nội dung câu hỏi phải có ít nhất 10 ký tự")
                 return
 
             # Lấy nội dung cũ để lưu history
@@ -2729,6 +2854,18 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
 
             # Reload danh sách câu hỏi
             self._reload_question_list()
+
+            # Thông báo thành công
+            if self.current_question_id:
+                QtWidgets.QMessageBox.information(self, "Thành công", "Đã cập nhật câu hỏi")
+            else:
+                QtWidgets.QMessageBox.information(self, "Thành công", "Đã thêm câu hỏi mới")
+
+            # Update preview và stats nếu có
+            if hasattr(self, 'update_preview'):
+                self.update_preview()
+            if hasattr(self, 'update_statistics'):
+                self.update_statistics()
 
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể lưu câu hỏi: {e}")
@@ -2766,22 +2903,48 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
             ent.clear()
 
     def delete_question(self):
+        """Xóa câu hỏi được chọn"""
         if not self.current_question_id:
             QtWidgets.QMessageBox.warning(self, "Chưa chọn", "Vui lòng chọn câu hỏi để xoá.")
             return
-        if QtWidgets.QMessageBox.question(self, "Xác nhận", "Bạn có chắc muốn xoá câu hỏi này?") != QtWidgets.QMessageBox.Yes:
-            return
-        try:
-            self.db.execute_query("DELETE FROM question_bank WHERE id=?", (self.current_question_id,))
-            self.clear_question_form()
-            tree_id = self._current_tree_id()
-            if tree_id:
-                rows = self.db.execute_query("SELECT * FROM question_bank WHERE tree_id=?", (tree_id,), fetch="all") or []
-                self._load_question_rows(rows)
-            QtWidgets.QMessageBox.information(self, "Đã xoá", "Câu hỏi đã được xoá.")
-        except Exception as e:
-            QtWidgets.QMessageBox.critical(self, "Lỗi CSDL", f"{e}")
 
+        # Xác nhận xóa
+        reply = QtWidgets.QMessageBox.question(
+            self,
+            "Xác nhận xóa",
+            f"Bạn có chắc muốn xóa câu hỏi ID: {self.current_question_id}?",
+            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+            QtWidgets.QMessageBox.No
+        )
+
+        if reply != QtWidgets.QMessageBox.Yes:
+            return
+
+        try:
+            # Xóa câu hỏi từ database
+            self.db.execute_query("DELETE FROM question_bank WHERE id=?", (self.current_question_id,))
+
+            # Clear form
+            self.clear_question_form()
+
+            # Reload danh sách câu hỏi - SỬ DỤNG PHƯƠNG THỨC CHUẨN
+            if hasattr(self, '_reload_question_list'):
+                self._reload_question_list()
+            else:
+                # Fallback nếu không có _reload_question_list
+                tree_id = self._current_tree_id()
+                if tree_id:
+                    self.load_questions_by_tree(tree_id)
+
+            # Thông báo thành công
+            QtWidgets.QMessageBox.information(self, "Thành công", "Đã xóa câu hỏi.")
+
+            # Update statistics nếu có
+            if hasattr(self, 'update_statistics'):
+                self.update_statistics()
+
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể xóa câu hỏi: {e}")
     # ====================== Path helpers ======================
     def get_tree_path(self, tree_id: int) -> List[dict]:
         path = []

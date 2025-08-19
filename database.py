@@ -149,8 +149,57 @@ class DatabaseManager:
             if 'do_kho' not in cols:
                 c.execute("ALTER TABLE question_bank ADD COLUMN do_kho TEXT")
             self.conn.commit()
+            # Thêm cột question_type cho bảng question_bank
+            c.execute("PRAGMA table_info(question_bank)")
+            cols = [info[1] for info in c.fetchall()]
+            if 'question_type' not in cols:
+                c.execute("ALTER TABLE question_bank ADD COLUMN question_type TEXT DEFAULT 'multiple_choice'")
+                print("✅ Đã thêm cột question_type vào bảng question_bank")
+
+            # Thêm các cột khác cần thiết cho question_bank
+            if 'option_a' not in cols:
+                c.execute("ALTER TABLE question_bank ADD COLUMN option_a TEXT")
+            if 'option_b' not in cols:
+                c.execute("ALTER TABLE question_bank ADD COLUMN option_b TEXT")
+            if 'option_c' not in cols:
+                c.execute("ALTER TABLE question_bank ADD COLUMN option_c TEXT")
+            if 'option_d' not in cols:
+                c.execute("ALTER TABLE question_bank ADD COLUMN option_d TEXT")
+            if 'correct_answer' not in cols:
+                c.execute("ALTER TABLE question_bank ADD COLUMN correct_answer TEXT")
+            if 'show_correct_answer' not in cols:
+                c.execute("ALTER TABLE question_bank ADD COLUMN show_correct_answer INTEGER DEFAULT 0")
+            if 'detailed_answer' not in cols:
+                c.execute("ALTER TABLE question_bank ADD COLUMN detailed_answer TEXT")
+            # Thêm cột created_date nếu thiếu
+            if 'created_date' not in cols:
+                # Thêm cột với default value đơn giản
+                c.execute("ALTER TABLE question_bank ADD COLUMN created_date TEXT DEFAULT ''")
+
+                # Cập nhật giá trị cho các record hiện có với thời gian hiện tại
+                c.execute("""
+                    UPDATE question_bank 
+                    SET created_date = datetime('now') 
+                    WHERE created_date = '' OR created_date IS NULL
+                """)
+                print("✅ Đã thêm cột created_date vào bảng question_bank")
+            # Thêm cột modified_date nếu thiếu (sửa lỗi SQLite non-constant default)
+            # Thêm cột modified_date nếu thiếu
+            if 'modified_date' not in cols:
+                # Thêm cột với default value đơn giản
+                c.execute("ALTER TABLE question_bank ADD COLUMN modified_date TEXT DEFAULT ''")
+
+                # Cập nhật giá trị cho các record hiện có với thời gian hiện tại
+                c.execute("""
+                    UPDATE question_bank 
+                    SET modified_date = datetime('now') 
+                    WHERE modified_date = '' OR modified_date IS NULL
+                """)
+                print("✅ Đã thêm cột modified_date vào bảng question_bank")
+            self.conn.commit()
         except sqlite3.Error as e:
             print(f"Lỗi khi nâng cấp CSDL: {e}")
+            self.conn.rollback()
 
     def execute_query(self, query, params=(), fetch=None):
         c = self.conn.cursor()
