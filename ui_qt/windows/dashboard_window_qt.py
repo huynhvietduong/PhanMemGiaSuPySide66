@@ -21,7 +21,6 @@ class DashboardWindowQt(QtWidgets.QMainWindow):
         super().__init__(parent)
         self.db = db_manager
         self.setWindowTitle("📚 Bảng điều khiển - Phần mềm Gia sư (Qt)")
-        self.resize(1100, 750)
 
         cw = QtWidgets.QWidget()
         self.setCentralWidget(cw)
@@ -78,6 +77,7 @@ class DashboardWindowQt(QtWidgets.QMainWindow):
         act_exit = QtGui.QAction("Thoát", self)
         act_exit.triggered.connect(self.close)
         m.addAction(act_exit)
+        self.showMaximized()
 
     # ---------- helpers ----------
     def _add_section(self, parent_layout: QtWidgets.QVBoxLayout, title: str, items: list[tuple[str, str, callable]]):
