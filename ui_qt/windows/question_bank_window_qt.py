@@ -2889,6 +2889,7 @@ class QuestionEditDialog(QtWidgets.QDialog):
                 cursor.insertText(f"$${latex_code}$$")
     def save_question(self):
         """Lưu câu hỏi vào database - ĐÃ SỬA LỖI"""
+
         try:
             if not self.tree_id:
                 QtWidgets.QMessageBox.warning(self, "Thiếu thư mục", "Vui lòng chọn vị trí lưu trong cây.")
@@ -2966,7 +2967,7 @@ class QuestionEditDialog(QtWidgets.QDialog):
                 QtWidgets.QMessageBox.warning(self, "Lỗi", "Vui lòng nhập đáp án")
                 return
 
-            # ✅ SỬA: Insert/Update với error handling tốt hơn
+            # ✅ Insert/Update với error handling tốt hơn
             if self.question_id:
                 # Update existing question
                 result = self.db.execute_query(
