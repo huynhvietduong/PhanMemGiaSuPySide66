@@ -19,7 +19,8 @@ from PySide6.QtWidgets import (
     QTableWidget, QTableWidgetItem,
     QTreeWidget, QTreeWidgetItem,
     QHeaderView, QAbstractItemView
-)
+,QSlider, QWidget, QApplication)
+
 from PySide6.QtGui import (
     QKeySequence, QShortcut, QPixmap, QImage,
     QTextDocument, QTextCursor, QColor, QBrush,
@@ -329,6 +330,7 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
         self.preview_image = AdaptiveImageViewer()
         self.preview_image.set_size_limits(600, 500, 250) # Nhỏ hơn cho preview
         self.preview_image.enable_zoom_controls()
+        self.setup_preview_interactions()
         self.preview_image.setToolTip("Double-click để xem ảnh fullscreen\nDùng nút +/- để zoom")
         image_scroll_area = QtWidgets.QScrollArea()
         image_scroll_area.setWidget(self.preview_image)
@@ -347,41 +349,10 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
         self.original_pixmap = None
 
         # Thiết lập tỷ lệ splitter: Tree(20%) - Questions(50%) - Preview(30%)
-        split.setSizes([150, 200,1000])
+        split.setSizes([200, 200,1000])
 
         self.q_table.itemSelectionChanged.connect(self.on_question_select)
 
-        # --- Cột phải: Panel chi tiết với tabs ---
-        right_tabs = QtWidgets.QTabWidget()
-        right_tabs.setStyleSheet("""
-            QTabWidget::pane {
-                border: 1px solid #dee2e6;
-                background: white;
-            }
-            QTabBar::tab {
-                background: #f8f9fa;
-                padding: 8px 16px;
-                margin-right: 2px;
-                border: 1px solid #dee2e6;
-                border-bottom: none;
-            }
-            QTabBar::tab:selected {
-                background: white;
-                border-bottom: 1px solid white;
-            }
-        """)
-
-        # Tab 2: Xem trước
-        preview_tab = QtWidgets.QWidget()
-        preview_layout = QtWidgets.QVBoxLayout(preview_tab)
-        preview_layout.setContentsMargins(10, 10, 10, 10)
-        self._create_preview_tab_content(preview_layout)
-        right_tabs.addTab(preview_tab, "👁️ Xem trước")
-        right_layout.addWidget(right_tabs)
-
-
-        split.addWidget(right_tabs)
-        split.setSizes([240, 150, 810])
 
         # Init dữ liệu
         self.refresh_tree()
@@ -2090,39 +2061,73 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
 
     def open_fullscreen_preview(self):
         """Mở ảnh preview fullscreen"""
-        # #(Phương thức xem ảnh preview ở chế độ toàn màn hình)
-        if (hasattr(self, 'preview_image') and
-                hasattr(self.preview_image, 'current_pixmap') and
-                self.preview_image.current_pixmap):
+        # #(Phương thức xem ảnh preview ở chế độ toàn màn hình với kiểm tra an toàn)
+        if not hasattr(self, 'preview_image'):
+            QtWidgets.QMessageBox.information(self, "Thông báo", "Không có preview image để hiển thị")
+            return
+
+        if not hasattr(self.preview_image, 'current_pixmap') or not self.preview_image.current_pixmap:
+            QtWidgets.QMessageBox.information(self, "Thông báo", "Không có ảnh nào để xem fullscreen")
+            return
+
+        if self.preview_image.current_pixmap.isNull():
+            QtWidgets.QMessageBox.information(self, "Thông báo", "Ảnh preview không hợp lệ")
+            return
+
+        try:
             dialog = ImageViewerDialog(self.preview_image.current_pixmap, self)
             dialog.exec()
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể mở ảnh fullscreen: {e}")
 
     def setup_preview_interactions(self):
         """Thiết lập tương tác cho preview"""
-        # Double-click để xem fullscreen
+        # #(Thiết lập sự kiện double-click và context menu cho preview image với cursor phù hợp)
         if hasattr(self, 'preview_image'):
-            self.preview_image.mouseDoubleClickEvent = lambda event: self.open_fullscreen_preview()
+            # Double-click để xem fullscreen
+            def handle_double_click(event):
+                # Kiểm tra có ảnh không trước khi mở fullscreen
+                if (hasattr(self.preview_image, 'current_pixmap') and
+                        self.preview_image.current_pixmap and
+                        not self.preview_image.current_pixmap.isNull()):
+                    self.open_fullscreen_preview()
+
+            self.preview_image.mouseDoubleClickEvent = handle_double_click
 
             # Right-click menu
             self.preview_image.setContextMenuPolicy(Qt.CustomContextMenu)
             self.preview_image.customContextMenuRequested.connect(self.show_preview_context_menu)
 
+            # Cập nhật tooltip và cursor
+            self.preview_image.setToolTip(
+                "🖱️ Double-click để xem fullscreen\n"
+                "🎮 Dùng nút +/- để zoom trong preview\n"
+                "📱 Chuột phải để xem menu"
+            )
+
+            # Set cursor để người dùng biết có thể click
+            if hasattr(self.preview_image, 'image_label'):
+                self.preview_image.image_label.setCursor(Qt.PointingHandCursor)
     def show_preview_context_menu(self, position):
         """Context menu cho ảnh preview"""
-        # #(Menu chuột phải cho preview)
+        # #(Menu chuột phải cho preview với kiểm tra an toàn)
+        if not hasattr(self, 'preview_image'):
+            return
+
         menu = QtWidgets.QMenu(self)
 
         fullscreen_action = menu.addAction("🔍 Xem fullscreen")
         fullscreen_action.triggered.connect(self.open_fullscreen_preview)
 
-        zoom_in_action = menu.addAction("🔍+ Phóng to")
-        zoom_in_action.triggered.connect(lambda: self.preview_image._zoom_in())
+        # Chỉ thêm zoom menu nếu có ảnh
+        if hasattr(self.preview_image, 'current_pixmap') and self.preview_image.current_pixmap:
+            zoom_in_action = menu.addAction("🔍+ Phóng to")
+            zoom_in_action.triggered.connect(self.preview_image._zoom_in)
 
-        zoom_out_action = menu.addAction("🔍- Thu nhỏ")
-        zoom_out_action.triggered.connect(lambda: self.preview_image._zoom_out())
+            zoom_out_action = menu.addAction("🔍- Thu nhỏ")
+            zoom_out_action.triggered.connect(self.preview_image._zoom_out)
 
-        menu.exec(self.preview_image.mapToGlobal(position))
-    # ========== XỬ LÝ ẢNH TRONG PREVIEW ========== #
+        menu.exec(self.preview_image.mapToGlobal(position))    # ========== XỬ LÝ ẢNH TRONG PREVIEW ========== #
     def load_image_from_data(self, content_data, content_metadata=None):
         """Load ảnh từ content_data với nhiều format"""
         if not content_data:
@@ -3247,9 +3252,6 @@ class AdaptiveImageViewer(QtWidgets.QWidget):
             display_width = self.max_width
             display_height = self.max_height
 
-        # Đảm bảo chiều cao tối thiểu
-        widget_min_height = max(display_height + 50, self.min_height)
-
         # Scale ảnh theo kích thước tính toán
         scaled_pixmap = self.current_pixmap.scaled(
             display_width, display_height,
@@ -3258,30 +3260,24 @@ class AdaptiveImageViewer(QtWidgets.QWidget):
 
         # Hiển thị ảnh
         self.image_label.setPixmap(scaled_pixmap)
-        self.image_label.setFixedSize(display_width, display_height)
+        self.image_label.setMinimumSize(display_width, display_height)
 
         # Điều chỉnh kích thước widget chứa
-        #self.setMinimumHeight(display_height + 50)  # +50 cho info label và padding
-        #self.setMaximumHeight(display_height + 50)
-        if original_height <= 200:  # Ảnh quá nhỏ
-            widget_height = max(display_height + 50, 150)  # Chiều cao tối thiểu hợp lý
-        else:
-            widget_height = display_height + 50
-
+        widget_height = display_height + 80  # +80 cho info label và padding
         self.setMinimumHeight(widget_height)
-        fixed_height = 500  # Chiều cao cố định cho khung preview
-        self.setMinimumHeight(fixed_height)
-        self.setMaximumHeight(fixed_height)
-        if self.parent():
-            self.parent().updateGeometry()
+        self.setMaximumHeight(max(widget_height, 400))  # Tối thiểu 400px
+
         # Cập nhật thông tin
-        scale_percent = int(scale_factor * 100)
+        scale_percent = int((display_width / original_width) * 100) if original_width > 0 else 100
         self.info_label.setText(
-            f"🔍 Gốc: {original_width}×{original_height} | "
+            f"📷 Gốc: {original_width}×{original_height} | "
             f"Hiển thị: {display_width}×{display_height} | "
             f"Tỷ lệ: {scale_percent}%"
         )
 
+        # #(Cập nhật layout parent để hiển thị thay đổi)
+        if self.parent():
+            self.parent().updateGeometry()
     def clear_image(self):
         """Xóa ảnh và reset kích thước"""
         self.current_pixmap = None
@@ -3323,15 +3319,21 @@ class AdaptiveImageViewer(QtWidgets.QWidget):
 
     def _zoom_in(self):
         """Phóng to ảnh"""
-        if self.max_height < 800:
-            self.max_height += 50
+        # #(Tăng kích thước giới hạn hiển thị để tạo hiệu ứng zoom)
+        if self.max_width < 1200 and self.max_height < 1000:
+            self.max_width = min(self.max_width + 100, 1200)
+            self.max_height = min(self.max_height + 80, 1000)
             self._display_adaptive_image()
+            print(f"🔍+ Zoom in: {self.max_width}×{self.max_height}")
 
     def _zoom_out(self):
         """Thu nhỏ ảnh"""
-        if self.max_height > 150:
-            self.max_height -= 50
+        # #(Giảm kích thước giới hạn hiển thị để tạo hiệu ứng zoom out)
+        if self.max_width > 200 and self.max_height > 150:
+            self.max_width = max(self.max_width - 100, 200)
+            self.max_height = max(self.max_height - 80, 150)
             self._display_adaptive_image()
+            print(f"🔍- Zoom out: {self.max_width}×{self.max_height}")
 
     def fit_to_container(self):
         """Điều chỉnh kích thước tối đa theo container thực tế"""
@@ -4317,103 +4319,334 @@ class TreeManagerDialog(QtWidgets.QDialog):
         # Implementation
         pass
 # ========== DIALOG XEM ẢNH FULLSCREEN ========== #
+# ========== DIALOG XEM ẢNH FULLSCREEN - HOÀN THIỆN ========== #
 class ImageViewerDialog(QtWidgets.QDialog):
-    """Dialog xem ảnh fullscreen với zoom"""
+    """Dialog xem ảnh fullscreen với đầy đủ tính năng zoom, pan, keyboard shortcuts"""
 
     def __init__(self, pixmap, parent=None):
         super().__init__(parent)
         self.original_pixmap = pixmap
         self.current_zoom = 1.0
+        self.min_zoom = 0.1
+        self.max_zoom = 10.0
+        self.zoom_step = 0.2
+        self.pan_offset = QtCore.QPoint(0, 0)
+        self.last_pan_point = QtCore.QPoint()
+        self.is_panning = False
 
-        self.setWindowTitle("🖼️ Xem ảnh")
-        self.setModal(True)
-        self.resize(800, 600)
-
+        self._setup_window()
         self._setup_ui()
-        self._display_image()
+        self._setup_shortcuts()
+        self._fit_to_window()
+
+    def _setup_window(self):
+        """#(Thiết lập cửa sổ dialog maximized - phóng to nhưng vẫn có thanh tiêu đề và viền)"""
+        self.setWindowTitle("🖼️ Xem ảnh - Nhấn ESC để thoát")
+
+        # Sử dụng window flags bình thường để có thanh tiêu đề và viền
+        self.setWindowFlags(
+            Qt.Dialog |
+            Qt.WindowMaximizeButtonHint |  # Có nút maximize
+            Qt.WindowMinimizeButtonHint |  # Có nút minimize
+            Qt.WindowCloseButtonHint  # Có nút close
+        )
+
+        # Màu nền đen cho viewer
+        self.setStyleSheet("""
+            QDialog {
+                background-color: #000000;
+            }
+        """)
+        self.showMaximized()
+        QtCore.QTimer.singleShot(100, self._fit_to_window)
 
     def _setup_ui(self):
-        """Setup UI cho image viewer"""
+        """#(Thiết lập giao diện với scroll area và toolbar)"""
         layout = QtWidgets.QVBoxLayout(self)
-
-        # Toolbar
-        toolbar = QtWidgets.QHBoxLayout()
-
-        zoom_out_btn = QtWidgets.QPushButton("🔍-")
-        zoom_out_btn.clicked.connect(self._zoom_out)
-
-        self.zoom_label = QtWidgets.QLabel("100%")
-        self.zoom_label.setMinimumWidth(60)
-        self.zoom_label.setAlignment(Qt.AlignCenter)
-
-        zoom_in_btn = QtWidgets.QPushButton("🔍+")
-        zoom_in_btn.clicked.connect(self._zoom_in)
-
-        fit_btn = QtWidgets.QPushButton("⛶ Fit")
-        fit_btn.clicked.connect(self._fit_to_window)
-
-        actual_btn = QtWidgets.QPushButton("1:1")
-        actual_btn.clicked.connect(self._actual_size)
-
-        close_btn = QtWidgets.QPushButton("❌ Đóng")
-        close_btn.clicked.connect(self.accept)
-
-        toolbar.addWidget(zoom_out_btn)
-        toolbar.addWidget(self.zoom_label)
-        toolbar.addWidget(zoom_in_btn)
-        toolbar.addWidget(fit_btn)
-        toolbar.addWidget(actual_btn)
-        toolbar.addStretch()
-        toolbar.addWidget(close_btn)
-
-        layout.addLayout(toolbar)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        self.setWindowFlags(
+            Qt.Window | Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint)
+        # Toolbar controls
+        self._setup_toolbar(layout)
 
         # Scroll area cho ảnh
         self.scroll_area = QtWidgets.QScrollArea()
         self.scroll_area.setAlignment(Qt.AlignCenter)
+        self.scroll_area.setStyleSheet("QScrollArea { border: none; background: #000000; }")
 
+        # Label hiển thị ảnh
         self.image_label = QtWidgets.QLabel()
         self.image_label.setAlignment(Qt.AlignCenter)
+        self.image_label.setStyleSheet("QLabel { background: transparent; }")
+        self.image_label.setPixmap(self.original_pixmap)
+
+        # Enable mouse tracking để pan
+        self.image_label.setMouseTracking(True)
+        self.image_label.mousePressEvent = self._mouse_press_event
+        self.image_label.mouseMoveEvent = self._mouse_move_event
+        self.image_label.mouseReleaseEvent = self._mouse_release_event
+
         self.scroll_area.setWidget(self.image_label)
+        layout.addWidget(self.scroll_area)
 
-        layout.addWidget(self.scroll_area, 1)
+        # Status bar
+        self._setup_status_bar(layout)
 
-    def _display_image(self):
-        """Hiển thị ảnh với zoom hiện tại"""
-        if not self.original_pixmap or self.original_pixmap.isNull():
-            return
+    def _setup_toolbar(self, layout):
+        """#(Tạo toolbar với các nút điều khiển zoom và điều hướng)"""
+        toolbar = QtWidgets.QWidget()
+        toolbar.setFixedHeight(50)
+        toolbar.setStyleSheet("""
+            QWidget {
+                background: rgba(0, 0, 0, 180);
+                border-bottom: 1px solid #333;
+            }
+            QPushButton {
+                background: rgba(255, 255, 255, 20);
+                border: 1px solid rgba(255, 255, 255, 50);
+                border-radius: 4px;
+                color: white;
+                font-size: 12px;
+                padding: 5px 10px;
+                min-width: 60px;
+            }
+            QPushButton:hover {
+                background: rgba(255, 255, 255, 40);
+                border: 1px solid rgba(255, 255, 255, 80);
+            }
+            QPushButton:pressed {
+                background: rgba(255, 255, 255, 60);
+            }
+            QSlider::groove:horizontal {
+                border: 1px solid #333;
+                height: 6px;
+                background: #555;
+                border-radius: 3px;
+            }
+            QSlider::handle:horizontal {
+                background: white;
+                border: 1px solid #333;
+                width: 16px;
+                border-radius: 8px;
+                margin: -5px 0;
+            }
+            QLabel {
+                color: white;
+                font-size: 11px;
+            }
+        """)
 
-        size = self.original_pixmap.size() * self.current_zoom
-        scaled_pixmap = self.original_pixmap.scaled(
-            size, Qt.KeepAspectRatio, Qt.SmoothTransformation
-        )
+        toolbar_layout = QtWidgets.QHBoxLayout(toolbar)
+        toolbar_layout.setContentsMargins(10, 5, 10, 5)
 
-        self.image_label.setPixmap(scaled_pixmap)
-        self.zoom_label.setText(f"{int(self.current_zoom * 100)}%")
+        # Zoom controls
+        self.zoom_out_btn = QtWidgets.QPushButton("🔍-")
+        self.zoom_out_btn.setToolTip("Thu nhỏ (Ctrl + -)")
+        self.zoom_out_btn.clicked.connect(self._zoom_out)
+
+        self.zoom_in_btn = QtWidgets.QPushButton("🔍+")
+        self.zoom_in_btn.setToolTip("Phóng to (Ctrl + +)")
+        self.zoom_in_btn.clicked.connect(self._zoom_in)
+
+        # Zoom slider
+        self.zoom_slider = QtWidgets.QSlider(Qt.Horizontal)
+        self.zoom_slider.setRange(int(self.min_zoom * 100), int(self.max_zoom * 100))
+        self.zoom_slider.setValue(int(self.current_zoom * 100))
+        self.zoom_slider.setFixedWidth(150)
+        self.zoom_slider.setToolTip("Kéo để điều chỉnh zoom")
+        self.zoom_slider.valueChanged.connect(self._zoom_slider_changed)
+
+        # Fit controls
+        self.fit_window_btn = QtWidgets.QPushButton("⚏ Vừa cửa sổ")
+        self.fit_window_btn.setToolTip("Vừa khít cửa sổ (Ctrl + 0)")
+        self.fit_window_btn.clicked.connect(self._fit_to_window)
+
+        self.actual_size_btn = QtWidgets.QPushButton("📐 Kích thước gốc")
+        self.actual_size_btn.setToolTip("Hiển thị kích thước gốc (Ctrl + 1)")
+        self.actual_size_btn.clicked.connect(self._actual_size)
+
+        # Close button
+        self.close_btn = QtWidgets.QPushButton("❌ Đóng")
+        self.close_btn.setToolTip("Đóng (ESC)")
+        self.close_btn.clicked.connect(self.close)
+
+        # Add to layout
+        toolbar_layout.addWidget(self.zoom_out_btn)
+        toolbar_layout.addWidget(self.zoom_in_btn)
+        toolbar_layout.addWidget(self.zoom_slider)
+        toolbar_layout.addWidget(self.fit_window_btn)
+        toolbar_layout.addWidget(self.actual_size_btn)
+        toolbar_layout.addStretch()
+        toolbar_layout.addWidget(self.close_btn)
+
+        layout.addWidget(toolbar)
+
+    def _setup_status_bar(self, layout):
+        """#(Tạo thanh trạng thái hiển thị thông tin ảnh)"""
+        self.status_bar = QtWidgets.QLabel()
+        self.status_bar.setFixedHeight(25)
+        self.status_bar.setStyleSheet("""
+            QLabel {
+                background: rgba(0, 0, 0, 180);
+                color: white;
+                padding: 0 10px;
+                border-top: 1px solid #333;
+                font-size: 11px;
+            }
+        """)
+        self._update_status()
+        layout.addWidget(self.status_bar)
+
+    def _setup_shortcuts(self):
+        """#(Thiết lập keyboard shortcuts cho các thao tác)"""
+        # ESC để đóng
+        QtGui.QShortcut(Qt.Key_Escape, self, self.close)
+
+        # Zoom shortcuts
+        QtGui.QShortcut(QtGui.QKeySequence("Ctrl++"), self, self._zoom_in)
+        QtGui.QShortcut(QtGui.QKeySequence("Ctrl+="), self, self._zoom_in)  # Cho bàn phím US
+        QtGui.QShortcut(QtGui.QKeySequence("Ctrl+-"), self, self._zoom_out)
+        QtGui.QShortcut(QtGui.QKeySequence("Ctrl+0"), self, self._fit_to_window)
+        QtGui.QShortcut(QtGui.QKeySequence("Ctrl+1"), self, self._actual_size)
+
+        # Pan với arrow keys
+        QtGui.QShortcut(Qt.Key_Left, self, lambda: self._pan_with_keys(-20, 0))
+        QtGui.QShortcut(Qt.Key_Right, self, lambda: self._pan_with_keys(20, 0))
+        QtGui.QShortcut(Qt.Key_Up, self, lambda: self._pan_with_keys(0, -20))
+        QtGui.QShortcut(Qt.Key_Down, self, lambda: self._pan_with_keys(0, 20))
 
     def _zoom_in(self):
-        """Zoom in"""
-        self.current_zoom = min(self.current_zoom * 1.25, 10.0)
-        self._display_image()
+        """#(Phóng to ảnh với giới hạn max_zoom)"""
+        new_zoom = min(self.current_zoom + self.zoom_step, self.max_zoom)
+        self._set_zoom(new_zoom)
 
     def _zoom_out(self):
-        """Zoom out"""
-        self.current_zoom = max(self.current_zoom / 1.25, 0.1)
-        self._display_image()
+        """#(Thu nhỏ ảnh với giới hạn min_zoom)"""
+        new_zoom = max(self.current_zoom - self.zoom_step, self.min_zoom)
+        self._set_zoom(new_zoom)
+
+    def _zoom_slider_changed(self, value):
+        """#(Xử lý thay đổi zoom từ slider)"""
+        new_zoom = value / 100.0
+        self._set_zoom(new_zoom, update_slider=False)
+
+    def _set_zoom(self, zoom_level, update_slider=True):
+        """#(Áp dụng mức zoom mới và cập nhật UI)"""
+        self.current_zoom = max(self.min_zoom, min(zoom_level, self.max_zoom))
+
+        # Update slider if needed
+        if update_slider:
+            self.zoom_slider.blockSignals(True)
+            self.zoom_slider.setValue(int(self.current_zoom * 100))
+            self.zoom_slider.blockSignals(False)
+
+        # Scale pixmap
+        if self.original_pixmap and not self.original_pixmap.isNull():
+            new_size = self.original_pixmap.size() * self.current_zoom
+            scaled_pixmap = self.original_pixmap.scaled(
+                new_size, Qt.KeepAspectRatio, Qt.SmoothTransformation
+            )
+            self.image_label.setPixmap(scaled_pixmap)
+            self.image_label.resize(new_size)
+
+        self._update_status()
 
     def _fit_to_window(self):
-        """Fit ảnh vào cửa sổ"""
+        """#(Điều chỉnh zoom để ảnh vừa khít cửa sổ)"""
         if not self.original_pixmap or self.original_pixmap.isNull():
             return
 
-        available_size = self.scroll_area.size() - QtCore.QSize(20, 20)
-        self.current_zoom = min(
-            available_size.width() / self.original_pixmap.width(),
-            available_size.height() / self.original_pixmap.height()
-        )
-        self._display_image()
+        # Kích thước available (trừ toolbar và status bar)
+        available_size = self.scroll_area.viewport().size()
+        image_size = self.original_pixmap.size()
+
+        # Tính scale factor để fit
+        scale_w = available_size.width() / image_size.width()
+        scale_h = available_size.height() / image_size.height()
+        scale_factor = min(scale_w, scale_h) * 0.9  # 0.9 để có chút margin
+
+        self._set_zoom(scale_factor)
 
     def _actual_size(self):
-        """Hiển thị kích thước thực"""
-        self.current_zoom = 1.0
-        self._display_image()
+        """#(Hiển thị ảnh ở kích thước gốc 100%)"""
+        self._set_zoom(1.0)
+
+    def _pan_with_keys(self, dx, dy):
+        """#(Di chuyển ảnh bằng phím mũi tên)"""
+        h_scroll = self.scroll_area.horizontalScrollBar()
+        v_scroll = self.scroll_area.verticalScrollBar()
+
+        h_scroll.setValue(h_scroll.value() + dx)
+        v_scroll.setValue(v_scroll.value() + dy)
+
+    def _mouse_press_event(self, event):
+        """#(Xử lý nhấn chuột để bắt đầu pan)"""
+        if event.button() == Qt.LeftButton:
+            self.is_panning = True
+            self.last_pan_point = event.pos()
+            self.image_label.setCursor(Qt.ClosedHandCursor)
+
+    def _mouse_move_event(self, event):
+        """#(Xử lý di chuyển chuột để pan ảnh)"""
+        if self.is_panning and (event.buttons() & Qt.LeftButton):
+            delta = event.pos() - self.last_pan_point
+
+            h_scroll = self.scroll_area.horizontalScrollBar()
+            v_scroll = self.scroll_area.verticalScrollBar()
+
+            h_scroll.setValue(h_scroll.value() - delta.x())
+            v_scroll.setValue(v_scroll.value() - delta.y())
+
+            self.last_pan_point = event.pos()
+
+    def _mouse_release_event(self, event):
+        """#(Xử lý thả chuột để kết thúc pan)"""
+        if event.button() == Qt.LeftButton:
+            self.is_panning = False
+            self.image_label.setCursor(Qt.OpenHandCursor)
+
+    def _update_status(self):
+        """#(Cập nhật thanh trạng thái với thông tin ảnh)"""
+        if not self.original_pixmap or self.original_pixmap.isNull():
+            return
+
+        original_size = self.original_pixmap.size()
+        current_size = self.image_label.size()
+        zoom_percent = int(self.current_zoom * 100)
+
+        status_text = (
+            f"📏 Gốc: {original_size.width()}×{original_size.height()} | "
+            f"Hiển thị: {current_size.width()}×{current_size.height()} | "
+            f"Zoom: {zoom_percent}% | "
+            f"💡 Mẹo: Kéo chuột để di chuyển, Ctrl+Scroll để zoom"
+        )
+
+        self.status_bar.setText(status_text)
+
+    def wheelEvent(self, event):
+        """#(Xử lý zoom bằng con lăn chuột với Ctrl)"""
+        modifiers = QtWidgets.QApplication.keyboardModifiers()
+        if modifiers == Qt.ControlModifier:
+            # Zoom với mouse wheel
+            delta = event.angleDelta().y()
+            if delta > 0:
+                self._zoom_in()
+            else:
+                self._zoom_out()
+            event.accept()
+        else:
+            # Scroll bình thường
+            super().wheelEvent(event)
+
+    def keyPressEvent(self, event):
+        """#(Xử lý các phím tắt bổ sung)"""
+        if event.key() == Qt.Key_Space:
+            # Space để fit to window
+            self._fit_to_window()
+            event.accept()
+        elif event.key() == Qt.Key_F:
+            # F để fullscreen toggle (nếu cần)
+            event.accept()
+        else:
+            super().keyPressEvent(event)
