@@ -902,3 +902,4 @@ class TrayIconsArea(QWidget):
         # Show menu
         global_pos = self.expand_btn.mapToGlobal(QPoint(0, 0))
         menu.exec(QPoint(global_pos.x(), global_pos.y() - menu.sizeHint().height()))
+        #dsf
