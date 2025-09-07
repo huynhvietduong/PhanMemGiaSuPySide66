@@ -23,12 +23,12 @@ from PySide6.QtCore import (
     Qt, QSize, QPoint, QRect, QTimer,
     Signal, QObject, QThread, QProcess,
     QPropertyAnimation, QEasingCurve,
-    QParallelAnimationGroup, QSequentialAnimationGroup,QEvent
+    QParallelAnimationGroup, QSequentialAnimationGroup
 )
 from PySide6.QtGui import (
     QIcon, QPixmap, QAction, QKeySequence,
     QCloseEvent, QResizeEvent, QPainter,
-    QBrush, QColor, QPen, QFont,
+    QBrush, QColor, QPen, QFont
 )
 
 # Import utils
@@ -124,14 +124,12 @@ class AppWindow(QMdiSubWindow):
         self.app_id = app_id
         self.window_title = title
         self.window_icon = icon or get_app_icon(app_id)
-        self.is_manually_hidden = False
+
         # State
         self.is_active = False
         self.is_pinned = False
         self.window_state = WindowState.NORMAL
-        # Set window properties
-        self.setWindowTitle(title)
-        self.setAttribute(Qt.WA_DeleteOnClose)
+
         # Process (if external app)
         self.process = None
 
@@ -196,36 +194,25 @@ class AppWindow(QMdiSubWindow):
         self.activateWindow()
         self.window_activated.emit(self.window_id)
 
-    # Override showMinimized để ẩn hoàn toàn thay vì minimize
-    def showMinimized(self):
-        """Override showMinimized - ẩn hoàn toàn thay vì minimize"""
-        # Ẩn window hoàn toàn
-        self.hide()
+    def set_window_state(self, state: WindowState):
+        """Set window state"""
+        old_state = self.window_state
+        self.window_state = state
 
-        # Update state
-        self.window_state = WindowState.MINIMIZED
+        if state == WindowState.NORMAL:
+            self.showNormal()
+        elif state == WindowState.MINIMIZED:
+            self.showMinimized()
+        elif state == WindowState.MAXIMIZED:
+            self.showMaximized()
+        elif state == WindowState.FULLSCREEN:
+            self.showFullScreen()
+        elif state == WindowState.HIDDEN:
+            self.hide()
 
-        # Emit signal
-        self.window_state_changed.emit(self.window_id, WindowState.MINIMIZED)
+        if old_state != state:
+            self.window_state_changed.emit(self.window_id, state)
 
-        logger.debug(f"Window {self.window_id} hidden instead of minimized")
-
-    # Override showNormal để restore từ hidden
-    def showNormal(self):
-        """Override showNormal - restore từ hidden state"""
-        # Hiện window nếu đang ẩn
-        if self.isHidden():
-            self.show()
-
-        # Gọi super để restore normal state
-        super().showNormal()
-
-        # Update state
-        self.window_state = WindowState.NORMAL
-
-        # Focus window
-        self.raise_()
-        self.activateWindow()
     def closeEvent(self, event: QCloseEvent):
         """Handle window close"""
         # Terminate process if exists
@@ -237,46 +224,7 @@ class AppWindow(QMdiSubWindow):
         self.window_closed.emit(self.window_id)
         super().closeEvent(event)
 
-    def setVisible(self, visible):
-        """Override setVisible để control khi nào window được hiện"""
-        # Nếu đang ẩn thủ công, không cho phép tự động hiện
-        if visible and self.is_manually_hidden:
-            return  # Chặn không cho hiện
-        super().setVisible(visible)
 
-    # Override showEvent để chặn
-    def showEvent(self, event):
-        """Override showEvent để chặn tự động hiện"""
-        if self.is_manually_hidden:
-            event.ignore()  # Ignore event show
-            return
-        super().showEvent(event)
-
-    # Phương thức ẩn thủ công
-    def hide_manually(self):
-        """Ẩn window và đánh dấu là ẩn thủ công"""
-        self.is_manually_hidden = True
-        self.hide()
-
-    # Phương thức hiện thủ công
-    def show_manually(self):
-        """Hiện window và xóa đánh dấu ẩn thủ công"""
-        self.is_manually_hidden = False
-        self.show()
-        self.showNormal()
-
-    def changeEvent(self, event):
-        """Override changeEvent để track state changes"""
-        if event.type() == QEvent.WindowStateChange:
-            # Nếu window bị minimize
-            if self.windowState() & Qt.WindowMinimized:
-                # Thay vì minimize, ẩn hoàn toàn
-                self.hide()
-                self.is_manually_hidden = True
-                event.accept()
-                return
-
-        super().changeEvent(event)
 # ========== WINDOW MANAGER SERVICE ==========
 
 class WindowManagerService(QObject):
@@ -308,10 +256,7 @@ class WindowManagerService(QObject):
         # Window storage
         self.windows: Dict[str, AppWindow] = {}
         self.window_info: Dict[str, WindowInfo] = {}
-        self.windows_state_before_desktop = {}
 
-        # Thêm tracking cho windows bị minimize thủ công
-        self.manually_minimized_windows = set()  # Set các window_id đã minimize thủ công
         # State
         self.active_window_id: Optional[str] = None
         self.z_order_counter = 0
@@ -335,48 +280,19 @@ class WindowManagerService(QObject):
 
         # Set background
         self.mdi_area.setBackground(QBrush(QColor(240, 240, 240)))
-        # Connect to subWindowActivated signal
-        self.mdi_area.subWindowActivated.connect(self._on_mdi_window_activated)
+
         # Enable tab view option
         self.mdi_area.setTabsClosable(True)
         self.mdi_area.setTabsMovable(True)
 
         # Connect signals
         self.mdi_area.subWindowActivated.connect(self._on_window_activated)
-        # Khi có window mới được thêm vào MDI area
-        self.mdi_area.subWindowActivated.connect(self._connect_window_signals)
+
     def set_mdi_area(self, mdi_area: QMdiArea):
         """Set MDI area to manage"""
         self.mdi_area = mdi_area
         self._setup_mdi_area()
 
-    # Connect signals cho từng MDI window
-    def _connect_window_signals(self, mdi_window):
-        """Connect signals để track window state changes"""
-        if not mdi_window:
-            return
-
-        # Tìm window_id từ mdi_window
-        window_id = None
-        for wid, window in self.windows.items():
-            if window == mdi_window:
-                window_id = wid
-                break
-
-        if not window_id:
-            return
-
-        # Override windowStateChanged để track minimize
-        def on_state_changed():
-            if mdi_window.isMinimized():
-                # Window vừa được minimize từ title bar
-                self.mark_manually_minimized(window_id)
-            elif not mdi_window.isMinimized() and window_id in self.manually_minimized_windows:
-                # Window được restore từ minimize
-                self.unmark_manually_minimized(window_id)
-
-        # Connect signal
-        mdi_window.windowStateChanged.connect(on_state_changed)
     # ========== WINDOW CREATION ==========
 
     def create_window(
@@ -479,13 +395,6 @@ class WindowManagerService(QObject):
             # Emit signal
             self.window_created.emit(window_id, info)
 
-            def on_state_changed():
-                if window.isMinimized():
-                    self.mark_manually_minimized(window_id)
-                elif not window.isMinimized() and window_id in self.manually_minimized_windows:
-                    self.unmark_manually_minimized(window_id)
-
-            window.windowStateChanged.connect(on_state_changed)
             logger.info(f"Window created: {window_id} - {title}")
             return window_id
 
@@ -562,22 +471,7 @@ class WindowManagerService(QObject):
             return None
 
     # ========== WINDOW OPERATIONS ==========
-    # Ẩn window hoàn toàn (không hiện title bar)
-    def hide_to_taskbar(self):
-        """Ẩn window hoàn toàn - chỉ hiện trên taskbar"""
-        self.hide()
-        self.window_state = WindowState.MINIMIZED
-        logger.debug(f"Window {self.window_id} hidden to taskbar")
 
-    # Restore window từ taskbar
-    def restore_from_taskbar(self):
-        """Hiện lại window từ taskbar"""
-        self.show()
-        self.showNormal()
-        self.raise_()
-        self.activateWindow()
-        self.window_state = WindowState.NORMAL
-        logger.debug(f"Window {self.window_id} restored from taskbar")
     def close_window(self, window_id: str) -> bool:
         """
         Close a window
@@ -633,139 +527,39 @@ class WindowManagerService(QObject):
         return count
 
     def minimize_window(self, window_id: str) -> bool:
-        """Minimize window - ẩn hoàn toàn với flag"""
+        """Minimize a window"""
         if window_id in self.windows:
-            window = self.windows[window_id]
-
-            # Sử dụng hide_manually để đánh dấu
-            if hasattr(window, 'hide_manually'):
-                window.hide_manually()
-            else:
-                window.hide()
-
-            if window_id in self.window_info:
-                self.window_info[window_id].state = WindowState.MINIMIZED
-
-            logger.info(f"Window {window_id} minimized with manual flag")
+            self.windows[window_id].showMinimized()
+            self.window_info[window_id].state = WindowState.MINIMIZED
             return True
         return False
-    # Track window được minimize thủ công (từ title bar)
-    def mark_manually_minimized(self, window_id: str):
-        """Đánh dấu window được minimize thủ công từ title bar"""
-        if window_id in self.windows:
-            self.manually_minimized_windows.add(window_id)
-            logger.debug(f"Window {window_id} marked as manually minimized")
 
-    # Xóa mark khi window được restore thủ công
-    def unmark_manually_minimized(self, window_id: str):
-        """Xóa đánh dấu manually minimized khi window được restore"""
-        if window_id in self.manually_minimized_windows:
-            self.manually_minimized_windows.remove(window_id)
-            logger.debug(f"Window {window_id} unmarked from manually minimized")
+    def maximize_window(self, window_id: str) -> bool:
+        """Maximize a window"""
+        if window_id in self.windows:
+            self.windows[window_id].showMaximized()
+            self.window_info[window_id].state = WindowState.MAXIMIZED
+            return True
+        return False
 
     def restore_window(self, window_id: str) -> bool:
-        """Restore window từ taskbar"""
+        """Restore window to normal state"""
         if window_id in self.windows:
-            window = self.windows[window_id]
-
-            # Sử dụng show_manually để xóa flag và hiện window
-            if hasattr(window, 'show_manually'):
-                window.show_manually()
-            else:
-                window.show()
-                window.showNormal()
-
-            window.raise_()
-            window.activateWindow()
-
-            if window_id in self.window_info:
-                self.window_info[window_id].state = WindowState.NORMAL
-
-            logger.info(f"Window {window_id} restored and manual flag cleared")
+            self.windows[window_id].showNormal()
+            self.window_info[window_id].state = WindowState.NORMAL
             return True
         return False
-    def toggle_window(self, window_id: str) -> bool:
-        """Toggle show/hide window"""
-        if window_id not in self.windows:
-            return False
-
-        window = self.windows[window_id]
-
-        # Toggle based on visibility
-        if window.isVisible():
-            return self.minimize_window(window_id)
-        else:
-            return self.restore_window(window_id)    # Lấy window ID từ app ID
-    def get_window_by_app_id(self, app_id: str) -> Optional[str]:
-        """Get first window ID for an app"""
-        for window_id, info in self.window_info.items():
-            if info.app_id == app_id:
-                return window_id
-        return None
 
     def minimize_all_windows(self):
-        """Minimize all windows và lưu trạng thái (trừ đã minimize thủ công)"""
-        # Lưu trạng thái trước khi minimize
-        self.save_windows_state()
-
-        count = 0
-        for window_id in list(self.windows.keys()):
-            # Bỏ qua những window đã minimize thủ công
-            if window_id not in self.manually_minimized_windows:
-                if self.minimize_window(window_id):
-                    count += 1
-
-        logger.info(f"Minimized {count} windows (skipped {len(self.manually_minimized_windows)} manually minimized)")
-        return count    # Lưu trạng thái hiện tại của tất cả windows
-    def save_windows_state(self):
-        """Lưu trạng thái hiện tại của tất cả windows trước khi show desktop"""
-        self.windows_state_before_desktop.clear()
-
-        for window_id, window in self.windows.items():
-            # Bỏ qua những window đã được minimize thủ công
-            if window_id in self.manually_minimized_windows:
-                continue
-
-            # Chỉ lưu những window đang hiển thị
-            if window.isVisible() and not window.isMinimized():
-                self.windows_state_before_desktop[window_id] = {
-                    'visible': True,
-                    'state': self.window_info[window_id].state
-                }
-
-        logger.info(
-            f"Saved state for {len(self.windows_state_before_desktop)} visible windows (excluded {len(self.manually_minimized_windows)} manually minimized)")
-    # Khôi phục lại trạng thái đã lưu
-    def restore_saved_windows_state(self):
-        """Khôi phục lại trạng thái windows đã lưu trước khi show desktop"""
-        restored_count = 0
-
-        for window_id in self.windows_state_before_desktop:
-            if window_id in self.windows:
-                window = self.windows[window_id]
-                saved_state = self.windows_state_before_desktop[window_id]
-
-                # Chỉ restore những window đã visible trước đó
-                if saved_state.get('visible', False):
-                    window.showNormal()
-                    restored_count += 1
-
-        # Clear saved state sau khi restore
-        self.windows_state_before_desktop.clear()
-
-        logger.info(f"Restored {restored_count} windows to previous state")
-        return restored_count
+        """Minimize all windows"""
+        for window in self.windows.values():
+            window.showMinimized()
 
     def restore_all_windows(self):
-        """Restore all windows (trừ những cái minimize thủ công)"""
-        count = 0
-        for window_id, window in self.windows.items():
-            # Bỏ qua những window minimize thủ công
-            if window_id not in self.manually_minimized_windows:
-                window.showNormal()
-                count += 1
+        """Restore all windows"""
+        for window in self.windows.values():
+            window.showNormal()
 
-        logger.info(f"Restored {count} windows (skipped {len(self.manually_minimized_windows)} manually minimized)")
     # ========== WINDOW ARRANGEMENT ==========
 
     def cascade_windows(self):

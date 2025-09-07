@@ -173,8 +173,6 @@ class MainDashboard(QMainWindow):
         self.settings_repo = SettingsRepository()
         self.app_repo = AppRepository()
         self.assets_manager = AssetsManager()
-        # Khai báo các attributes
-        self.db_manager = db_manager
 
         # Services
         self.app_launcher = AppLauncherService(self.db, self)
@@ -207,22 +205,9 @@ class MainDashboard(QMainWindow):
 
         # Show window
         self.show_window()
-        if self.mdi_area:
-            self.mdi_area.installEventFilter(self)
-    # ========== UI SETUP ==========
-    # Chặn các event có thể trigger auto-show
-    def eventFilter(self, source, event):
-        """Event filter để chặn auto-show windows"""
-        # Nếu là MDI area và là resize event
-        if source == self.mdi_area:
-            if event.type() == QEvent.Resize:
-                # Không cho resize trigger show windows
-                for window in self.mdi_area.subWindowList():
-                    if hasattr(window, 'is_manually_hidden') and window.is_manually_hidden:
-                        # Giữ window ẩn nếu đang ẩn thủ công
-                        window.hide()
 
-        return super().eventFilter(source, event)
+    # ========== UI SETUP ==========
+
     def setup_ui(self):
         """Setup main UI components"""
         self.setWindowTitle("🖥️ Dashboard Desktop - Phần mềm Gia sư")
@@ -287,6 +272,7 @@ class MainDashboard(QMainWindow):
             if hasattr(self.desktop_area, 'icon_double_clicked'):
                 self.desktop_area.icon_double_clicked.connect(self.handle_app_launch)
 
+            logger.info("Desktop area created successfully")
 
         except Exception as e:
             logger.error(f"Failed to create desktop area: {e}")
@@ -295,11 +281,7 @@ class MainDashboard(QMainWindow):
         # MDI Area for app windows
         self.mdi_area = QMdiArea()
         self.mdi_area.setObjectName("MdiArea")
-        # QUAN TRỌNG: Disable auto tile/cascade khi resize
-        self.mdi_area.setOption(QMdiArea.DontMaximizeSubWindowOnActivation, True)
 
-        # Disable tự động arrange
-        self.mdi_area.setActivationOrder(QMdiArea.ActivationHistoryOrder)
         # QUAN TRỌNG: Set MDI area không chặn mouse events khi không có child windows
         self.mdi_area.setAttribute(Qt.WA_TransparentForMouseEvents, True)
 
@@ -331,15 +313,8 @@ class MainDashboard(QMainWindow):
     def create_taskbar(self):
         """Create taskbar at bottom"""
         try:
-            from .taskbar.taskbar import Taskbar
+            from taskbar.taskbar import Taskbar
             self.taskbar = Taskbar(self)
-
-            # Thêm dictionary để lưu window references
-            self.taskbar.window_refs = {}  # Thêm dòng này
-
-            # Connect signal để xử lý đóng app từ taskbar
-            if hasattr(self.taskbar, 'close_app_requested'):
-                self.taskbar.close_app_requested.connect(self.close_app_from_taskbar)
         except ImportError:
             # Fallback: Create basic taskbar
             self.taskbar = QWidget()
@@ -582,7 +557,8 @@ class MainDashboard(QMainWindow):
         QShortcut(QKeySequence(Qt.Key_Meta), self, self.toggle_start_menu)
 
         # Win+D - Show desktop
-        QShortcut(QKeySequence("Meta+D"), self, self.toggle_desktop)
+        QShortcut(QKeySequence("Meta+D"), self, self.show_desktop)
+
         # Win+L - Lock screen
         QShortcut(QKeySequence("Meta+L"), self, self.lock_screen)
 
@@ -639,6 +615,7 @@ class MainDashboard(QMainWindow):
                     (screen.geometry().height() - self.height()) // 2
                 )
 
+        logger.info("Dashboard window hiển thị thành công")
     def cascade_windows(self):
         """Cascade MDI windows"""
         if self.mdi_area:
@@ -661,40 +638,10 @@ class MainDashboard(QMainWindow):
         """Minimize all windows to show desktop"""
         if self.mdi_area:
             for window in self.mdi_area.subWindowList():
-                # Chỉ ẩn những window đang hiển thị
-                if window.isVisible() and not window.isMinimized():
-                    if hasattr(window, 'hide_manually'):
-                        window.hide_manually()
-                    else:
-                        window.hide()
+                window.showMinimized()
 
-    def toggle_desktop(self):
-        """Toggle show/hide desktop"""
-        if not self.mdi_area:
-            return
+    # ========== APP MANAGEMENT ==========
 
-        # Lấy danh sách windows đang hiển thị
-        visible_windows = []
-        for window in self.mdi_area.subWindowList():
-            if window.isVisible() and not window.isMinimized():
-                if not (hasattr(window, 'is_manually_hidden') and window.is_manually_hidden):
-                    visible_windows.append(window)
-
-        if visible_windows:
-            # Ẩn các windows đang hiển thị
-            for window in visible_windows:
-                if hasattr(window, 'hide_manually'):
-                    window.hide_manually()
-                else:
-                    window.hide()
-        else:
-            # Restore các windows (trừ manually hidden)
-            for window in self.mdi_area.subWindowList():
-                if hasattr(window, 'is_manually_hidden') and not window.is_manually_hidden:
-                    if hasattr(window, 'show_manually'):
-                        window.show_manually()
-                    else:
-                        window.show()
     def launch_app(self, app_id: str):
         """Launch app by ID"""
         result, window = self.app_launcher.launch_app_by_id(
@@ -716,13 +663,9 @@ class MainDashboard(QMainWindow):
         """Handle app launched"""
         logger.info(f"App launched: {app_id}")
 
-        # Update taskbar - truyền cả app_id và window
-        if self.taskbar:
-            try:
-                self.taskbar.add_app_button(app_id, window)
-                logger.info(f"Added button to taskbar for app: {app_id}")
-            except Exception as e:
-                logger.error(f"Error adding button to taskbar: {e}")
+        # Update taskbar
+        if self.taskbar and hasattr(self.taskbar, 'add_app_button'):
+            self.taskbar.add_app_button(app_id, window)
 
         # Update app count
         self.update_app_count()
@@ -735,12 +678,8 @@ class MainDashboard(QMainWindow):
         logger.info(f"App closed: {app_id}")
 
         # Update taskbar
-        if self.taskbar:
-            try:
-                self.taskbar.remove_app_button(app_id)
-                logger.info(f"Removed button from taskbar for app: {app_id}")
-            except Exception as e:
-                logger.error(f"Error removing button from taskbar: {e}")
+        if self.taskbar and hasattr(self.taskbar, 'remove_app_button'):
+            self.taskbar.remove_app_button(app_id)
 
         # Update app count
         self.update_app_count()
@@ -748,11 +687,6 @@ class MainDashboard(QMainWindow):
         # Emit signal
         self.app_closed.emit(app_id)
 
-    # Đóng app khi click close từ taskbar
-    def close_app_from_taskbar(self, app_id: str):
-        """Đóng app từ taskbar button"""
-        if hasattr(self.app_launcher, 'close_app'):
-            self.app_launcher.close_app(app_id)
     def on_app_error(self, app_id: str, error_msg: str):
         """Handle app error"""
         logger.error(f"App error {app_id}: {error_msg}")
@@ -771,6 +705,7 @@ class MainDashboard(QMainWindow):
             app_id: ID của app cần mở
         """
         try:
+            logger.info(f"Handle app launch: {app_id}")
 
             # Gọi launch_app để mở ứng dụng
             self.launch_app(app_id)
@@ -787,6 +722,7 @@ class MainDashboard(QMainWindow):
     def load_desktop_icons(self):
         """Load desktop icons từ pinned apps"""
         try:
+            logger.info("Đang load desktop icons...")
 
             # Kiểm tra và tạo desktop area nếu cần
             if not self.desktop_area:
@@ -801,6 +737,11 @@ class MainDashboard(QMainWindow):
                 return
 
             pinned_apps = self.app_repo.get_pinned_apps()
+            logger.info(f"Got {len(pinned_apps)} pinned apps from repository")
+
+            # In chi tiết apps nhận được
+            for i, app in enumerate(pinned_apps):
+                logger.info(f"  App {i}: {app.id}")
 
             # KIỂM TRA XEM CÓ BỊ CẮT KHÔNG
             if len(pinned_apps) > 4:
@@ -812,6 +753,8 @@ class MainDashboard(QMainWindow):
                 all_apps = self.app_repo.get_all_apps()
                 pinned_apps = all_apps[:6] if len(all_apps) >= 6 else all_apps  # ← DÒNG NÀY CÓ THỂ LÀ VẤN ĐỀ
 
+            logger.info(f"Sẽ load {len(pinned_apps)} icons lên desktop")
+
             # Tạo icons trực tiếp trên desktop area
             self._create_desktop_icons_directly(pinned_apps)
 
@@ -821,6 +764,7 @@ class MainDashboard(QMainWindow):
             traceback.print_exc()
     def on_icon_added(self, icon_id: str):
         """Handle icon added to desktop"""
+        logger.info(f"Desktop icon added: {icon_id}")
 
         # Create icon widget if desktop area exists
         if self.desktop_area and hasattr(self.desktop_area, 'create_icon_widget'):
@@ -828,6 +772,7 @@ class MainDashboard(QMainWindow):
 
     def on_icon_removed(self, icon_id: str):
         """Handle icon removed from desktop"""
+        logger.info(f"Desktop icon removed: {icon_id}")
 
         # Remove icon widget if desktop area exists
         if self.desktop_area and hasattr(self.desktop_area, 'remove_icon_widget'):
@@ -916,10 +861,13 @@ class MainDashboard(QMainWindow):
                     # Save position to settings
                     self.settings_repo.save_desktop_icon_position(app.id, position)
 
+                    logger.info(f"Đã tạo icon: {app.display_name} tại {position}")
+
                 except Exception as e:
                     logger.error(f"Lỗi tạo icon cho {app.display_name}: {e}")
 
             icon_count = len(self.desktop_area.desktop_icons)
+            logger.info(f"Đã tạo thành công {icon_count} icons")
 
         except Exception as e:
             logger.error(f"Lỗi tạo desktop icons: {e}")
@@ -979,6 +927,7 @@ class MainDashboard(QMainWindow):
                     self.desktop_area.desktop_icons = {}
                 self.desktop_area.desktop_icons[app.id] = button
 
+            logger.info(f"Đã tạo {len(apps)} basic icons")
 
         except Exception as e:
             logger.error(f"Lỗi tạo basic icons: {e}")
@@ -1129,6 +1078,7 @@ class MainDashboard(QMainWindow):
         # Gọi set_wallpaper của desktop_area
         if hasattr(self.desktop_area, 'set_wallpaper'):
             self.desktop_area.set_wallpaper(wallpaper_path)
+            logger.info(f"Đã set wallpaper cho desktop area: {wallpaper_path}")
     def toggle_fullscreen(self):
         """Toggle fullscreen mode"""
         if self.is_fullscreen:
@@ -1253,6 +1203,7 @@ class MainDashboard(QMainWindow):
     def auto_save(self):
         """Auto-save settings"""
         self.save_settings()
+        logger.info("Auto-saved settings")
 
     # ========== EVENT HANDLERS ==========
 
@@ -1324,12 +1275,45 @@ class MainDashboard(QMainWindow):
             elif self.desktop_area and hasattr(self.desktop_area, '_load_desktop_icons'):
                 self.desktop_area._load_desktop_icons()
 
+            logger.info("Đã load desktop items")
 
         except Exception as e:
             logger.error(f"Lỗi khi load desktop items: {e}")
+    # Phương thức debug để kiểm tra trạng thái
+    def debug_desktop_state(self):
+        """Debug trạng thái desktop để kiểm tra vấn đề"""
+        logger.info("=== DEBUG DESKTOP STATE ===")
+        logger.info(f"Desktop area exists: {self.desktop_area is not None}")
+
+        if self.desktop_area:
+            logger.info(f"Desktop area visible: {self.desktop_area.isVisible()}")
+            logger.info(f"Desktop area size: {self.desktop_area.size()}")
+            logger.info(f"Desktop area children: {len(self.desktop_area.children())}")
+
+            if hasattr(self.desktop_area, 'desktop_icons'):
+                logger.info(f"Desktop icons count: {len(self.desktop_area.desktop_icons)}")
+                for icon_id, widget in self.desktop_area.desktop_icons.items():
+                    logger.info(
+                        f"  - Icon {icon_id}: visible={widget.isVisible()}, pos={widget.pos()}, size={widget.size()}")
+            else:
+                logger.info("Desktop area không có thuộc tính desktop_icons")
+
+        if hasattr(self.app_repo, 'get_all_apps'):
+            apps = self.app_repo.get_all_apps()
+            logger.info(f"Total apps in repository: {len(apps)}")
+            pinned = self.app_repo.get_pinned_apps()
+            logger.info(f"Pinned apps: {len(pinned)}")
+
+            # List một vài apps
+            for i, app in enumerate(apps[:3]):
+                logger.info(f"  - App {i}: {app.display_name} (pinned: {app.pinned})")
+
+        logger.info("=== END DEBUG ===")
     # Check và fix desktop area nếu cần
     def _check_and_fix_desktop(self):
         """Check và fix desktop area nếu có vấn đề"""
+        logger.info("=== CHECK AND FIX DESKTOP ===")
+
         # Check desktop area
         if not self.desktop_area:
             logger.warning("Desktop area không tồn tại, đang tạo lại...")
@@ -1341,6 +1325,7 @@ class MainDashboard(QMainWindow):
             # Desktop area đã tồn tại
             if hasattr(self.desktop_area, 'desktop_icons'):
                 icon_count = len(self.desktop_area.desktop_icons)
+                logger.info(f"Icon count: {icon_count}")
 
                 # KHÔNG load lại nếu đã có icons
                 # Chỉ log warning thôi
@@ -1366,12 +1351,16 @@ class MainDashboard(QMainWindow):
         # Check icon container
         if hasattr(self.desktop_area, 'icon_container'):
             container = self.desktop_area.icon_container
+            logger.info(f"Icon container exists: {container}")
+            logger.info(f"Container visible: {container.isVisible()}")
+            logger.info(f"Container size: {container.size()}")
         else:
             logger.warning("No icon_container attribute")
 
         # Check desktop icons dict
         if hasattr(self.desktop_area, 'desktop_icons'):
             icons = self.desktop_area.desktop_icons
+            logger.info(f"Desktop icons count: {len(icons)}")
             for app_id, widget in icons.items():
                 logger.info(f"  - {app_id}: visible={widget.isVisible()}, pos={widget.pos()}")
         else:

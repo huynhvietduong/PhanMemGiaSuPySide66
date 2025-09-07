@@ -3,7 +3,7 @@
 Taskbar Container - Thanh tác vụ chính của Dashboard
 Chứa Start button, Search box, App buttons, System tray
 """
-#...
+
 import os
 from pathlib import Path
 from typing import Dict, List, Optional, Any
@@ -42,7 +42,7 @@ from ...utils.animations import fade_in_animation
 # Import repositories
 from ...repositories.app_repository import AppRepository, AppModel
 from ...repositories.settings_repository import SettingsRepository
-#123
+
 # Logger
 logger = logging.getLogger(__name__)
 
