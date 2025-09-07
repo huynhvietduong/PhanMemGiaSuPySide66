@@ -97,7 +97,7 @@ def check_file_structure():
         "ui_qt/__init__.py",
         "ui_qt/windows/__init__.py",
         "ui_qt/windows/question_bank_window_qt.py",
-        "ui_qt/windows/dashboard_window_qt.py"
+        "ui_qt/windows/#dashboard_window_qt.py"
     ]
 
     for file_path in files_to_check:
@@ -134,7 +134,7 @@ if __name__ == "__main__":
     print("\n" + "=" * 60)
     if success:
         print("🎉 KẾT LUẬN: QuestionBankWindowQt có thể import được!")
-        print("   Lỗi có thể nằm ở chỗ khác trong dashboard_window_qt.py")
+        print("   Lỗi có thể nằm ở chỗ khác trong #dashboard_window_qt.py")
     else:
         print("❌ KẾT LUẬN: Có lỗi import cần sửa")
         print("   Hãy sửa các lỗi trên trước khi chạy lại ứng dụng")

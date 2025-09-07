@@ -19,14 +19,139 @@ from PySide6.QtWidgets import (
     QTableWidget, QTableWidgetItem,
     QTreeWidget, QTreeWidgetItem,
     QHeaderView, QAbstractItemView
-,QSlider, QWidget, QApplication)
+, QSlider, QWidget, QApplication)
 
 from PySide6.QtGui import (
     QKeySequence, QShortcut, QPixmap, QImage,
     QTextDocument, QTextCursor, QColor, QBrush,
-    QAction, QIcon
+    QAction, QIcon, QFont
 )
 from PySide6.QtPrintSupport import QPrintPreviewDialog, QPrinter
+
+# #(Custom QTextBrowser để load ảnh từ database resources)
+class CustomHTMLViewer(QtWidgets.QTextBrowser):
+    """Custom QTextBrowser với khả năng load ảnh từ database"""
+
+    def __init__(self, db_manager, question_id=None, parent=None):
+        super().__init__(parent)
+        self.db = db_manager
+        self.question_id = question_id
+        self.setOpenExternalLinks(False)
+
+    def loadResource(self, type_hint, name):
+        """Override để load resource từ database hoặc convert HTML"""
+        # Nếu là QTextDocument.ImageResource
+        if type_hint == QtGui.QTextDocument.ImageResource:
+            try:
+                resource_id = str(name.toString()) if hasattr(name, 'toString') else str(name)
+
+                # Nếu là data URI, decode và return
+                if resource_id.startswith('data:image/'):
+                    return self._decode_data_uri(resource_id)
+
+                # Nếu là số thuần túy (resource ID từ QTextEdit)
+                if resource_id.isdigit():
+                    # #(Tìm ảnh trong database dựa trên resource pattern)
+                    image_from_db = self._load_image_from_database(resource_id)
+                    if image_from_db:
+                        return image_from_db
+
+                    return self._create_placeholder_image(f"Resource ID: {resource_id}")
+
+            except Exception as e:
+                print(f"⚠️ Lỗi load resource: {e}")
+
+        # Fallback về parent implementation
+        return super().loadResource(type_hint, name)
+
+    # #(Phương thức load ảnh từ database dựa trên resource ID hoặc pattern matching)
+
+    # #(Helper method load pixmap từ nhiều định dạng data)
+    def _try_load_pixmap_from_data(self, data):
+        """Thử load pixmap từ data với nhiều format"""
+        if not data:
+            return None
+
+        try:
+            pixmap = QtGui.QPixmap()
+
+            # Nếu là binary data
+            if isinstance(data, (bytes, bytearray)):
+                if pixmap.loadFromData(data):
+                    return pixmap
+
+            # Nếu là string (base64 hoặc data URI)
+            elif isinstance(data, str):
+                import base64
+
+                # Data URI format
+                if data.startswith('data:image'):
+                    try:
+                        header, b64_data = data.split(',', 1)
+                        decoded_data = base64.b64decode(b64_data)
+                        if pixmap.loadFromData(decoded_data):
+                            return pixmap
+                    except:
+                        pass
+
+                # Pure base64
+                else:
+                    try:
+                        decoded_data = base64.b64decode(data)
+                        if pixmap.loadFromData(decoded_data):
+                            return pixmap
+                    except:
+                        pass
+
+            return None
+
+        except Exception as e:
+            print(f"⚠️ Lỗi load pixmap từ data: {e}")
+            return None
+
+    # THAY THẾ phương thức _create_placeholder_image():
+    def _create_placeholder_image(self, info_text="Ảnh không tìm thấy"):
+        """Tạo placeholder image với thông tin chi tiết"""
+        pixmap = QtGui.QPixmap(300, 150)
+        pixmap.fill(QtGui.QColor("#f8f9fa"))
+
+        painter = QtGui.QPainter(pixmap)
+        painter.setPen(QtGui.QColor("#666"))
+        painter.setFont(QtGui.QFont("Arial", 10))
+
+        # Vẽ border
+        painter.drawRect(pixmap.rect().adjusted(2, 2, -2, -2))
+
+        # Vẽ icon ảnh
+        painter.setFont(QtGui.QFont("Arial", 24))
+        painter.drawText(pixmap.rect(), Qt.AlignCenter | Qt.AlignTop, "🖼️")
+
+        # Vẽ text thông tin
+        painter.setFont(QtGui.QFont("Arial", 9))
+        text_rect = pixmap.rect().adjusted(10, 50, -10, -10)
+
+        full_text = f"Đáp án chứa ảnh\n{info_text}\nẢnh được nhúng từ text editor"
+        painter.drawText(text_rect, Qt.AlignCenter | Qt.TextWordWrap, full_text)
+
+        painter.end()
+        return pixmap
+
+    def _decode_data_uri(self, data_uri):
+        """Decode data URI thành QPixmap"""
+        try:
+            import base64
+            if ',base64,' in data_uri:
+                header, data = data_uri.split(',base64,', 1)
+                image_data = base64.b64decode(data)
+
+                pixmap = QtGui.QPixmap()
+                if pixmap.loadFromData(image_data):
+                    return pixmap
+        except Exception as e:
+            print(f"⚠️ Lỗi decode data URI: {e}")
+
+        return self._create_placeholder_image()
+
 
 class QuestionBankWindowQt(QtWidgets.QWidget):
     # ========== NHÓM 1: KHỞI TẠO VÀ THIẾT LẬP ========== #
@@ -211,7 +336,7 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
         # Bảng câu hỏi tối ưu (9 cột thay vì 8)
         # Bảng câu hỏi với 10 cột
         self.q_table = QtWidgets.QTableWidget(0, 9)
-        headers = ["☑️", "ID","📊 Loại", "🎯 Độ khó", "✅ Đáp án", "📁 Chủ đề", "🏷️ Tags", "📊 Sử dụng",
+        headers = ["☑️", "ID", "📊 Loại", "🎯 Độ khó", "✅ Đáp án", "📁 Chủ đề", "🏷️ Tags", "📊 Sử dụng",
                    "📅 Ngày tạo"]
         self.q_table.setHorizontalHeaderLabels(headers)
 
@@ -328,7 +453,7 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
 
         # Image preview adaptive
         self.preview_image = AdaptiveImageViewer()
-        self.preview_image.set_size_limits(600, 500, 250) # Nhỏ hơn cho preview
+        self.preview_image.set_size_limits(600, 500, 250)  # Nhỏ hơn cho preview
         self.preview_image.enable_zoom_controls()
         self.setup_preview_interactions()
         self.preview_image.setToolTip("Double-click để xem ảnh fullscreen\nDùng nút +/- để zoom")
@@ -339,21 +464,15 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
         image_scroll_area.setStyleSheet("QScrollArea { border: none; }")
         self.preview_container.addWidget(self.preview_image)
 
-
         preview_layout.addWidget(self.preview_container)
         right_layout.addWidget(self.preview_group)
         split.addWidget(right_widget)
 
-        # Khởi tạo biến đơn giản
-        self.current_zoom = 1.0
-        self.original_pixmap = None
-
         # Thiết lập tỷ lệ splitter: Tree(20%) - Questions(50%) - Preview(30%)
-        split.setSizes([200, 200,1000])
+        split.setSizes([200, 200, 1000])
 
         self.q_table.itemSelectionChanged.connect(self.on_question_select)
-
-
+        self.q_table.cellDoubleClicked.connect(self.on_cell_double_clicked)
         # Init dữ liệu
         self.refresh_tree()
         self.load_available_subjects()
@@ -376,20 +495,8 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
 
         self._setup_tree_management()
 
-        self.apply_default_compact_mode()
     # ========== HELPER FUNCTIONS CHO DATABASE ROW ========== #
-    def apply_default_compact_mode(self):
-        """Áp dụng chế độ thu gọn làm mặc định khi khởi động"""
 
-        def set_compact():
-            try:
-                self.toggle_compact_mode()
-                print("✅ Đã áp dụng chế độ thu gọn làm mặc định")
-            except Exception as e:
-                print(f"⚠️ Lỗi áp dụng chế độ thu gọn: {e}")
-
-        # Delay 200ms để đảm bảo UI đã render xong
-        QtCore.QTimer.singleShot(200, set_compact)
     def safe_get(self, row, column, default=None):
         """Truy cập an toàn dữ liệu từ sqlite3.Row hoặc dict - SỬA LỖI"""
         if row is None:
@@ -415,6 +522,100 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
         except (KeyError, IndexError, TypeError, AttributeError) as e:
             print(f"⚠️ safe_get error for column '{column}': {e}")
             return default
+
+    # #(Helper method load pixmap từ answer_data binary)
+    def load_pixmap_from_answer_data(self, answer_data):
+        """Load QPixmap từ answer_data (binary hoặc base64)"""
+        if not answer_data:
+            return None
+
+        try:
+            pixmap = QtGui.QPixmap()
+
+            # Nếu là bytes/binary data
+            if isinstance(answer_data, (bytes, bytearray)):
+                if pixmap.loadFromData(answer_data):
+                    return pixmap
+
+            # Nếu là string (có thể là base64)
+            elif isinstance(answer_data, str):
+                import base64
+                try:
+                    if answer_data.startswith('data:image'):
+                        # Data URL format
+                        header, data = answer_data.split(',', 1)
+                        decoded_data = base64.b64decode(data)
+                    else:
+                        # Pure base64
+                        decoded_data = base64.b64decode(answer_data)
+
+                    if pixmap.loadFromData(decoded_data):
+                        return pixmap
+                except:
+                    pass
+
+            return None
+
+        except Exception as e:
+            print(f"⚠️ Lỗi load pixmap: {e}")
+            return None
+
+    # #(Helper method kiểm tra HTML có chứa ảnh không)
+    def _has_images_in_html(self, html_content):
+        """Kiểm tra HTML có chứa ảnh không"""
+        if not html_content:
+            return False
+
+        # Kiểm tra các tag ảnh HTML
+        html_lower = html_content.lower()
+
+        # Kiểm tra tag <img>
+        if '<img' in html_lower:
+            return True
+
+        # Kiểm tra data URI cho ảnh
+        if 'data:image/' in html_lower:
+            return True
+
+        # Kiểm tra các định dạng ảnh base64
+        if 'base64' in html_lower and ('png' in html_lower or 'jpg' in html_lower or 'jpeg' in html_lower):
+            return True
+
+        return False
+
+    # #(Phương thức tiền xử lý HTML để convert resource IDs thành data URIs)
+    def _process_html_for_display(self, html_content, question_id):
+        """Tiền xử lý HTML để convert resource IDs thành displayable format"""
+        if not html_content:
+            return html_content
+
+        try:
+            import re
+
+            # Tìm và thay thế tất cả thẻ img với src là số
+            def replace_img_tag(match):
+                resource_id = match.group(1)
+                placeholder_html = (
+                    '<div style="border: 2px dashed #ccc; padding: 20px; text-align: center; '
+                    'margin: 10px; background: #f9f9f9;">'
+                    '<p style="color: #666; margin: 0;"><strong>🖼️ Hình ảnh đáp án</strong></p>'
+                    f'<p style="color: #999; font-size: 12px; margin: 5px 0 0 0;">Resource ID: {resource_id}</p>'
+                    '<p style="color: #777; font-size: 11px; margin: 5px 0 0 0;">'
+                    '<em>Ảnh được nhúng từ text editor</em></p>'
+                    '</div>'
+                )
+                return placeholder_html
+
+            # Pattern tìm thẻ img với src là số
+            img_pattern = r'<img[^>]*src=["\'](\d+)["\'][^>]*>'
+            processed_html = re.sub(img_pattern, replace_img_tag, html_content, flags=re.IGNORECASE)
+
+            return processed_html
+
+        except Exception as e:
+            print(f"⚠️ Lỗi process HTML: {e}")
+            return html_content
+
     def row_to_dict(self, row):
         """Chuyển đổi sqlite3.Row thành dictionary an toàn - SỬA LỖI RECURSION"""
         if row is None:
@@ -439,6 +640,7 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
         except Exception as e:
             print(f"⚠️ Lỗi row_to_dict: {e}, type: {type(row)}")
             return {}
+
     def open_add_question_dialog(self):
         """Mở dialog thêm câu hỏi mới"""
         tree_id = self._current_tree_id()
@@ -451,10 +653,12 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
         if dialog.exec() == QtWidgets.QDialog.Accepted:
             # Refresh danh sách câu hỏi
             self.on_tree_select()
+
     def _ensure_tables(self):
         """Đảm bảo các bảng tồn tại với schema mới"""
         self.db.upgrade_question_bank_schema()
         print("✅ Đã đảm bảo schema ngân hàng câu hỏi")
+
     def _insert_sample_tree_data(self):
         """Thêm dữ liệu mẫu cho cây thư mục"""
         sample_data = [
@@ -513,6 +717,7 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
 
         clear_filter_btn = toolbar.addAction("🔄 Xóa lọc")
         clear_filter_btn.triggered.connect(self.clear_filters)
+
     def _create_preview_tab_content(self, layout):
         """Tạo nội dung tab preview"""
         layout.addWidget(QtWidgets.QLabel("📋 Xem trước câu hỏi:"))
@@ -529,6 +734,7 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
             }
         """)
         layout.addWidget(self.preview_widget)
+
     def _create_stats_tab_content(self, layout):
         """Tạo nội dung tab thống kê"""
         layout.addWidget(QtWidgets.QLabel("📊 Thống kê ngân hàng câu hỏi:"))
@@ -540,6 +746,7 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
         update_stats_btn = QtWidgets.QPushButton("🔄 Cập nhật thống kê")
         update_stats_btn.clicked.connect(self.update_statistics)
         layout.addWidget(update_stats_btn)
+
     def _create_history_tab_content(self, layout):
         """Tạo nội dung tab lịch sử"""
         layout.addWidget(QtWidgets.QLabel("📜 Lịch sử chỉnh sửa:"))
@@ -631,6 +838,7 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
     def open_tree_manager(self):
         """Mở cửa sổ quản lý cây"""
         QtWidgets.QMessageBox.information(self, "Thông tin", "Chức năng quản lý cây đang phát triển.")
+
     def _setup_tree_management(self):
         """Thiết lập chức năng quản lý cây thư mục"""
         # Thêm context menu cho tree
@@ -891,16 +1099,16 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
 
                 info_text = f"""
                 📁 THÔNG TIN NHÁNH
-                
+
                 ID: {node['id']}
                 Tên: {node['name']}
                 Cấp độ: {node['level']}
                 Mô tả: {node.get('description', 'Không có')}
-                
+
                 📊 THỐNG KÊ:
                 - Số nhánh con: {children_count}
                 - Số câu hỏi: {questions_count}
-                
+
                 🕐 Ngày tạo: {node.get('created_at', 'Không rõ')}
                 """
 
@@ -1142,6 +1350,7 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
         except Exception as e:
             print(f"⚠️ Lỗi load preview: {e}")
             self.clear_preview()
+
     def clear_preview(self):
         """Clear preview đơn giản"""
         try:
@@ -1161,6 +1370,7 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
             self.current_zoom = 1.0
         except Exception as e:
             print(f"⚠️ Lỗi clear_preview: {e}")
+
     # Chuột phải vào câu hỏi trong bảng ể hiện thị các menu
     def show_enhanced_context_menu(self, position):
         """Hiển thị context menu nâng cao"""
@@ -1196,6 +1406,7 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
         delete_action.triggered.connect(self.delete_question)
 
         menu.exec(self.q_table.mapToGlobal(position))
+
     # ========== NHÓM 4: QUẢN LÝ DANH SÁCH CÂU HỎI ========== #
     def _load_question_rows(self, rows):
         """Load danh sách câu hỏi với xử lý lỗi an toàn"""
@@ -1236,7 +1447,6 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
                 if not row_id:
                     continue
 
-
                 # Loại content với fallback
                 content_type = self.safe_get(row_dict, "content_type", "text")
                 type_display = {
@@ -1257,9 +1467,17 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
                 difficulty_color, difficulty_display = difficulty_colors.get(difficulty, ("#f8f9fa", "🟡 Trung bình"))
 
                 # Đáp án
-                correct_answer = self.safe_get(row_dict, "correct_answer", "") or self.safe_get(row_dict, "correct", "")
-                answer_display = correct_answer[:30] + (
-                    "..." if len(correct_answer) > 30 else "") if correct_answer else "Chưa có đáp án"
+                answer_text = self.safe_get(row_dict, "answer_text", "") or self.safe_get(row_dict, "correct_answer",
+                                                                                          "")  # Fallback
+                answer_type = self.safe_get(row_dict, "answer_type", "text")
+
+                if answer_type == "image":
+                    answer_display = "🖼️ [Đáp án hình ảnh]"
+                elif answer_type == "pdf":
+                    answer_display = "📄 [Đáp án PDF]"
+                else:
+                    answer_display = answer_text[:30] + (
+                        "..." if len(answer_text) > 30 else "") if answer_text else "Chưa có đáp án"
 
                 # Trạng thái
                 status = self.safe_get(row_dict, "status", "active")
@@ -1358,6 +1576,7 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
                 self.update_stats_label()
             except:
                 pass
+
     def on_question_select(self):
         """Load câu hỏi được chọn với xử lý sqlite3.Row an toàn"""
         items = self.q_table.selectedItems()
@@ -1391,15 +1610,10 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
             self.content_text.setPlainText(content_text)
 
         # Hiển thị đáp án
-        correct_answer = self.safe_get(q_dict, "correct_answer", "")
+        answer_text = self.safe_get(q_dict, "answer_text", "") or self.safe_get(q_dict, "correct_answer",
+                                                                                "")  # Fallback
+        answer_type = self.safe_get(q_dict, "answer_type", "text")
         answer_data = self.safe_get(q_dict, "answer_data", "")
-
-        # Ưu tiên correct_answer, fallback về correct nếu có
-        if not correct_answer:
-            correct_answer = self.safe_get(q_dict, "correct", "")
-
-        if hasattr(self, 'answer_text'):
-            self.answer_text.setPlainText(correct_answer)
 
         # Load preview nếu có method
         if hasattr(self, 'load_question_preview'):
@@ -1408,6 +1622,689 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
         # Load lịch sử nếu có method
         if hasattr(self, '_load_question_history'):
             self._load_question_history(qid)
+
+    # (Phương thức xử lý double-click vào ô trong bảng)
+    def on_cell_double_clicked(self, row, column):
+        """Xử lý double-click vào ô trong bảng câu hỏi"""
+        try:
+            # Kiểm tra nếu double-click vào cột "Đáp án" (cột 4)
+            if column != 4:
+                return
+
+            # Lấy ID câu hỏi từ cột ID (cột 1)
+            id_item = self.q_table.item(row, 1)
+            if not id_item:
+                return
+
+            question_id = int(id_item.text())
+
+            # Truy vấn thông tin câu hỏi từ database
+            question = self.db.execute_query(
+                "SELECT answer_type, answer_data, answer_text FROM question_bank WHERE id=?",
+                (question_id,), fetch="one"
+            )
+
+            if not question:
+                QtWidgets.QMessageBox.warning(self, "Lỗi", "Không tìm thấy câu hỏi!")
+                return
+
+            # Chuyển đổi sang dict để truy cập an toàn
+            q_dict = dict(question) if hasattr(question, 'keys') else question
+
+            answer_type = self.safe_get(q_dict, "answer_type", "text")
+            answer_data = self.safe_get(q_dict, "answer_data")
+
+            # ÁP DỤNG FALLBACK LOGIC GIỐNG CÁC PHƯƠNG THỨC KHÁC
+            answer_text = self.safe_get(q_dict, "answer_text", "")
+
+            # Kiểm tra đáp án ảnh thuần túy
+            if answer_type == "image" and answer_data:
+                self.show_answer_image_dialog(question_id, answer_data)
+                return
+
+            # Hiển thị đáp án text thông thường
+            if answer_text:
+                import re
+                clean_text = re.sub(r'<[^>]+>', '', answer_text).strip()
+                if clean_text:
+                    QtWidgets.QMessageBox.information(
+                        self, "Đáp án câu hỏi",
+                        f"Đáp án: {clean_text}"
+                    )
+                else:
+                    QtWidgets.QMessageBox.information(
+                        self, "Đáp án câu hỏi",
+                        "Đáp án chứa nội dung HTML phức tạp"
+                    )
+            else:
+                QtWidgets.QMessageBox.information(
+                    self, "Đáp án câu hỏi",
+                    "Chưa có đáp án"
+                )
+        except Exception as e:
+            QtWidgets.QMessageBox.warning(self, "Lỗi", f"Không thể hiển thị đáp án: {e}")
+
+    # (Hiển thị dialog ảnh đáp án với giao diện đầy đủ giống show_html_answer_dialog)
+    def show_answer_image_dialog(self, question_id, answer_data):
+        """Hiển thị dialog chứa hình ảnh đáp án với giao diện chuyên nghiệp giống ImageViewerDialog"""
+        try:
+            # Tạo dialog với styling chuyên nghiệp
+            dialog = QtWidgets.QDialog(self)
+            dialog.setWindowTitle(f"🖼️ Đáp án hình ảnh - Câu #{question_id}")
+            dialog.setModal(False)
+            dialog.resize(1200, 900)
+
+            # (Window flags đầy đủ)
+            dialog.setWindowFlags(
+                Qt.Window |
+                Qt.WindowMinimizeButtonHint |
+                Qt.WindowMaximizeButtonHint |
+                Qt.WindowCloseButtonHint |
+                Qt.WindowSystemMenuHint |
+                Qt.WindowTitleHint |
+                Qt.CustomizeWindowHint
+            )
+
+            dialog.setMinimumSize(400, 300)
+            dialog.setSizeGripEnabled(True)
+
+            layout = QtWidgets.QVBoxLayout(dialog)
+            layout.setContentsMargins(0, 0, 0, 0)
+            layout.setSpacing(0)
+
+            # Load ảnh từ binary data trước
+            original_pixmap = self.load_pixmap_from_answer_data(answer_data)
+            current_zoom = 1.0
+
+            # (Main toolbar với styling chuyên nghiệp - giống ImageViewerDialog)
+            main_toolbar = QtWidgets.QWidget()
+            main_toolbar.setFixedHeight(55)
+            main_toolbar.setStyleSheet("""
+                QWidget {
+                    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                              stop: 0 #f8f9fa, stop: 1 #e9ecef);
+                    border-bottom: 2px solid #adb5bd;
+                }
+                QPushButton {
+                    background: white;
+                    border: 1px solid #ced4da;
+                    border-radius: 6px;
+                    color: #495057;
+                    font-weight: 500;
+                    padding: 8px 12px;
+                    margin: 2px;
+                    min-width: 80px;
+                }
+                QPushButton:hover {
+                    background: #e3f2fd;
+                    border-color: #2196f3;
+                    color: #1976d2;
+                }
+                QPushButton:pressed {
+                    background: #bbdefb;
+                }
+                QPushButton:checked {
+                    background: #4caf50;
+                    color: white;
+                    border-color: #388e3c;
+                }
+                QSlider::groove:horizontal {
+                    border: 1px solid #bbb;
+                    height: 8px;
+                    background: white;
+                    border-radius: 4px;
+                }
+                QSlider::handle:horizontal {
+                    background: #2196f3;
+                    border: 1px solid #1976d2;
+                    width: 18px;
+                    border-radius: 9px;
+                    margin: -5px 0;
+                }
+                QSlider::handle:horizontal:hover {
+                    background: #1976d2;
+                }
+                QLabel {
+                    color: #495057;
+                    font-weight: 500;
+                    padding: 0 8px;
+                }
+            """)
+
+            toolbar_layout = QtWidgets.QHBoxLayout(main_toolbar)
+            toolbar_layout.setContentsMargins(15, 8, 15, 8)
+            toolbar_layout.setSpacing(8)
+
+            # (Nhóm điều khiển cửa sổ)
+            window_group = QtWidgets.QWidget()
+            window_layout = QtWidgets.QHBoxLayout(window_group)
+            window_layout.setContentsMargins(0, 0, 0, 0)
+            window_layout.setSpacing(4)
+
+            minimize_btn = QtWidgets.QPushButton("🗕 Thu nhỏ")
+            minimize_btn.setToolTip("Thu nhỏ cửa sổ (Alt+F9)")
+            minimize_btn.clicked.connect(dialog.showMinimized)
+
+            maximize_btn = QtWidgets.QPushButton("🗖 Phóng to")
+            maximize_btn.setToolTip("Phóng to/Khôi phục (Alt+F10)")
+
+            hide_btn = QtWidgets.QPushButton("👁️ Ẩn")
+            hide_btn.setToolTip("Ẩn cửa sổ (Ctrl+H)")
+            hide_btn.clicked.connect(dialog.hide)
+
+            window_layout.addWidget(minimize_btn)
+            window_layout.addWidget(maximize_btn)
+            window_layout.addWidget(hide_btn)
+            toolbar_layout.addWidget(window_group)
+
+            # Separator
+            separator1 = QtWidgets.QFrame()
+            separator1.setFrameShape(QtWidgets.QFrame.VLine)
+            separator1.setStyleSheet("color: #adb5bd;")
+            toolbar_layout.addWidget(separator1)
+
+            # (Nhóm zoom controls với slider)
+            zoom_group = QtWidgets.QWidget()
+            zoom_layout = QtWidgets.QHBoxLayout(zoom_group)
+            zoom_layout.setContentsMargins(0, 0, 0, 0)
+            zoom_layout.setSpacing(4)
+
+            zoom_out_btn = QtWidgets.QPushButton("🔍−")
+            zoom_out_btn.setToolTip("Thu nhỏ (Ctrl + -)")
+            zoom_out_btn.setFixedWidth(40)
+
+            # Zoom slider với styling đẹp
+            zoom_slider = QtWidgets.QSlider(Qt.Horizontal)
+            zoom_slider.setRange(10, 500)  # 10% đến 500%
+            zoom_slider.setValue(int(current_zoom * 100))
+            zoom_slider.setFixedWidth(120)
+            zoom_slider.setToolTip("Kéo để điều chỉnh zoom")
+
+            zoom_in_btn = QtWidgets.QPushButton("🔍+")
+            zoom_in_btn.setToolTip("Phóng to (Ctrl + +)")
+            zoom_in_btn.setFixedWidth(40)
+
+            # Zoom percentage display
+            zoom_label = QtWidgets.QLabel("100%")
+            zoom_label.setFixedWidth(50)
+            zoom_label.setAlignment(Qt.AlignCenter)
+
+            zoom_layout.addWidget(zoom_out_btn)
+            zoom_layout.addWidget(zoom_slider)
+            zoom_layout.addWidget(zoom_in_btn)
+            zoom_layout.addWidget(zoom_label)
+            toolbar_layout.addWidget(zoom_group)
+
+            # Separator
+            separator2 = QtWidgets.QFrame()
+            separator2.setFrameShape(QtWidgets.QFrame.VLine)
+            separator2.setStyleSheet("color: #adb5bd;")
+            toolbar_layout.addWidget(separator2)
+
+            # (Nhóm fit controls)
+            fit_group = QtWidgets.QWidget()
+            fit_layout = QtWidgets.QHBoxLayout(fit_group)
+            fit_layout.setContentsMargins(0, 0, 0, 0)
+            fit_layout.setSpacing(4)
+
+            fit_window_btn = QtWidgets.QPushButton("📐 Vừa cửa sổ")
+            fit_window_btn.setToolTip("Vừa khít cửa sổ (Ctrl + 0)")
+
+            actual_size_btn = QtWidgets.QPushButton("1:1 Gốc")
+            actual_size_btn.setToolTip("Hiển thị kích thước gốc (Ctrl + 1)")
+
+            fit_layout.addWidget(fit_window_btn)
+            fit_layout.addWidget(actual_size_btn)
+            toolbar_layout.addWidget(fit_group)
+
+            # Separator
+            separator3 = QtWidgets.QFrame()
+            separator3.setFrameShape(QtWidgets.QFrame.VLine)
+            separator3.setStyleSheet("color: #adb5bd;")
+            toolbar_layout.addWidget(separator3)
+
+            # (Nhóm tiện ích)
+            utility_group = QtWidgets.QWidget()
+            utility_layout = QtWidgets.QHBoxLayout(utility_group)
+            utility_layout.setContentsMargins(0, 0, 0, 0)
+            utility_layout.setSpacing(4)
+
+            always_top_btn = QtWidgets.QPushButton("📌 Luôn trên")
+            always_top_btn.setCheckable(True)
+            always_top_btn.setToolTip("Giữ cửa sổ luôn ở trên (Ctrl+T)")
+
+            opacity_btn = QtWidgets.QPushButton("🔅 Độ mờ")
+            opacity_btn.setToolTip("Điều chỉnh độ trong suốt")
+
+            utility_layout.addWidget(always_top_btn)
+            utility_layout.addWidget(opacity_btn)
+            toolbar_layout.addWidget(utility_group)
+
+            # Spacer để đẩy close button sang phải
+            toolbar_layout.addStretch()
+
+            # (Nút đóng nổi bật)
+            close_btn = QtWidgets.QPushButton("✖ Đóng")
+            close_btn.setToolTip("Đóng cửa sổ (ESC)")
+            close_btn.clicked.connect(dialog.close)
+            close_btn.setStyleSheet("""
+                QPushButton {
+                    background: #dc3545;
+                    color: white;
+                    border: 1px solid #c82333;
+                    font-weight: bold;
+                    min-width: 60px;
+                }
+                QPushButton:hover {
+                    background: #c82333;
+                    border-color: #bd2130;
+                }
+                QPushButton:pressed {
+                    background: #bd2130;
+                }
+            """)
+            toolbar_layout.addWidget(close_btn)
+
+            layout.addWidget(main_toolbar)
+
+            # (Container chính với background tối chuyên nghiệp - giống ImageViewerDialog)
+            main_container = QtWidgets.QWidget()
+            main_container.setStyleSheet("""
+                QWidget {
+                    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                              stop: 0 #1a1a1a, stop: 1 #000000);
+                }
+            """)
+            main_layout = QtWidgets.QVBoxLayout(main_container)
+            main_layout.setContentsMargins(8, 8, 8, 8)
+
+            # Scroll area với styling cao cấp
+            scroll_area = QtWidgets.QScrollArea()
+            scroll_area.setAlignment(Qt.AlignCenter)
+            scroll_area.setStyleSheet("""
+                QScrollArea { 
+                    border: 2px solid #333;
+                    border-radius: 8px;
+                    background: #000000;
+                }
+                QScrollArea QScrollBar:vertical {
+                    background: #2b2b2b;
+                    width: 12px;
+                    border-radius: 6px;
+                }
+                QScrollArea QScrollBar::handle:vertical {
+                    background: #555;
+                    border-radius: 6px;
+                    min-height: 30px;
+                }
+                QScrollArea QScrollBar::handle:vertical:hover {
+                    background: #777;
+                }
+                QScrollArea QScrollBar:horizontal {
+                    background: #2b2b2b;
+                    height: 12px;
+                    border-radius: 6px;
+                }
+                QScrollArea QScrollBar::handle:horizontal {
+                    background: #555;
+                    border-radius: 6px;
+                    min-width: 30px;
+                }
+                QScrollArea QScrollBar::handle:horizontal:hover {
+                    background: #777;
+                }
+            """)
+
+            # (Image label với effects và interactions - giống ImageViewerDialog)
+            image_label = QtWidgets.QLabel()
+            image_label.setAlignment(Qt.AlignCenter)
+            image_label.setStyleSheet("""
+                QLabel { 
+                    background: transparent;
+                    border: 1px solid #444;
+                    border-radius: 4px;
+                    padding: 5px;
+                }
+            """)
+            image_label.setMinimumSize(200, 150)
+
+            if original_pixmap and not original_pixmap.isNull():
+                image_label.setPixmap(original_pixmap)
+                image_label.setCursor(Qt.OpenHandCursor)
+            else:
+                image_label.setText("⚠️ Không thể hiển thị ảnh")
+                image_label.setStyleSheet(
+                    "color: #dc3545; font-size: 18px; background: #2b2b2b; border: 2px dashed #dc3545;")
+
+            scroll_area.setWidget(image_label)
+            main_layout.addWidget(scroll_area)
+            layout.addWidget(main_container)
+
+            # (Status bar nâng cao với thông tin chi tiết - giống ImageViewerDialog)
+            status_bar = QtWidgets.QWidget()
+            status_bar.setFixedHeight(35)
+            status_bar.setStyleSheet("""
+                QWidget {
+                    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                              stop: 0 #2b2b2b, stop: 1 #1a1a1a);
+                    border-top: 1px solid #444;
+                }
+                QLabel {
+                    color: #ffffff;
+                    padding: 0 12px;
+                    font-size: 11px;
+                }
+                QLabel#main_info {
+                    font-weight: bold;
+                    color: #4fc3f7;
+                }
+                QLabel#tips {
+                    color: #81c784;
+                    font-style: italic;
+                }
+            """)
+
+            status_layout = QtWidgets.QHBoxLayout(status_bar)
+            status_layout.setContentsMargins(8, 0, 8, 0)
+
+            # Main image info
+            main_status_label = QtWidgets.QLabel()
+            main_status_label.setObjectName("main_info")
+            status_layout.addWidget(main_status_label)
+
+            # Spacer
+            status_layout.addStretch()
+
+            # Tips label
+            tips_label = QtWidgets.QLabel("💡 Kéo chuột để di chuyển • Ctrl+Scroll để zoom • Double-click để fit")
+            tips_label.setObjectName("tips")
+            status_layout.addWidget(tips_label)
+
+            layout.addWidget(status_bar)
+
+            # (Logic zoom functions - giữ nguyên logic, chỉ cập nhật UI)
+            def update_zoom_display():
+                if original_pixmap and not original_pixmap.isNull():
+                    new_size = original_pixmap.size() * current_zoom
+                    scaled_pixmap = original_pixmap.scaled(
+                        new_size, Qt.KeepAspectRatio, Qt.SmoothTransformation
+                    )
+                    image_label.setPixmap(scaled_pixmap)
+                    image_label.resize(new_size)
+
+                    # Update UI elements
+                    zoom_percent = int(current_zoom * 100)
+                    zoom_label.setText(f"{zoom_percent}%")
+                    zoom_slider.blockSignals(True)
+                    zoom_slider.setValue(zoom_percent)
+                    zoom_slider.blockSignals(False)
+
+                    # Update status bar
+                    original_size = original_pixmap.size()
+                    main_status_label.setText(
+                        f"🖼️ Gốc: {original_size.width()}×{original_size.height()} | "
+                        f"Hiển thị: {new_size.width()}×{new_size.height()} | "
+                        f"Zoom: {zoom_percent}%"
+                    )
+
+            def zoom_in():
+                nonlocal current_zoom
+                if current_zoom < 5.0:
+                    current_zoom *= 1.25
+                    update_zoom_display()
+
+            def zoom_out():
+                nonlocal current_zoom
+                if current_zoom > 0.1:
+                    current_zoom *= 0.8
+                    update_zoom_display()
+
+            def fit_to_window():
+                nonlocal current_zoom
+                if original_pixmap and not original_pixmap.isNull():
+                    available_size = scroll_area.viewport().size()
+                    scale_w = available_size.width() / original_pixmap.width()
+                    scale_h = available_size.height() / original_pixmap.height()
+                    current_zoom = min(scale_w, scale_h) * 0.9
+                    update_zoom_display()
+
+            def actual_size():
+                nonlocal current_zoom
+                current_zoom = 1.0
+                update_zoom_display()
+
+            def zoom_slider_changed(value):
+                nonlocal current_zoom
+                current_zoom = value / 100.0
+                update_zoom_display()
+
+            # Connect zoom controls
+            zoom_in_btn.clicked.connect(zoom_in)
+            zoom_out_btn.clicked.connect(zoom_out)
+            fit_window_btn.clicked.connect(fit_to_window)
+            actual_size_btn.clicked.connect(actual_size)
+            zoom_slider.valueChanged.connect(zoom_slider_changed)
+
+            # (Logic window controls)
+            def toggle_maximize():
+                if dialog.isMaximized():
+                    dialog.showNormal()
+                    maximize_btn.setText("🗖 Phóng to")
+                else:
+                    dialog.showMaximized()
+                    maximize_btn.setText("🗗 Khôi phục")
+
+            maximize_btn.clicked.connect(toggle_maximize)
+
+            def toggle_always_on_top(checked):
+                if checked:
+                    dialog.setWindowFlags(dialog.windowFlags() | Qt.WindowStaysOnTopHint)
+                    dialog.show()
+                    always_top_btn.setText("📌 Luôn trên ✓")
+                else:
+                    dialog.setWindowFlags(dialog.windowFlags() & ~Qt.WindowStaysOnTopHint)
+                    dialog.show()
+                    always_top_btn.setText("📌 Luôn trên")
+
+            always_top_btn.toggled.connect(toggle_always_on_top)
+
+            def show_opacity_dialog():
+                opacity_dialog = QtWidgets.QDialog(dialog)
+                opacity_dialog.setWindowTitle("Điều chỉnh độ mờ")
+                opacity_dialog.resize(320, 140)
+
+                dlg_layout = QtWidgets.QVBoxLayout(opacity_dialog)
+                dlg_layout.setSpacing(15)
+
+                title = QtWidgets.QLabel("🔅 Điều chỉnh độ trong suốt")
+                title.setStyleSheet("font-weight: bold; font-size: 14px; color: #2c3e50;")
+                title.setAlignment(Qt.AlignCenter)
+                dlg_layout.addWidget(title)
+
+                slider = QtWidgets.QSlider(Qt.Horizontal)
+                slider.setRange(20, 100)
+                slider.setValue(int(dialog.windowOpacity() * 100))
+
+                label = QtWidgets.QLabel(f"Độ mờ: {slider.value()}%")
+                label.setAlignment(Qt.AlignCenter)
+
+                def update_opacity(value):
+                    dialog.setWindowOpacity(value / 100.0)
+                    label.setText(f"Độ mờ: {value}%")
+
+                slider.valueChanged.connect(update_opacity)
+
+                dlg_layout.addWidget(label)
+                dlg_layout.addWidget(slider)
+
+                btn_layout = QtWidgets.QHBoxLayout()
+                reset_btn = QtWidgets.QPushButton("🔄 Reset")
+                reset_btn.clicked.connect(lambda: slider.setValue(100))
+                close_dlg_btn = QtWidgets.QPushButton("✓ Đóng")
+                close_dlg_btn.clicked.connect(opacity_dialog.accept)
+
+                btn_layout.addWidget(reset_btn)
+                btn_layout.addWidget(close_dlg_btn)
+                dlg_layout.addLayout(btn_layout)
+
+                opacity_dialog.exec()
+
+            opacity_btn.clicked.connect(show_opacity_dialog)
+
+            # (Mouse interactions - giống ImageViewerDialog)
+            is_panning = False
+            last_pan_point = QtCore.QPoint()
+
+            def mouse_press_event(event):
+                nonlocal is_panning, last_pan_point
+                if event.button() == Qt.LeftButton:
+                    is_panning = True
+                    last_pan_point = event.pos()
+                    image_label.setCursor(Qt.ClosedHandCursor)
+
+            def mouse_move_event(event):
+                nonlocal is_panning, last_pan_point
+                if is_panning and (event.buttons() & Qt.LeftButton):
+                    delta = event.pos() - last_pan_point
+                    h_scroll = scroll_area.horizontalScrollBar()
+                    v_scroll = scroll_area.verticalScrollBar()
+                    h_scroll.setValue(h_scroll.value() - delta.x())
+                    v_scroll.setValue(v_scroll.value() - delta.y())
+                    last_pan_point = event.pos()
+
+            def mouse_release_event(event):
+                nonlocal is_panning
+                if event.button() == Qt.LeftButton:
+                    is_panning = False
+                    image_label.setCursor(Qt.OpenHandCursor)
+
+            def mouse_double_click_event(event):
+                if event.button() == Qt.LeftButton:
+                    fit_to_window()
+
+            # Set mouse events
+            if original_pixmap and not original_pixmap.isNull():
+                image_label.mousePressEvent = mouse_press_event
+                image_label.mouseMoveEvent = mouse_move_event
+                image_label.mouseReleaseEvent = mouse_release_event
+                image_label.mouseDoubleClickEvent = mouse_double_click_event
+                image_label.setMouseTracking(True)
+
+            # (Mouse wheel zoom)
+            def wheelEvent(event):
+                modifiers = QtWidgets.QApplication.keyboardModifiers()
+                if modifiers == Qt.ControlModifier:
+                    if event.angleDelta().y() > 0:
+                        zoom_in()
+                    else:
+                        zoom_out()
+                    event.accept()
+                else:
+                    QtWidgets.QScrollArea.wheelEvent(scroll_area, event)
+
+            scroll_area.wheelEvent = wheelEvent
+
+            # (Context menu - giống ImageViewerDialog)
+            def show_context_menu(pos):
+                menu = QtWidgets.QMenu(dialog)
+                menu.setStyleSheet("""
+                    QMenu {
+                        background: #2b2b2b;
+                        color: white;
+                        border: 1px solid #555;
+                        border-radius: 4px;
+                        padding: 4px;
+                    }
+                    QMenu::item {
+                        padding: 8px 20px;
+                        border-radius: 3px;
+                    }
+                    QMenu::item:selected {
+                        background: #4fc3f7;
+                    }
+                    QMenu::separator {
+                        height: 1px;
+                        background: #555;
+                        margin: 4px 0;
+                    }
+                """)
+
+                # Window controls
+                menu.addAction("🗕 Thu nhỏ", dialog.showMinimized)
+                if dialog.isMaximized():
+                    menu.addAction("🗗 Khôi phục", dialog.showNormal)
+                else:
+                    menu.addAction("🗖 Phóng to", dialog.showMaximized)
+                menu.addAction("👁️ Ẩn", dialog.hide)
+                menu.addSeparator()
+
+                # Zoom controls
+                if original_pixmap and not original_pixmap.isNull():
+                    menu.addAction("🔍+ Phóng to ảnh", zoom_in)
+                    menu.addAction("🔍− Thu nhỏ ảnh", zoom_out)
+                    menu.addAction("📐 Vừa cửa sổ", fit_to_window)
+                    menu.addAction("1:1 Kích thước gốc", actual_size)
+                    menu.addSeparator()
+                    menu.addAction("💾 Lưu ảnh...", lambda: self._save_image_to_file(original_pixmap))
+                    menu.addAction("📋 Copy ảnh", lambda: QtWidgets.QApplication.clipboard().setPixmap(original_pixmap))
+                    menu.addSeparator()
+
+                # Window utilities
+                always_top_text = "📌 Luôn trên ✓" if always_top_btn.isChecked() else "📌 Luôn trên"
+                menu.addAction(always_top_text, lambda: always_top_btn.toggle())
+                menu.addAction("🔅 Độ mờ...", show_opacity_dialog)
+                menu.addSeparator()
+                menu.addAction("✖ Đóng", dialog.close)
+
+                menu.exec(dialog.mapToGlobal(pos))
+
+            dialog.setContextMenuPolicy(Qt.CustomContextMenu)
+            dialog.customContextMenuRequested.connect(show_context_menu)
+
+            # (Keyboard shortcuts)
+            QtGui.QShortcut(QtGui.QKeySequence("Alt+F9"), dialog).activated.connect(dialog.showMinimized)
+            QtGui.QShortcut(QtGui.QKeySequence("Alt+F10"), dialog).activated.connect(toggle_maximize)
+            QtGui.QShortcut(QtGui.QKeySequence("Ctrl+H"), dialog).activated.connect(dialog.hide)
+            QtGui.QShortcut(QtGui.QKeySequence("Ctrl+T"), dialog).activated.connect(lambda: always_top_btn.toggle())
+            QtGui.QShortcut(QtGui.QKeySequence("Escape"), dialog).activated.connect(dialog.close)
+            QtGui.QShortcut(QtGui.QKeySequence("Ctrl++"), dialog).activated.connect(zoom_in)
+            QtGui.QShortcut(QtGui.QKeySequence("Ctrl+-"), dialog).activated.connect(zoom_out)
+            QtGui.QShortcut(QtGui.QKeySequence("Ctrl+0"), dialog).activated.connect(fit_to_window)
+            QtGui.QShortcut(QtGui.QKeySequence("Ctrl+1"), dialog).activated.connect(actual_size)
+
+            # Initial setup
+            if original_pixmap and not original_pixmap.isNull():
+                QtCore.QTimer.singleShot(100, fit_to_window)
+            else:
+                main_status_label.setText("❌ Không thể tải ảnh đáp án")
+
+            # Show dialog
+            dialog.show()
+            dialog.raise_()
+            dialog.activateWindow()
+
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể hiển thị ảnh đáp án: {e}")
+    # (Helper method save ảnh ra file)
+    def _save_image_to_file(self, pixmap):
+        """Lưu ảnh ra file"""
+        try:
+            file_path, _ = QtWidgets.QFileDialog.getSaveFileName(
+                self, "Lưu ảnh đáp án",
+                f"dap_an_anh_{QtCore.QDateTime.currentDateTime().toString('yyyyMMdd_hhmmss')}.png",
+                "PNG files (*.png);;JPG files (*.jpg);;All files (*.*)"
+            )
+
+            if file_path:
+                if pixmap.save(file_path):
+                    QtWidgets.QMessageBox.information(self, "Thành công", f"Đã lưu ảnh: {file_path}")
+                else:
+                    QtWidgets.QMessageBox.warning(self, "Lỗi", "Không thể lưu ảnh")
+
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Lỗi", f"Lỗi lưu ảnh: {e}")
+    # #(Phương thức hiển thị dialog đáp án HTML chứa ảnh)
+    # #(Helper method hiển thị mã nguồn HTML)
     def show_table_context_menu(self, position):
         """Hiển thị context menu cho bảng"""
         if not self.q_table.itemAt(position):
@@ -1430,6 +2327,7 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
         delete_action.triggered.connect(self.delete_question)
 
         menu.exec(self.q_table.mapToGlobal(position))
+
     def get_tree_path(self, tree_id):
         """Lấy đường dẫn cây thư mục với xử lý an toàn"""
         if not tree_id:
@@ -1518,6 +2416,7 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
 
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể lưu: {e}")
+
     def delete_question(self):
         """Xóa câu hỏi"""
         if not self.current_question_id:
@@ -1637,6 +2536,7 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
                                     question_id=self.current_question_id, parent=self)
         if dialog.exec() == QtWidgets.QDialog.Accepted:
             self.on_tree_select()
+
     # ========== NHÓM 6: TÌM KIẾM VÀ LỌC ========== #
     def search_questions(self):
         """Tìm kiếm câu hỏi"""
@@ -2108,6 +3008,7 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
             # Set cursor để người dùng biết có thể click
             if hasattr(self.preview_image, 'image_label'):
                 self.preview_image.image_label.setCursor(Qt.PointingHandCursor)
+
     def show_preview_context_menu(self, position):
         """Context menu cho ảnh preview"""
         # #(Menu chuột phải cho preview với kiểm tra an toàn)
@@ -2127,7 +3028,8 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
             zoom_out_action = menu.addAction("🔍- Thu nhỏ")
             zoom_out_action.triggered.connect(self.preview_image._zoom_out)
 
-        menu.exec(self.preview_image.mapToGlobal(position))    # ========== XỬ LÝ ẢNH TRONG PREVIEW ========== #
+        menu.exec(self.preview_image.mapToGlobal(position))  # ========== XỬ LÝ ẢNH TRONG PREVIEW ========== #
+
     def load_image_from_data(self, content_data, content_metadata=None):
         """Load ảnh từ content_data với nhiều format"""
         if not content_data:
@@ -2199,6 +3101,7 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
         except Exception as e:
             print(f"⚠️ Lỗi display image: {e}")
             self.show_text_preview("🖼️ [Câu hỏi có hình ảnh]")
+
     def show_text_preview(self, text):
         """Hiển thị text preview đơn giản - không dùng widget phức tạp"""
         try:
@@ -2206,6 +3109,7 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
                 self.preview_content.setText(str(text))
         except Exception as e:
             print(f"⚠️ Lỗi show_text_preview: {e}")
+
     # ========== VALIDATION HELPER ========== #
     def validate_question_data(self, question_data):
         """Validate dữ liệu câu hỏi trước khi xử lý"""
@@ -2236,6 +3140,8 @@ class QuestionBankWindowQt(QtWidgets.QWidget):
         except Exception as e:
             print(f"⚠️ Lỗi database query: {e}")
             return None if fetch == "one" else []
+
+
 class ImageViewer(QtWidgets.QWidget):
     """Widget hiển thị và xử lý ảnh"""
 
@@ -2354,6 +3260,8 @@ class ImageViewer(QtWidgets.QWidget):
         """Xóa ảnh"""
         self.current_pixmap = None
         self.image_label.clear()
+
+
 class PDFViewer(QtWidgets.QWidget):
     """Widget hiển thị PDF (placeholder - cần thêm thư viện PDF)"""
 
@@ -2394,6 +3302,8 @@ class PDFViewer(QtWidgets.QWidget):
         if self.current_page < self.total_pages:
             self.current_page += 1
             self.page_spin.setValue(self.current_page)
+
+
 class LaTeXInputDialog(QtWidgets.QDialog):
     """Dialog nhập công thức LaTeX"""
 
@@ -2428,6 +3338,8 @@ class LaTeXInputDialog(QtWidgets.QDialog):
 
     def get_latex(self):
         return self.latex_edit.toPlainText()
+
+
 class QuestionEditDialog(QtWidgets.QDialog):
     def __init__(self, db_manager, tree_id=None, question_id=None, parent=None):
         super().__init__(parent)
@@ -2444,6 +3356,7 @@ class QuestionEditDialog(QtWidgets.QDialog):
         if question_id:
             self.load_question_data()
         self.setWindowState(Qt.WindowMaximized)
+
     def setup_ui(self):
         self.setWindowTitle("➕ Thêm câu hỏi mới" if not self.question_id else "✏️ Chỉnh sửa câu hỏi")
         self.setWindowFlags(
@@ -2594,6 +3507,7 @@ class QuestionEditDialog(QtWidgets.QDialog):
 
         # Enable paste từ clipboard
         self.setup_clipboard()
+
     # #(Phương thức load dữ liệu câu hỏi để chỉnh sửa)
     def load_question_data(self):
         """Load dữ liệu câu hỏi để chỉnh sửa"""
@@ -2647,20 +3561,19 @@ class QuestionEditDialog(QtWidgets.QDialog):
 
             # Load đáp án
             answer_type = q_dict.get('answer_type', 'text')
-            answer_text = q_dict.get('answer_text', '')
+            answer_text = q_dict.get('answer_text', '') or q_dict.get('correct_answer', '')  # Fallback cho data cũ
             answer_data = q_dict.get('answer_data')
 
             if answer_type == 'text':
-                # Hiển thị text answer
                 self.answer_widget.setCurrentIndex(0)  # Text editor
-                self.answer_text_editor.setHtml(answer_text)
+                self.answer_text_editor.setHtml(answer_text) if self._has_images_in_html(
+                    answer_text) else self.answer_text_editor.setPlainText(answer_text)
                 self.answer_type = 'text'
 
             elif answer_type == 'image':
-                # Hiển thị image answer
                 self.answer_widget.setCurrentIndex(1)  # Image viewer
                 if answer_data:
-                    self.answer_image_viewer.load_image_from_data(answer_data)
+                    self._load_image_to_viewer(self.answer_image_viewer, answer_data)
                 self.answer_type = 'image'
                 self.answer_data = answer_data
 
@@ -2679,6 +3592,7 @@ class QuestionEditDialog(QtWidgets.QDialog):
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể load dữ liệu câu hỏi: {e}")
             print(f"❌ Lỗi load_question_data: {e}")
+
     # #(Phương thức hỗ trợ load image từ data)
     def _load_image_to_viewer(self, viewer, image_data):
         """Load image data vào viewer"""
@@ -2715,10 +3629,35 @@ class QuestionEditDialog(QtWidgets.QDialog):
         except Exception as e:
             print(f"⚠️ Lỗi load image: {e}")
             return False
+
+    def _has_images_in_html(self, html_content):
+        """Kiểm tra HTML có chứa ảnh không"""
+        # #(Helper method kiểm tra ảnh trong HTML content)
+        if not html_content:
+            return False
+
+        # Kiểm tra các tag ảnh HTML
+        html_lower = html_content.lower()
+
+        # Kiểm tra tag <img>
+        if '<img' in html_lower:
+            return True
+
+        # Kiểm tra data URI cho ảnh
+        if 'data:image/' in html_lower:
+            return True
+
+        # Kiểm tra các định dạng ảnh base64
+        if 'base64' in html_lower and ('png' in html_lower or 'jpg' in html_lower or 'jpeg' in html_lower):
+            return True
+
+        return False
+
     def setup_clipboard(self):
         """Xử lý paste ảnh từ clipboard"""
         shortcut = QShortcut(QKeySequence.Paste, self)  # ✅ cross-platform (Ctrl+V / Cmd+V)
         shortcut.activated.connect(self.paste_from_clipboard)
+
     def paste_from_clipboard(self):
         """Dán nội dung (ưu tiên ảnh) từ clipboard vào nội dung câu hỏi"""
         try:
@@ -2779,31 +3718,66 @@ class QuestionEditDialog(QtWidgets.QDialog):
             QtWidgets.QMessageBox.information(self, "Thông báo", "Clipboard không có nội dung phù hợp để dán.")
         except Exception as e:
             QtWidgets.QMessageBox.warning(self, "Lỗi", f"Không thể dán: {e}")
+
+    # (Phương thức paste đáp án giống y hệt paste nội dung câu hỏi)
     def paste_answer_from_clipboard(self):
-        """Dán nội dung (ưu tiên ảnh) từ clipboard vào đáp án"""
-        # #(Phương thức paste ảnh cho đáp án)
+        """Dán nội dung (ưu tiên ảnh) từ clipboard vào đáp án - Logic giống paste nội dung câu hỏi"""
         try:
             cb = QtWidgets.QApplication.clipboard()
+            md = cb.mimeData()
 
-            # Kiểm tra có ảnh không
-            if cb.mimeData().hasImage():
-                image = cb.image()
-                if not image.isNull():
-                    # Chuyển sang chế độ text nếu chưa
-                    if self.answer_type != "text":
-                        self.answer_type = "text"
-                        self.answer_widget.setCurrentWidget(self.answer_text_editor)
+            def qimage_from_clipboard():
+                # 1) Ảnh thuần
+                if md.hasImage():
+                    img = cb.image()
+                    if not img.isNull():
+                        return img
+                # 2) Fallback pixmap (Windows hay dùng)
+                pm = cb.pixmap()
+                if not pm.isNull():
+                    return pm.toImage()
+                # 3) Ảnh nhúng base64 trong HTML
+                if md.hasHtml():
+                    import re, base64
+                    html = md.html()
+                    m = re.search(r'data:image/(png|jpeg|jpg);base64,([A-Za-z0-9+/=]+)', html, re.I)
+                    if m:
+                        fmt = m.group(1).upper()
+                        ba = QtCore.QByteArray.fromBase64(m.group(2).encode('ascii'))
+                        img = QtGui.QImage()
+                        if img.loadFromData(ba, fmt):
+                            return img
+                return None
 
-                    # Chèn ảnh vào text editor
-                    cursor = self.answer_text_editor.textCursor()
-                    cursor.insertImage(image)
-                    return
+            image = qimage_from_clipboard()
 
-            # Nếu không có ảnh, paste text bình thường
-            if cb.mimeData().hasText():
+            if image:
+                # Chuyển sang chế độ ảnh và hiển thị
+                self.answer_type = "image"
+                self.answer_widget.setCurrentWidget(self.answer_image_viewer)
+                self.answer_image_viewer.set_image(image)
+
+                # Lưu tạm bytes PNG để save xuống DB khi bấm Lưu
+                ba = QtCore.QByteArray()
+                buff = QtCore.QBuffer(ba)
+                buff.open(QtCore.QIODevice.WriteOnly)
+                image.save(buff, "PNG")
+                self.answer_data = bytes(ba)
+
+                QtWidgets.QMessageBox.information(self, "Thành công", "Đã dán ảnh đáp án từ clipboard!")
+                return
+
+            # Nếu không có ảnh, dán text bình thường vào editor
+            if md.hasText():
+                text = md.text()
+                if self.answer_widget.currentWidget() != self.answer_text_editor:
+                    # Nếu đang ở màn ảnh, chuyển về text
+                    self.add_answer("text")
                 cursor = self.answer_text_editor.textCursor()
-                cursor.insertText(cb.text())
+                cursor.insertText(text)
+                return
 
+            QtWidgets.QMessageBox.information(self, "Thông báo", "Clipboard không có nội dung phù hợp để dán.")
         except Exception as e:
             QtWidgets.QMessageBox.warning(self, "Lỗi", f"Không thể dán: {e}")
     def eventFilter(self, obj, event):
@@ -2823,55 +3797,54 @@ class QuestionEditDialog(QtWidgets.QDialog):
                 return True
 
         return super().eventFilter(obj, event)
-    def add_content(self, content_type):
-        """Thêm nội dung theo loại"""
-        if content_type == "text":
-            self.content_type = "text"
-            self.content_widget.setCurrentWidget(self.text_editor)
 
-        elif content_type == "image":
+    def _select_media_file(self, file_type, is_answer=False):
+        """Phương thức chung chọn file media"""
+        if file_type == "image":
             file_path, _ = QtWidgets.QFileDialog.getOpenFileName(
                 self, "Chọn ảnh", "", "Images (*.png *.jpg *.jpeg *.gif *.bmp)")
             if file_path:
-                self.content_type = "image"
                 pixmap = QPixmap(file_path)
-                self.image_viewer.set_pixmap(pixmap)
-                self.content_widget.setCurrentWidget(self.image_viewer)
+                if is_answer:
+                    self.answer_type = "image"
+                    self.answer_image_viewer.set_pixmap(pixmap)
+                    self.answer_widget.setCurrentWidget(self.answer_image_viewer)
+                else:
+                    self.content_type = "image"
+                    self.image_viewer.set_pixmap(pixmap)
+                    self.content_widget.setCurrentWidget(self.image_viewer)
 
-        elif content_type == "pdf":
+        elif file_type == "pdf":
             file_path, _ = QtWidgets.QFileDialog.getOpenFileName(
                 self, "Chọn PDF", "", "PDF Files (*.pdf)")
             if file_path:
-                self.content_type = "pdf"
-                self.pdf_viewer.load_pdf(file_path)
-                self.content_widget.setCurrentWidget(self.pdf_viewer)
+                if is_answer:
+                    self.answer_type = "pdf"
+                    self.answer_pdf_viewer.load_pdf(file_path)
+                    self.answer_widget.setCurrentWidget(self.answer_pdf_viewer)
+                else:
+                    self.content_type = "pdf"
+                    self.pdf_viewer.load_pdf(file_path)
+                    self.content_widget.setCurrentWidget(self.pdf_viewer)
 
+    def add_content(self, content_type):
+        """Thêm nội dung theo loại - ĐÃ TỐI ƯU"""
+        if content_type == "text":
+            self.content_type = "text"
+            self.content_widget.setCurrentWidget(self.text_editor)
+        elif content_type in ["image", "pdf"]:
+            self._select_media_file(content_type, is_answer=False)
         elif content_type == "word":
             QtWidgets.QMessageBox.information(self, "Thông báo",
                                               "Chức năng import Word đang phát triển")
+
     def add_answer(self, answer_type):
-        """Thêm đáp án theo loại - GIỐNG PHẦN NỘI DUNG"""
+        """Thêm đáp án theo loại - ĐÃ TỐI ƯU"""
         if answer_type == "text":
             self.answer_type = "text"
             self.answer_widget.setCurrentWidget(self.answer_text_editor)
-
-        elif answer_type == "image":
-            file_path, _ = QtWidgets.QFileDialog.getOpenFileName(
-                self, "Chọn ảnh đáp án", "", "Images (*.png *.jpg *.jpeg *.gif *.bmp)")
-            if file_path:
-                self.answer_type = "image"
-                pixmap = QPixmap(file_path)
-                self.answer_image_viewer.set_pixmap(pixmap)
-                self.answer_widget.setCurrentWidget(self.answer_image_viewer)
-
-        elif answer_type == "pdf":
-            file_path, _ = QtWidgets.QFileDialog.getOpenFileName(
-                self, "Chọn PDF đáp án", "", "PDF Files (*.pdf)")
-            if file_path:
-                self.answer_type = "pdf"
-                self.answer_pdf_viewer.load_pdf(file_path)
-                self.answer_widget.setCurrentWidget(self.answer_pdf_viewer)
-
+        elif answer_type in ["image", "pdf"]:
+            self._select_media_file(answer_type, is_answer=True)
         elif answer_type == "word":
             QtWidgets.QMessageBox.information(self, "Thông báo",
                                               "Chức năng import Word đang phát triển")
@@ -2883,6 +3856,7 @@ class QuestionEditDialog(QtWidgets.QDialog):
             if self.content_type == "text":
                 cursor = self.text_editor.textCursor()
                 cursor.insertText(f"$${latex_code}$$")
+
     def insert_answer_latex(self):
         """Chèn công thức LaTeX vào đáp án"""
         # #(Phương thức chèn LaTeX cho đáp án)
@@ -2892,6 +3866,7 @@ class QuestionEditDialog(QtWidgets.QDialog):
             if self.answer_type == "text":
                 cursor = self.answer_text_editor.textCursor()
                 cursor.insertText(f"$${latex_code}$$")
+
     def save_question(self):
         """Lưu câu hỏi vào database - ĐÃ SỬA LỖI"""
 
@@ -2932,43 +3907,35 @@ class QuestionEditDialog(QtWidgets.QDialog):
                     QtWidgets.QMessageBox.warning(self, "Thiếu nội dung", "Vui lòng chọn file PDF.")
                     return
 
-            #Khởi tạo answer_data
-            answer_text = ""
+            # Khởi tạo answer_data
+            answer_text = None
             answer_data = None
-            answer_has_data = False
 
             if self.answer_type == "text":
-                answer_plain = self.answer_text_editor.toPlainText().strip()
-                answer_html = self.answer_text_editor.toHtml().strip()
-
-                if answer_plain or self._has_images_in_html(answer_html):
-                    answer_has_data = True
-                    # Lưu HTML nếu có ảnh, ngược lại lưu plain text
+                answer_text = self.answer_text_editor.toPlainText().strip()
+                if not answer_text:
+                    # Thử lấy HTML nếu có rich content
+                    answer_html = self.answer_text_editor.toHtml().strip()
                     if self._has_images_in_html(answer_html):
                         answer_text = answer_html
-                    else:
-                        answer_text = answer_plain
 
             elif self.answer_type == "image":
-                #  Xử lý đầy đủ binary data cho ảnh đáp án
-                if hasattr(self.answer_image_viewer, 'current_pixmap') and self.answer_image_viewer.current_pixmap:
-                    # Chuyển ảnh thành binary data
+                # Ưu tiên self.answer_data nếu đã set khi paste
+                if self.answer_data is None and hasattr(self.answer_image_viewer,
+                                                        'current_pixmap') and self.answer_image_viewer.current_pixmap:
                     ba = QtCore.QByteArray()
                     buff = QtCore.QBuffer(ba)
                     buff.open(QtCore.QIODevice.WriteOnly)
                     self.answer_image_viewer.current_pixmap.toImage().save(buff, "PNG")
-                    answer_data = bytes(ba)
-
-                    answer_has_data = True
-                    answer_text = "[Answer Image]"  # Text mô tả
+                    self.answer_data = bytes(ba)
+                answer_data = self.answer_data
 
             elif self.answer_type == "pdf":
-                # ✅ THÊM: Xử lý PDF đáp án
                 if hasattr(self.answer_pdf_viewer, 'pdf_path') and self.answer_pdf_viewer.pdf_path:
-                    answer_has_data = True
                     answer_text = f"[Answer PDF: {self.answer_pdf_viewer.pdf_path}]"
 
-            if not answer_has_data:
+            # Validation đơn giản hơn
+            if not answer_text and not answer_data:
                 QtWidgets.QMessageBox.warning(self, "Lỗi", "Vui lòng nhập đáp án")
                 return
 
@@ -2977,12 +3944,12 @@ class QuestionEditDialog(QtWidgets.QDialog):
                 # Update existing question
                 result = self.db.execute_query(
                     """UPDATE question_bank
-                       SET content_text=?, content_type=?, content_data=?,
-                           answer_type=?, answer_data=?, correct=?,
-                           tree_id=?, modified_date=CURRENT_TIMESTAMP
-                       WHERE id=?""",
+                               SET content_text=?, content_type=?, content_data=?,
+                                   answer_text=?, answer_type=?, answer_data=?,
+                                   tree_id=?, modified_date=CURRENT_TIMESTAMP
+                               WHERE id=?""",
                     (content_text, self.content_type, content_data,
-                     self.answer_type, answer_data, answer_text,
+                     answer_text, self.answer_type, answer_data,
                      self.tree_id, self.question_id)
                 )
 
@@ -2993,11 +3960,11 @@ class QuestionEditDialog(QtWidgets.QDialog):
                 # Insert new question
                 new_id = self.db.execute_query(
                     """INSERT INTO question_bank
-                       (content_text, content_type, content_data,
-                        answer_type, answer_data, correct, tree_id, created_date)
-                       VALUES (?,?,?,?,?,?,?, CURRENT_TIMESTAMP)""",
-                    (content_text, self.content_type, content_data,
-                     self.answer_type, answer_data, answer_text, self.tree_id)
+                        (content_text, content_type, content_data,
+                        answer_text, answer_type, answer_data, tree_id, created_date)
+                        VALUES (?,?,?,?,?,?,?, CURRENT_TIMESTAMP)""",
+                      (content_text, self.content_type, content_data,
+                      answer_text, self.answer_type, answer_data, self.tree_id)
                 )
 
                 if not new_id:
@@ -3012,28 +3979,8 @@ class QuestionEditDialog(QtWidgets.QDialog):
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể lưu: {e}")
             print(f"Chi tiết lỗi save_question: {e}")  # Debug log
-    def _has_images_in_html(self, html_content):
-        """Kiểm tra HTML có chứa ảnh không"""
-        # #(Helper method kiểm tra ảnh trong HTML content)
-        if not html_content:
-            return False
 
-        # Kiểm tra các tag ảnh HTML
-        html_lower = html_content.lower()
 
-        # Kiểm tra tag <img>
-        if '<img' in html_lower:
-            return True
-
-        # Kiểm tra data URI cho ảnh
-        if 'data:image/' in html_lower:
-            return True
-
-        # Kiểm tra các định dạng ảnh base64
-        if 'base64' in html_lower and ('png' in html_lower or 'jpg' in html_lower or 'jpeg' in html_lower):
-            return True
-
-        return False
 # ========== DIALOG XEM CHI TIẾT CÂU HỎI ========== #
 class QuestionDetailDialog(QtWidgets.QDialog):
     """Dialog hiển thị chi tiết đầy đủ của câu hỏi"""
@@ -3138,6 +4085,8 @@ class QuestionDetailDialog(QtWidgets.QDialog):
 
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể load dữ liệu: {e}")
+
+
 # ========== CLASS MỚI - THÊM VÀO ========== #
 class AdaptiveImageViewer(QtWidgets.QWidget):
     """Widget hiển thị ảnh tự động điều chỉnh kích thước theo ảnh"""
@@ -3157,6 +4106,7 @@ class AdaptiveImageViewer(QtWidgets.QWidget):
         super().resizeEvent(event)
         if hasattr(self, 'current_pixmap') and self.current_pixmap:
             QtCore.QTimer.singleShot(50, self.fit_to_container)  # Delay nhỏ để đảm bảo UI đã update
+
     def _setup_ui(self):
         """Thiết lập giao diện"""
         layout = QtWidgets.QVBoxLayout(self)
@@ -3278,6 +4228,7 @@ class AdaptiveImageViewer(QtWidgets.QWidget):
         # #(Cập nhật layout parent để hiển thị thay đổi)
         if self.parent():
             self.parent().updateGeometry()
+
     def clear_image(self):
         """Xóa ảnh và reset kích thước"""
         self.current_pixmap = None
@@ -3356,7 +4307,9 @@ class AdaptiveImageViewer(QtWidgets.QWidget):
             # Refresh hiển thị
             self._display_adaptive_image()
         except Exception as e:
-            print(f"⚠️ Lỗi fit_to_container: {e}")# ========== DIALOG XEM CHI TIẾT CÂU HỎI ========== #
+            print(f"⚠️ Lỗi fit_to_container: {e}")  # ========== DIALOG XEM CHI TIẾT CÂU HỎI ========== #
+
+
 # ========== DIALOG CHỌN THƯ MỤC ========== #
 class FolderSelectDialog(QtWidgets.QDialog):
     """Dialog chọn thư mục đích để di chuyển câu hỏi"""
@@ -3591,6 +4544,8 @@ class FolderSelectDialog(QtWidgets.QDialog):
     def _is_emoji(self, char):
         """Kiểm tra ký tự có phải emoji không"""
         return ord(char) > 0x1F000
+
+
 # ========== DIALOG QUẢN LÝ TAGS CÂU HỎI ========== #
 class TagsManagerDialog(QtWidgets.QDialog):
     """Dialog quản lý tags cho câu hỏi"""
@@ -3916,6 +4871,8 @@ class TagsManagerDialog(QtWidgets.QDialog):
 
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể xóa tag: {e}")
+
+
 class TreeNodeDialog(QtWidgets.QDialog):
     def __init__(self, db_manager, mode="add", node_id=None, parent=None):
         super().__init__(parent)
@@ -4238,6 +5195,8 @@ class TreeNodeDialog(QtWidgets.QDialog):
             return False
 
         return True
+
+
 # ========== CLASS QUẢN LÝ CÂY NÂNG CAO ========== #
 class TreeManagerDialog(QtWidgets.QDialog):
     def __init__(self, db_manager, parent=None):
@@ -4314,10 +5273,6 @@ class TreeManagerDialog(QtWidgets.QDialog):
         # Implementation
         pass
 
-    def _export_structure(self):
-        """Xuất cấu trúc cây"""
-        # Implementation
-        pass
 # ========== DIALOG XEM ẢNH FULLSCREEN ========== #
 # ========== DIALOG XEM ẢNH FULLSCREEN - HOÀN THIỆN ========== #
 class ImageViewerDialog(QtWidgets.QDialog):
@@ -4359,40 +5314,528 @@ class ImageViewerDialog(QtWidgets.QDialog):
         """)
         self.showMaximized()
         QtCore.QTimer.singleShot(100, self._fit_to_window)
-
+    # Giao diện xem ảnh câu hỏi khi nhấn đúp
     def _setup_ui(self):
-        """#(Thiết lập giao diện với scroll area và toolbar)"""
+        """Thiết lập giao diện với toolbar đầy đủ, controls và styling chuyên nghiệp"""
         layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
-        self.setWindowFlags(
-            Qt.Window | Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint)
-        # Toolbar controls
-        self._setup_toolbar(layout)
 
-        # Scroll area cho ảnh
+        # Window flags đầy đủ
+        self.setWindowFlags(
+            Qt.Window |
+            Qt.WindowMinimizeButtonHint |
+            Qt.WindowMaximizeButtonHint |
+            Qt.WindowCloseButtonHint |
+            Qt.WindowSystemMenuHint |
+            Qt.WindowTitleHint |
+            Qt.CustomizeWindowHint
+        )
+
+        # Thiết lập toolbar chính với styling đẹp
+        self._setup_main_toolbar(layout)
+
+        # (Container chính với background tối chuyên nghiệp)
+        main_container = QtWidgets.QWidget()
+        main_container.setStyleSheet("""
+            QWidget {
+                background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                          stop: 0 #1a1a1a, stop: 1 #000000);
+            }
+        """)
+        main_layout = QtWidgets.QVBoxLayout(main_container)
+        main_layout.setContentsMargins(8, 8, 8, 8)
+
+        # Scroll area cho ảnh với styling cao cấp
         self.scroll_area = QtWidgets.QScrollArea()
         self.scroll_area.setAlignment(Qt.AlignCenter)
-        self.scroll_area.setStyleSheet("QScrollArea { border: none; background: #000000; }")
+        self.scroll_area.setStyleSheet("""
+            QScrollArea { 
+                border: 2px solid #333;
+                border-radius: 8px;
+                background: #000000;
+            }
+            QScrollArea QScrollBar:vertical {
+                background: #2b2b2b;
+                width: 12px;
+                border-radius: 6px;
+            }
+            QScrollArea QScrollBar::handle:vertical {
+                background: #555;
+                border-radius: 6px;
+                min-height: 30px;
+            }
+            QScrollArea QScrollBar::handle:vertical:hover {
+                background: #777;
+            }
+            QScrollArea QScrollBar:horizontal {
+                background: #2b2b2b;
+                height: 12px;
+                border-radius: 6px;
+            }
+            QScrollArea QScrollBar::handle:horizontal {
+                background: #555;
+                border-radius: 6px;
+                min-width: 30px;
+            }
+            QScrollArea QScrollBar::handle:horizontal:hover {
+                background: #777;
+            }
+        """)
 
-        # Label hiển thị ảnh
+        # (Image label với effects và interactions)
         self.image_label = QtWidgets.QLabel()
         self.image_label.setAlignment(Qt.AlignCenter)
-        self.image_label.setStyleSheet("QLabel { background: transparent; }")
+        self.image_label.setStyleSheet("""
+            QLabel { 
+                background: transparent;
+                border: 1px solid #444;
+                border-radius: 4px;
+                padding: 5px;
+            }
+        """)
         self.image_label.setPixmap(self.original_pixmap)
+        self.image_label.setMinimumSize(200, 150)
 
-        # Enable mouse tracking để pan
+        # Enable mouse interactions cho pan và zoom
         self.image_label.setMouseTracking(True)
         self.image_label.mousePressEvent = self._mouse_press_event
         self.image_label.mouseMoveEvent = self._mouse_move_event
         self.image_label.mouseReleaseEvent = self._mouse_release_event
+        self.image_label.mouseDoubleClickEvent = self._mouse_double_click_event
+
+        # Thiết lập cursor hints
+        self.image_label.setCursor(Qt.OpenHandCursor)
 
         self.scroll_area.setWidget(self.image_label)
-        layout.addWidget(self.scroll_area)
+        main_layout.addWidget(self.scroll_area)
+        layout.addWidget(main_container)
 
-        # Status bar
-        self._setup_status_bar(layout)
+        # Status bar với thông tin chi tiết
+        self._setup_enhanced_status_bar(layout)
 
+        # Context menu cho toàn dialog
+        self._setup_context_menu()
+
+    def _setup_main_toolbar(self, layout):
+        """#(Thiết lập toolbar chính với tất cả controls)"""
+        toolbar = QtWidgets.QWidget()
+        toolbar.setFixedHeight(55)
+        toolbar.setStyleSheet("""
+            QWidget {
+                background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                          stop: 0 #f8f9fa, stop: 1 #e9ecef);
+                border-bottom: 2px solid #adb5bd;
+            }
+            QPushButton {
+                background: white;
+                border: 1px solid #ced4da;
+                border-radius: 6px;
+                color: #495057;
+                font-weight: 500;
+                padding: 8px 12px;
+                margin: 2px;
+                min-width: 80px;
+            }
+            QPushButton:hover {
+                background: #e3f2fd;
+                border-color: #2196f3;
+                color: #1976d2;
+            }
+            QPushButton:pressed {
+                background: #bbdefb;
+            }
+            QPushButton:checked {
+                background: #4caf50;
+                color: white;
+                border-color: #388e3c;
+            }
+            QSlider::groove:horizontal {
+                border: 1px solid #bbb;
+                height: 8px;
+                background: white;
+                border-radius: 4px;
+            }
+            QSlider::handle:horizontal {
+                background: #2196f3;
+                border: 1px solid #1976d2;
+                width: 18px;
+                border-radius: 9px;
+                margin: -5px 0;
+            }
+            QSlider::handle:horizontal:hover {
+                background: #1976d2;
+            }
+            QLabel {
+                color: #495057;
+                font-weight: 500;
+                padding: 0 8px;
+            }
+        """)
+
+        toolbar_layout = QtWidgets.QHBoxLayout(toolbar)
+        toolbar_layout.setContentsMargins(15, 8, 15, 8)
+        toolbar_layout.setSpacing(8)
+
+        # (Nhóm điều khiển cửa sổ)
+        window_group = QtWidgets.QWidget()
+        window_layout = QtWidgets.QHBoxLayout(window_group)
+        window_layout.setContentsMargins(0, 0, 0, 0)
+        window_layout.setSpacing(4)
+
+        self.minimize_btn = QtWidgets.QPushButton("🗕 Thu nhỏ")
+        self.minimize_btn.setToolTip("Thu nhỏ cửa sổ (Alt+F9)")
+        self.minimize_btn.clicked.connect(self.showMinimized)
+
+        self.maximize_btn = QtWidgets.QPushButton("🗖 Phóng to")
+        self.maximize_btn.setToolTip("Phóng to/Khôi phục (Alt+F10)")
+
+        self.hide_btn = QtWidgets.QPushButton("👁️ Ẩn")
+        self.hide_btn.setToolTip("Ẩn cửa sổ (Ctrl+H)")
+        self.hide_btn.clicked.connect(self.hide)
+
+        window_layout.addWidget(self.minimize_btn)
+        window_layout.addWidget(self.maximize_btn)
+        window_layout.addWidget(self.hide_btn)
+        toolbar_layout.addWidget(window_group)
+
+        # Separator
+        separator1 = QtWidgets.QFrame()
+        separator1.setFrameShape(QtWidgets.QFrame.VLine)
+        separator1.setStyleSheet("color: #adb5bd;")
+        toolbar_layout.addWidget(separator1)
+
+        # (Nhóm zoom controls)
+        zoom_group = QtWidgets.QWidget()
+        zoom_layout = QtWidgets.QHBoxLayout(zoom_group)
+        zoom_layout.setContentsMargins(0, 0, 0, 0)
+        zoom_layout.setSpacing(4)
+
+        self.zoom_out_btn = QtWidgets.QPushButton("🔍−")
+        self.zoom_out_btn.setToolTip("Thu nhỏ (Ctrl + -)")
+        self.zoom_out_btn.clicked.connect(self._zoom_out)
+        self.zoom_out_btn.setFixedWidth(40)
+
+        # Zoom slider với styling đẹp
+        self.zoom_slider = QtWidgets.QSlider(Qt.Horizontal)
+        self.zoom_slider.setRange(int(self.min_zoom * 100), int(self.max_zoom * 100))
+        self.zoom_slider.setValue(int(self.current_zoom * 100))
+        self.zoom_slider.setFixedWidth(120)
+        self.zoom_slider.setToolTip("Kéo để điều chỉnh zoom")
+        self.zoom_slider.valueChanged.connect(self._zoom_slider_changed)
+
+        self.zoom_in_btn = QtWidgets.QPushButton("🔍+")
+        self.zoom_in_btn.setToolTip("Phóng to (Ctrl + +)")
+        self.zoom_in_btn.clicked.connect(self._zoom_in)
+        self.zoom_in_btn.setFixedWidth(40)
+
+        # Zoom percentage display
+        self.zoom_label = QtWidgets.QLabel("100%")
+        self.zoom_label.setFixedWidth(50)
+        self.zoom_label.setAlignment(Qt.AlignCenter)
+
+        zoom_layout.addWidget(self.zoom_out_btn)
+        zoom_layout.addWidget(self.zoom_slider)
+        zoom_layout.addWidget(self.zoom_in_btn)
+        zoom_layout.addWidget(self.zoom_label)
+        toolbar_layout.addWidget(zoom_group)
+
+        # Separator
+        separator2 = QtWidgets.QFrame()
+        separator2.setFrameShape(QtWidgets.QFrame.VLine)
+        separator2.setStyleSheet("color: #adb5bd;")
+        toolbar_layout.addWidget(separator2)
+
+        # (Nhóm fit controls)
+        fit_group = QtWidgets.QWidget()
+        fit_layout = QtWidgets.QHBoxLayout(fit_group)
+        fit_layout.setContentsMargins(0, 0, 0, 0)
+        fit_layout.setSpacing(4)
+
+        self.fit_window_btn = QtWidgets.QPushButton("📐 Vừa cửa sổ")
+        self.fit_window_btn.setToolTip("Vừa khít cửa sổ (Ctrl + 0)")
+        self.fit_window_btn.clicked.connect(self._fit_to_window)
+
+        self.actual_size_btn = QtWidgets.QPushButton("1:1 Gốc")
+        self.actual_size_btn.setToolTip("Hiển thị kích thước gốc (Ctrl + 1)")
+        self.actual_size_btn.clicked.connect(self._actual_size)
+
+        fit_layout.addWidget(self.fit_window_btn)
+        fit_layout.addWidget(self.actual_size_btn)
+        toolbar_layout.addWidget(fit_group)
+
+        # Separator
+        separator3 = QtWidgets.QFrame()
+        separator3.setFrameShape(QtWidgets.QFrame.VLine)
+        separator3.setStyleSheet("color: #adb5bd;")
+        toolbar_layout.addWidget(separator3)
+
+        # (Nhóm tiện ích)
+        utility_group = QtWidgets.QWidget()
+        utility_layout = QtWidgets.QHBoxLayout(utility_group)
+        utility_layout.setContentsMargins(0, 0, 0, 0)
+        utility_layout.setSpacing(4)
+
+        self.always_top_btn = QtWidgets.QPushButton("📌 Luôn trên")
+        self.always_top_btn.setCheckable(True)
+        self.always_top_btn.setToolTip("Giữ cửa sổ luôn ở trên (Ctrl+T)")
+
+        self.opacity_btn = QtWidgets.QPushButton("🔅 Độ mờ")
+        self.opacity_btn.setToolTip("Điều chỉnh độ trong suốt")
+
+        utility_layout.addWidget(self.always_top_btn)
+        utility_layout.addWidget(self.opacity_btn)
+        toolbar_layout.addWidget(utility_group)
+
+        # Spacer để đẩy close button sang phải
+        toolbar_layout.addStretch()
+
+        # (Nút đóng nổi bật)
+        self.close_btn = QtWidgets.QPushButton("✖ Đóng")
+        self.close_btn.setToolTip("Đóng cửa sổ (ESC)")
+        self.close_btn.clicked.connect(self.close)
+        self.close_btn.setStyleSheet("""
+            QPushButton {
+                background: #dc3545;
+                color: white;
+                border: 1px solid #c82333;
+                font-weight: bold;
+                min-width: 60px;
+            }
+            QPushButton:hover {
+                background: #c82333;
+                border-color: #bd2130;
+            }
+            QPushButton:pressed {
+                background: #bd2130;
+            }
+        """)
+        toolbar_layout.addWidget(self.close_btn)
+
+        layout.addWidget(toolbar)
+
+        # Connect maximize toggle
+        def toggle_maximize():
+            if self.isMaximized():
+                self.showNormal()
+                self.maximize_btn.setText("🗖 Phóng to")
+                self.maximize_btn.setToolTip("Phóng to cửa sổ")
+            else:
+                self.showMaximized()
+                self.maximize_btn.setText("🗗 Khôi phục")
+                self.maximize_btn.setToolTip("Khôi phục kích thước ban đầu")
+
+        self.maximize_btn.clicked.connect(toggle_maximize)
+
+        # Connect utility buttons
+        self.always_top_btn.toggled.connect(self._toggle_always_on_top)
+        self.opacity_btn.clicked.connect(self._show_opacity_dialog)
+
+    def _setup_enhanced_status_bar(self, layout):
+        """#(Thiết lập status bar nâng cao với nhiều thông tin)"""
+        self.status_bar = QtWidgets.QWidget()
+        self.status_bar.setFixedHeight(35)
+        self.status_bar.setStyleSheet("""
+            QWidget {
+                background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                          stop: 0 #2b2b2b, stop: 1 #1a1a1a);
+                border-top: 1px solid #444;
+            }
+            QLabel {
+                color: #ffffff;
+                padding: 0 12px;
+                font-size: 11px;
+            }
+            QLabel#main_info {
+                font-weight: bold;
+                color: #4fc3f7;
+            }
+            QLabel#tips {
+                color: #81c784;
+                font-style: italic;
+            }
+        """)
+
+        status_layout = QtWidgets.QHBoxLayout(self.status_bar)
+        status_layout.setContentsMargins(8, 0, 8, 0)
+
+        # Main image info
+        self.main_status_label = QtWidgets.QLabel()
+        self.main_status_label.setObjectName("main_info")
+        status_layout.addWidget(self.main_status_label)
+
+        # Spacer
+        status_layout.addStretch()
+
+        # Tips label
+        self.tips_label = QtWidgets.QLabel("💡 Kéo chuột để di chuyển • Ctrl+Scroll để zoom • Double-click để fit")
+        self.tips_label.setObjectName("tips")
+        status_layout.addWidget(self.tips_label)
+
+        layout.addWidget(self.status_bar)
+
+    def _setup_context_menu(self):
+        """#(Thiết lập context menu toàn diện)"""
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self._show_enhanced_context_menu)
+
+    def _show_enhanced_context_menu(self, position):
+        """Hiển thị context menu nâng cao"""
+        menu = QtWidgets.QMenu(self)
+        menu.setStyleSheet("""
+            QMenu {
+                background: #2b2b2b;
+                color: white;
+                border: 1px solid #555;
+                border-radius: 4px;
+                padding: 4px;
+            }
+            QMenu::item {
+                padding: 8px 20px;
+                border-radius: 3px;
+            }
+            QMenu::item:selected {
+                background: #4fc3f7;
+            }
+            QMenu::separator {
+                height: 1px;
+                background: #555;
+                margin: 4px 0;
+            }
+        """)
+
+        # Window controls
+        menu.addAction("🗕 Thu nhỏ", self.showMinimized)
+
+        if self.isMaximized():
+            menu.addAction("🗗 Khôi phục", self.showNormal)
+        else:
+            menu.addAction("🗖 Phóng to", self.showMaximized)
+
+        menu.addAction("👁️ Ẩn", self.hide)
+        menu.addSeparator()
+
+        # Zoom controls
+        menu.addAction("🔍+ Phóng to ảnh", self._zoom_in)
+        menu.addAction("🔍− Thu nhỏ ảnh", self._zoom_out)
+        menu.addAction("📐 Vừa cửa sổ", self._fit_to_window)
+        menu.addAction("1:1 Kích thước gốc", self._actual_size)
+        menu.addSeparator()
+
+        # Image utilities
+        if self.original_pixmap and not self.original_pixmap.isNull():
+            menu.addAction("💾 Lưu ảnh...", lambda: self._save_image())
+            menu.addAction("📋 Copy ảnh", lambda: QtWidgets.QApplication.clipboard().setPixmap(self.original_pixmap))
+            menu.addSeparator()
+
+        # Window utilities
+        always_top_text = "📌 Luôn trên ✓" if self.always_top_btn.isChecked() else "📌 Luôn trên"
+        menu.addAction(always_top_text, lambda: self.always_top_btn.toggle())
+        menu.addAction("🔅 Độ mờ...", self._show_opacity_dialog)
+        menu.addSeparator()
+
+        # Close
+        menu.addAction("✖ Đóng", self.close)
+
+        menu.exec(self.mapToGlobal(position))
+
+    def _mouse_double_click_event(self, event):
+        """#(Double-click để fit to window)"""
+        if event.button() == Qt.LeftButton:
+            self._fit_to_window()
+
+    def _toggle_always_on_top(self, checked):
+        """Toggle always on top functionality"""
+        if checked:
+            self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
+            self.show()
+            self.always_top_btn.setText("📌 Luôn trên ✓")
+        else:
+            self.setWindowFlags(self.windowFlags() & ~Qt.WindowStaysOnTopHint)
+            self.show()
+            self.always_top_btn.setText("📌 Luôn trên")
+
+    def _show_opacity_dialog(self):
+        """Hiển thị dialog điều chỉnh độ mờ"""
+        opacity_dialog = QtWidgets.QDialog(self)
+        opacity_dialog.setWindowTitle("Điều chỉnh độ mờ")
+        opacity_dialog.resize(320, 140)
+        opacity_dialog.setStyleSheet("""
+            QDialog {
+                background: #f8f9fa;
+            }
+            QSlider::groove:horizontal {
+                border: 1px solid #bbb;
+                height: 8px;
+                background: white;
+                border-radius: 4px;
+            }
+            QSlider::handle:horizontal {
+                background: #2196f3;
+                border: 1px solid #1976d2;
+                width: 20px;
+                border-radius: 10px;
+                margin: -6px 0;
+            }
+        """)
+
+        layout = QtWidgets.QVBoxLayout(opacity_dialog)
+        layout.setSpacing(15)
+
+        # Title
+        title = QtWidgets.QLabel("🔅 Điều chỉnh độ trong suốt")
+        title.setStyleSheet("font-weight: bold; font-size: 14px; color: #2c3e50;")
+        title.setAlignment(Qt.AlignCenter)
+        layout.addWidget(title)
+
+        # Slider
+        slider = QtWidgets.QSlider(Qt.Horizontal)
+        slider.setRange(20, 100)
+        slider.setValue(int(self.windowOpacity() * 100))
+
+        # Label
+        label = QtWidgets.QLabel(f"Độ mờ: {slider.value()}%")
+        label.setAlignment(Qt.AlignCenter)
+        label.setStyleSheet("font-size: 12px; color: #495057;")
+
+        def update_opacity(value):
+            self.setWindowOpacity(value / 100.0)
+            label.setText(f"Độ mờ: {value}%")
+
+        slider.valueChanged.connect(update_opacity)
+
+        layout.addWidget(label)
+        layout.addWidget(slider)
+
+        # Buttons
+        btn_layout = QtWidgets.QHBoxLayout()
+        reset_btn = QtWidgets.QPushButton("🔄 Reset")
+        reset_btn.clicked.connect(lambda: slider.setValue(100))
+        close_btn = QtWidgets.QPushButton("✓ Đóng")
+        close_btn.clicked.connect(opacity_dialog.accept)
+
+        btn_layout.addWidget(reset_btn)
+        btn_layout.addWidget(close_btn)
+        layout.addLayout(btn_layout)
+
+        opacity_dialog.exec()
+
+    def _save_image(self):
+        """Lưu ảnh hiện tại ra file"""
+        if not self.original_pixmap or self.original_pixmap.isNull():
+            return
+
+        file_path, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self, "Lưu ảnh",
+            f"image_{QtCore.QDateTime.currentDateTime().toString('yyyyMMdd_hhmmss')}.png",
+            "PNG files (*.png);;JPG files (*.jpg);;All files (*.*)"
+        )
+
+        if file_path:
+            if self.original_pixmap.save(file_path):
+                QtWidgets.QMessageBox.information(self, "Thành công", f"Đã lưu ảnh: {file_path}")
+            else:
+                QtWidgets.QMessageBox.warning(self, "Lỗi", "Không thể lưu ảnh")
     def _setup_toolbar(self, layout):
         """#(Tạo toolbar với các nút điều khiển zoom và điều hướng)"""
         toolbar = QtWidgets.QWidget()
@@ -4607,7 +6050,7 @@ class ImageViewerDialog(QtWidgets.QDialog):
             self.image_label.setCursor(Qt.OpenHandCursor)
 
     def _update_status(self):
-        """#(Cập nhật thanh trạng thái với thông tin ảnh)"""
+        """#(Cập nhật status bar với thông tin chi tiết)"""
         if not self.original_pixmap or self.original_pixmap.isNull():
             return
 
@@ -4615,15 +6058,17 @@ class ImageViewerDialog(QtWidgets.QDialog):
         current_size = self.image_label.size()
         zoom_percent = int(self.current_zoom * 100)
 
-        status_text = (
-            f"📏 Gốc: {original_size.width()}×{original_size.height()} | "
+        # Update zoom label in toolbar
+        self.zoom_label.setText(f"{zoom_percent}%")
+
+        # Update main status
+        main_status = (
+            f"🖼️ Gốc: {original_size.width()}×{original_size.height()} | "
             f"Hiển thị: {current_size.width()}×{current_size.height()} | "
-            f"Zoom: {zoom_percent}% | "
-            f"💡 Mẹo: Kéo chuột để di chuyển, Ctrl+Scroll để zoom"
+            f"Zoom: {zoom_percent}%"
         )
 
-        self.status_bar.setText(status_text)
-
+        self.main_status_label.setText(main_status)
     def wheelEvent(self, event):
         """#(Xử lý zoom bằng con lăn chuột với Ctrl)"""
         modifiers = QtWidgets.QApplication.keyboardModifiers()
