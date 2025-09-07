@@ -1,0 +1,20 @@
+2025-09-06 13:20:39,821 - __main__ - INFO - ======================================================================
+2025-09-06 13:20:39,821 - __main__ - INFO - 🚀 Starting Dashboard Desktop Application
+2025-09-06 13:20:39,821 - __main__ - INFO - ======================================================================
+2025-09-06 13:20:39,843 - __main__ - INFO - ✓ Application initialized
+2025-09-06 13:20:41,289 - __main__ - INFO - ✓ Directory structure ready (mode: main)
+2025-09-06 13:20:41,295 - __main__ - INFO - ✓ Database connected
+2025-09-06 13:20:41,353 - ui_qt.windows.dashboard_window_qt.utils.assets - INFO - Assets manager đã khởi tạo
+2025-09-06 13:20:41,360 - __main__ - INFO - Loading MainDashboard (Desktop-Style)...
+2025-09-06 13:20:41,370 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã load settings từ C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 13:20:41,371 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã load vị trí 4 icons
+2025-09-06 13:20:41,392 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 13:20:41,392 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Wallpaper set: default (mode: fill)
+2025-09-06 13:20:41,392 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Desktop settings loaded
+2025-09-06 13:20:41,425 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - ERROR - Error adding desktop icon: 'dict' object has no attribute 'x'
+2025-09-06 13:20:41,427 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - ERROR - Error adding desktop icon: 'dict' object has no attribute 'x'
+2025-09-06 13:20:41,428 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - ERROR - Error adding desktop icon: 'dict' object has no attribute 'x'
+2025-09-06 13:20:41,429 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - ERROR - Error adding desktop icon: 'dict' object has no attribute 'x'
+2025-09-06 13:20:41,429 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Desktop Area initialized
+2025-09-06 13:20:41,429 - __main__ - ERROR - Failed to load dashboard: 'PySide6.QtWidgets.QMdiArea' object has no attribute 'setWidget'
+2025-09-06 13:20:41,444 - __main__ - ERROR - ✗ Failed to create window: 'PySide6.QtWidgets.QMdiArea' object has no attribute 'setWidget'

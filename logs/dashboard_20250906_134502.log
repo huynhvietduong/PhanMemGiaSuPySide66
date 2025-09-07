@@ -1,0 +1,40 @@
+2025-09-06 13:45:02,872 - __main__ - INFO - ======================================================================
+2025-09-06 13:45:02,872 - __main__ - INFO - 🚀 Starting Dashboard Desktop Application
+2025-09-06 13:45:02,872 - __main__ - INFO - ======================================================================
+2025-09-06 13:45:02,895 - __main__ - INFO - ✓ Application initialized
+2025-09-06 13:45:04,328 - __main__ - INFO - ✓ Directory structure ready (mode: main)
+2025-09-06 13:45:04,334 - __main__ - INFO - ✓ Database connected
+2025-09-06 13:45:04,394 - ui_qt.windows.dashboard_window_qt.utils.assets - INFO - Assets manager đã khởi tạo
+2025-09-06 13:45:04,398 - __main__ - INFO - Loading MainDashboard (Desktop-Style)...
+2025-09-06 13:45:04,409 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã load settings từ C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 13:45:04,411 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã load vị trí 0 icons
+2025-09-06 13:45:04,417 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - WARNING - Desktop area module not found, using basic MDI
+2025-09-06 13:45:04,441 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đang load desktop icons...
+2025-09-06 13:45:04,441 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - ERROR - Desktop area hoặc app repository chưa sẵn sàng
+2025-09-06 13:45:04,459 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Dashboard window hiển thị thành công
+2025-09-06 13:45:04,460 - __main__ - INFO - ✓ Dashboard loaded (main)
+2025-09-06 13:45:04,508 - __main__ - INFO - Assets manager initialized
+2025-09-06 13:45:04,512 - __main__ - INFO - Settings loaded
+2025-09-06 13:45:04,519 - __main__ - INFO - All services initialized successfully
+2025-09-06 13:45:04,520 - __main__ - INFO - ✓ Application ready - Starting event loop
+2025-09-06 13:45:04,958 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đang load desktop icons...
+2025-09-06 13:45:04,959 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - ERROR - Desktop area hoặc app repository chưa sẵn sàng
+2025-09-06 13:45:05,459 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - === DEBUG DESKTOP STATE ===
+2025-09-06 13:45:05,460 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Desktop area exists: False
+2025-09-06 13:45:05,460 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Desktop area visible: False
+2025-09-06 13:45:05,461 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Total apps in repository: 17
+2025-09-06 13:45:05,463 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Pinned apps: 4
+2025-09-06 13:45:05,463 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - === END DEBUG ===
+2025-09-06 13:45:17,576 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 13:45:17,577 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 13:45:17,577 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 0 icons
+2025-09-06 13:45:17,595 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - Cleaning up app launcher service...
+2025-09-06 13:45:17,595 - __main__ - INFO - Shutting down application...
+2025-09-06 13:45:17,597 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 13:45:17,599 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 13:45:17,599 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 0 icons
+2025-09-06 13:45:17,599 - __main__ - INFO - ✓ Settings saved
+2025-09-06 13:45:17,599 - __main__ - ERROR - Error during shutdown: 'DatabaseManager' object has no attribute 'close'
+2025-09-06 13:45:17,599 - __main__ - INFO - ======================================================================
+2025-09-06 13:45:17,599 - __main__ - INFO - Application shutdown complete
+2025-09-06 13:45:17,599 - __main__ - INFO - ======================================================================

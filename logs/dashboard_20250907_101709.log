@@ -1,0 +1,51 @@
+2025-09-07 10:17:09,644 - __main__ - INFO - ======================================================================
+2025-09-07 10:17:09,644 - __main__ - INFO - 🚀 Starting Dashboard Desktop Application
+2025-09-07 10:17:09,644 - __main__ - INFO - ======================================================================
+2025-09-07 10:17:09,724 - __main__ - INFO - ✓ Application initialized
+2025-09-07 10:17:11,586 - __main__ - INFO - ✓ Directory structure ready (mode: main)
+2025-09-07 10:17:11,595 - __main__ - INFO - ✓ Database connected
+2025-09-07 10:17:11,652 - ui_qt.windows.dashboard_window_qt.utils.assets - INFO - Assets manager đã khởi tạo
+2025-09-07 10:17:11,657 - __main__ - INFO - Loading MainDashboard (Desktop-Style)...
+2025-09-07 10:17:11,666 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã load settings từ C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-07 10:17:11,668 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã load vị trí 0 icons
+2025-09-07 10:17:12,025 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Wallpaper set: C:/Users/lenovo/Downloads/hinh-nen-may-tinh-6.jpg (mode: fill)
+2025-09-07 10:17:12,025 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Desktop area created successfully
+2025-09-07 10:17:12,048 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đang load desktop icons...
+2025-09-07 10:17:12,048 - ui_qt.windows.dashboard_window_qt.repositories.app_repository - INFO - Storage path: dashboard_apps.json
+2025-09-07 10:17:12,048 - ui_qt.windows.dashboard_window_qt.repositories.app_repository - INFO - Storage exists: True
+2025-09-07 10:17:12,049 - ui_qt.windows.dashboard_window_qt.repositories.app_repository - INFO - Total apps in storage: 17
+2025-09-07 10:17:12,049 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Got 17 pinned apps from repository
+2025-09-07 10:17:12,049 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 0: group_manager
+2025-09-07 10:17:12,049 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 1: student_manager
+2025-09-07 10:17:12,049 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 2: question_bank
+2025-09-07 10:17:12,049 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 3: main_calendar
+2025-09-07 10:17:12,049 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 4: package_manager
+2025-09-07 10:17:12,049 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 5: attendance_report
+2025-09-07 10:17:12,049 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 6: assign_exercise
+2025-09-07 10:17:12,049 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 7: submit_exercise
+2025-09-07 10:17:12,049 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 8: submitted_exercises
+2025-09-07 10:17:12,049 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 9: exercise_suggestion
+2025-09-07 10:17:12,049 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 10: create_test
+2025-09-07 10:17:12,049 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 11: exercise_tree
+2025-09-07 10:17:12,049 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 12: progress_report
+2025-09-07 10:17:12,049 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 13: skill_report
+2025-09-07 10:17:12,049 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 14: skill_rating
+2025-09-07 10:17:12,049 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 15: group_suggestion
+2025-09-07 10:17:12,049 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 16: salary_report
+2025-09-07 10:17:12,049 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - WARNING - Have 17 apps but may only show some!
+2025-09-07 10:17:12,049 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Sẽ load 17 icons lên desktop
+2025-09-07 10:17:12,118 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo thành công 17 icons
+2025-09-07 10:17:12,135 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Wallpaper set: C:/Users/lenovo/Downloads/hinh-nen-may-tinh-6.jpg (mode: fill)
+2025-09-07 10:17:12,135 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã set wallpaper cho desktop area: C:/Users/lenovo/Downloads/hinh-nen-may-tinh-6.jpg
+2025-09-07 10:17:12,154 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Wallpaper set: C:/Users/lenovo/Downloads/hinh-nen-may-tinh-6.jpg (mode: fill)
+2025-09-07 10:17:12,155 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã set wallpaper cho desktop area: C:/Users/lenovo/Downloads/hinh-nen-may-tinh-6.jpg
+2025-09-07 10:17:12,589 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Dashboard window hiển thị thành công
+2025-09-07 10:17:12,589 - __main__ - INFO - ✓ Dashboard loaded (main)
+2025-09-07 10:17:13,057 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Wallpaper set: C:/Users/lenovo/Downloads/hinh-nen-may-tinh-6.jpg (mode: fill)
+2025-09-07 10:17:13,057 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã set wallpaper cho desktop area: C:/Users/lenovo/Downloads/hinh-nen-may-tinh-6.jpg
+2025-09-07 10:17:13,108 - __main__ - INFO - Assets manager initialized
+2025-09-07 10:17:13,111 - __main__ - INFO - Settings loaded
+2025-09-07 10:17:13,118 - __main__ - INFO - All services initialized successfully
+2025-09-07 10:17:13,121 - __main__ - INFO - ✓ Application ready - Starting event loop
+2025-09-07 10:17:14,739 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Wallpaper set: C:/Users/lenovo/Downloads/hinh-nen-may-tinh-6.jpg (mode: fill)
+2025-09-07 10:17:14,739 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã set wallpaper cho desktop area: C:/Users/lenovo/Downloads/hinh-nen-may-tinh-6.jpg

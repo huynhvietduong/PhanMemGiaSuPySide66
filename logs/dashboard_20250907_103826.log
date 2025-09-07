@@ -1,0 +1,46 @@
+2025-09-07 10:38:26,085 - __main__ - INFO - ======================================================================
+2025-09-07 10:38:26,086 - __main__ - INFO - 🚀 Starting Dashboard Desktop Application
+2025-09-07 10:38:26,086 - __main__ - INFO - ======================================================================
+2025-09-07 10:38:26,109 - __main__ - INFO - ✓ Application initialized
+2025-09-07 10:38:27,513 - __main__ - INFO - ✓ Directory structure ready (mode: main)
+2025-09-07 10:38:27,521 - __main__ - INFO - ✓ Database connected
+2025-09-07 10:38:27,576 - ui_qt.windows.dashboard_window_qt.utils.assets - INFO - Assets manager đã khởi tạo
+2025-09-07 10:38:27,580 - __main__ - INFO - Loading MainDashboard (Desktop-Style)...
+2025-09-07 10:38:28,093 - ui_qt.windows.dashboard_window_qt.views.taskbar.system_tray - INFO - System Tray initialized
+2025-09-07 10:38:28,094 - ui_qt.windows.dashboard_window_qt.views.taskbar.taskbar - ERROR - Error loading taskbar settings: 'SettingsRepository' object has no attribute 'get_taskbar_settings'
+2025-09-07 10:38:28,094 - ui_qt.windows.dashboard_window_qt.repositories.app_repository - INFO - Storage path: dashboard_apps.json
+2025-09-07 10:38:28,094 - ui_qt.windows.dashboard_window_qt.repositories.app_repository - INFO - Storage exists: True
+2025-09-07 10:38:28,095 - ui_qt.windows.dashboard_window_qt.repositories.app_repository - INFO - Total apps in storage: 17
+2025-09-07 10:38:28,095 - ui_qt.windows.dashboard_window_qt.views.taskbar.taskbar - ERROR - Error loading pinned apps: Taskbar.add_app_button() got an unexpected keyword argument 'is_pinned'
+2025-09-07 10:38:28,095 - ui_qt.windows.dashboard_window_qt.views.taskbar.taskbar - INFO - Taskbar initialized
+2025-09-07 10:38:28,114 - ui_qt.windows.dashboard_window_qt.repositories.app_repository - INFO - Storage path: dashboard_apps.json
+2025-09-07 10:38:28,114 - ui_qt.windows.dashboard_window_qt.repositories.app_repository - INFO - Storage exists: True
+2025-09-07 10:38:28,115 - ui_qt.windows.dashboard_window_qt.repositories.app_repository - INFO - Total apps in storage: 17
+2025-09-07 10:38:28,115 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - WARNING - Have 17 apps but may only show some!
+2025-09-07 10:38:28,566 - __main__ - INFO - ✓ Dashboard loaded (main)
+2025-09-07 10:38:28,947 - __main__ - INFO - Assets manager initialized
+2025-09-07 10:38:28,951 - __main__ - INFO - Settings loaded
+2025-09-07 10:38:28,959 - __main__ - INFO - All services initialized successfully
+2025-09-07 10:38:28,961 - __main__ - INFO - ✓ Application ready - Starting event loop
+2025-09-07 10:38:36,658 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - Đang khởi chạy app: question_bank
+2025-09-07 10:38:36,658 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - Importing module: ui_qt.windows.question_bank.views.main_window
+2025-09-07 10:38:37,119 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - App launched: question_bank
+2025-09-07 10:38:37,119 - ui_qt.windows.dashboard_window_qt.views.taskbar.taskbar - INFO - Adding button for app: question_bank
+2025-09-07 10:38:37,121 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - ERROR - Error adding button to taskbar: maximum recursion depth exceeded
+2025-09-07 10:38:37,139 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - App launched: question_bank
+2025-09-07 10:38:37,139 - ui_qt.windows.dashboard_window_qt.views.taskbar.taskbar - INFO - Adding button for app: question_bank
+2025-09-07 10:38:37,149 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - ERROR - Error adding button to taskbar: maximum recursion depth exceeded
+2025-09-07 10:38:37,149 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - Đã khởi chạy app thành công: question_bank
+2025-09-07 10:38:41,704 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - Đang khởi chạy app: question_bank
+2025-09-07 10:38:42,092 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - App launched: question_bank
+2025-09-07 10:38:42,092 - ui_qt.windows.dashboard_window_qt.views.taskbar.taskbar - INFO - Adding button for app: question_bank
+2025-09-07 10:38:42,094 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - ERROR - Error adding button to taskbar: maximum recursion depth exceeded
+2025-09-07 10:38:42,111 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - App launched: question_bank
+2025-09-07 10:38:42,111 - ui_qt.windows.dashboard_window_qt.views.taskbar.taskbar - INFO - Adding button for app: question_bank
+2025-09-07 10:38:42,124 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - ERROR - Error adding button to taskbar: maximum recursion depth exceeded
+2025-09-07 10:38:42,125 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - Đã khởi chạy app thành công: question_bank
+2025-09-07 10:39:28,180 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 0 icons
+2025-09-07 10:40:28,198 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 0 icons
+2025-09-07 10:41:28,208 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 0 icons
+2025-09-07 10:42:28,226 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 0 icons
+2025-09-07 10:43:28,285 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 0 icons

@@ -1,0 +1,45 @@
+# viewers/pdf_viewer.py
+from PySide6 import QtWidgets, QtCore, QtGui
+from PySide6.QtCore import Qt
+import os
+
+class PDFViewer(QtWidgets.QWidget):
+    """Widget hiển thị PDF (placeholder - cần thêm thư viện PDF)"""
+
+    def __init__(self):
+        super().__init__()
+        layout = QtWidgets.QVBoxLayout(self)
+
+        self.info_label = QtWidgets.QLabel("📄 PDF Viewer")
+        self.info_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(self.info_label)
+
+        # Toolbar cho PDF
+        toolbar = QtWidgets.QToolBar()
+        self.page_spin = QtWidgets.QSpinBox()
+        self.page_spin.setMinimum(1)
+        toolbar.addWidget(QtWidgets.QLabel("Trang:"))
+        toolbar.addWidget(self.page_spin)
+        toolbar.addAction("⬅️").triggered.connect(self.prev_page)
+        toolbar.addAction("➡️").triggered.connect(self.next_page)
+        layout.addWidget(toolbar)
+
+        self.pdf_path = None
+        self.current_page = 1
+        self.total_pages = 1
+
+    def load_pdf(self, file_path):
+        """Load PDF file"""
+        self.pdf_path = file_path
+        self.info_label.setText(f"📄 {os.path.basename(file_path)}")
+        # TODO: Implement PDF rendering với PyMuPDF hoặc pdf2image
+
+    def prev_page(self):
+        if self.current_page > 1:
+            self.current_page -= 1
+            self.page_spin.setValue(self.current_page)
+
+    def next_page(self):
+        if self.current_page < self.total_pages:
+            self.current_page += 1
+            self.page_spin.setValue(self.current_page)

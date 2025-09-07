@@ -1,0 +1,7 @@
+from PySide6 import QtWidgets, QtCore, QtGui
+try:
+    from docx import Document
+    from docx.oxml.text.paragraph import CT_P
+    from docx.oxml.table import CT_Tbl
+except ImportError:
+    Document = None

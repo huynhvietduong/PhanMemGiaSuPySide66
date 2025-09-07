@@ -1,0 +1,658 @@
+# dialogs/question_edit_dialog.py
+from PySide6 import QtWidgets, QtCore, QtGui
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont, QSyntaxHighlighter, QTextCharFormat, QColor
+try:
+    from ui_qt.windows.question_bank.viewers.pdf_viewer import PDFViewer
+    from ui_qt.windows.question_bank.viewers.image_viewer import ImageViewer
+except ImportError:
+    try:
+        from viewers.pdf_viewer import PDFViewer
+        from viewers.image_viewer import ImageViewer
+    except ImportError:
+        PDFViewer = None
+        ImageViewer = None
+class QuestionEditDialog(QtWidgets.QDialog):
+    def __init__(self, db_manager, tree_id=None, question_id=None, parent=None):
+        super().__init__(parent)
+        self.setModal(False)
+        self.db = db_manager
+        self.tree_id = tree_id
+        self.question_id = question_id
+        self.content_type = "text"
+        self.answer_type = "text"
+        self.content_data = None
+        self.answer_data = None
+
+        self.setup_ui()
+        if question_id:
+            self.load_question_data()
+        self.setWindowState(Qt.WindowMaximized)
+
+    def setup_ui(self):
+        self.setWindowTitle("➕ Thêm câu hỏi mới" if not self.question_id else "✏️ Chỉnh sửa câu hỏi")
+        self.setWindowFlags(
+            Qt.Window | Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint)
+        layout = QtWidgets.QVBoxLayout(self)
+
+        # Toolbar cho chọn loại nội dung
+        toolbar = QtWidgets.QToolBar()
+        toolbar.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+
+        # Nhóm nút cho Câu hỏi
+        toolbar.addWidget(QtWidgets.QLabel("📝 Thêm câu hỏi:"))
+
+        text_action = toolbar.addAction("📝 Văn bản")
+        text_action.triggered.connect(lambda: self.add_content("text"))
+
+        image_action = toolbar.addAction("🖼️ Ảnh")
+        image_action.triggered.connect(lambda: self.add_content("image"))
+
+        pdf_action = toolbar.addAction("📄 PDF")
+        pdf_action.triggered.connect(lambda: self.add_content("pdf"))
+
+        word_action = toolbar.addAction("📘 Word")
+        word_action.triggered.connect(lambda: self.add_content("word"))
+
+        toolbar.addSeparator()
+
+        latex_action = toolbar.addAction("∑ LaTeX")
+        latex_action.triggered.connect(self.insert_latex)
+
+        layout.addWidget(toolbar)
+
+        # Splitter cho câu hỏi và đáp án
+        splitter = QtWidgets.QSplitter(Qt.Vertical)
+
+        # Phần 1: Câu hỏi
+        question_group = QtWidgets.QGroupBox("📋 NỘI DUNG CÂU HỎI")
+        question_layout = QtWidgets.QVBoxLayout(question_group)
+
+        # Widget hiển thị nội dung (có thể là text, image, pdf viewer)
+        self.content_widget = QtWidgets.QStackedWidget()
+
+        # Text editor cho văn bản
+        self.text_editor = QtWidgets.QTextEdit()
+        self.text_editor.installEventFilter(self)
+        self.text_editor.setAcceptRichText(True)
+        self.text_editor.setPlaceholderText("Nhập nội dung câu hỏi hoặc dán ảnh (Ctrl+V)...")
+        self.content_widget.addWidget(self.text_editor)
+
+        # Image viewer
+        self.image_viewer = ImageViewer()
+        self.content_widget.addWidget(self.image_viewer)
+
+        # PDF viewer
+        self.pdf_viewer = PDFViewer()
+        self.content_widget.addWidget(self.pdf_viewer)
+
+        question_layout.addWidget(self.content_widget)
+        splitter.addWidget(question_group)
+
+        # Phần 2: Đáp án (có thể ẩn/hiện)
+        self.answer_group = QtWidgets.QGroupBox("✅ ĐÁP ÁN")
+        self.answer_group.setCheckable(True)
+        self.answer_group.setChecked(True)
+        answer_layout = QtWidgets.QVBoxLayout(self.answer_group)
+
+        # Toolbar cho đáp án
+        answer_toolbar = QtWidgets.QToolBar()
+        answer_toolbar.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+
+        # Nhóm nút cho Đáp án
+        answer_toolbar.addWidget(QtWidgets.QLabel("📝 Thêm đáp án:"))
+
+        ans_text_action = answer_toolbar.addAction("📝 Văn bản")
+        ans_text_action.triggered.connect(lambda: self.add_answer("text"))
+
+        ans_image_action = answer_toolbar.addAction("🖼️ Ảnh")
+        ans_image_action.triggered.connect(lambda: self.add_answer("image"))
+
+        ans_pdf_action = answer_toolbar.addAction("📄 PDF")
+        ans_pdf_action.triggered.connect(lambda: self.add_answer("pdf"))
+
+        ans_word_action = answer_toolbar.addAction("📘 Word")
+        ans_word_action.triggered.connect(lambda: self.add_answer("word"))
+
+        answer_toolbar.addSeparator()
+
+        ans_latex_action = answer_toolbar.addAction("∑ LaTeX")
+        ans_latex_action.triggered.connect(self.insert_answer_latex)
+
+        answer_layout.addWidget(answer_toolbar)
+
+        # Widget hiển thị đáp án
+        self.answer_widget = QtWidgets.QStackedWidget()
+
+        # Text editor cho đáp án văn bản (với EventFilter)
+        self.answer_text_editor = QtWidgets.QTextEdit()
+        self.answer_text_editor.installEventFilter(self)  # Hỗ trợ paste ảnh
+        self.answer_text_editor.setAcceptRichText(True)
+        self.answer_text_editor.setPlaceholderText("Nhập đáp án hoặc dán ảnh (Ctrl+V)...")
+        self.answer_text_editor.setMaximumHeight(150)  # Giữ giới hạn chiều cao
+        self.answer_widget.addWidget(self.answer_text_editor)
+
+        # Image viewer cho đáp án ảnh
+        self.answer_image_viewer = ImageViewer()
+        self.answer_widget.addWidget(self.answer_image_viewer)
+
+        # PDF viewer cho đáp án PDF
+        self.answer_pdf_viewer = PDFViewer()
+        self.answer_widget.addWidget(self.answer_pdf_viewer)
+
+        answer_layout.addWidget(self.answer_widget)
+        splitter.addWidget(self.answer_group)
+
+        layout.addWidget(splitter)
+
+        # Phần 3: Tags
+        meta_group = QtWidgets.QGroupBox("📊 Mức độ")
+        meta_layout = QtWidgets.QFormLayout(meta_group)
+        self.difficulty_combo = QtWidgets.QComboBox()
+        self.difficulty_combo.addItems(["Dễ", "Trung bình", "Khó"])
+        meta_layout.addRow("Độ khó:", self.difficulty_combo)
+
+        tags_group = QtWidgets.QGroupBox("🏷️ TAGS")
+        tags_layout = QtWidgets.QHBoxLayout(tags_group)
+        layout.addWidget(meta_group)
+        self.tags_edit = QtWidgets.QLineEdit()
+        self.tags_edit.setPlaceholderText("Nhập tags: môn, lớp, chủ đề, mức độ (phân cách bằng dấu phẩy)")
+        tags_layout.addWidget(self.tags_edit)
+        layout.addWidget(tags_group)
+
+        # Buttons
+        button_layout = QtWidgets.QHBoxLayout()
+
+        save_btn = QtWidgets.QPushButton("💾 Lưu")
+        save_btn.setStyleSheet("QPushButton { background: #28a745; color: white; padding: 10px 30px; }")
+        save_btn.clicked.connect(self.save_question)
+
+        cancel_btn = QtWidgets.QPushButton("❌ Hủy")
+        cancel_btn.setStyleSheet("QPushButton { background: #6c757d; color: white; padding: 10px 30px; }")
+        cancel_btn.clicked.connect(self.reject)
+
+        button_layout.addStretch()
+        button_layout.addWidget(cancel_btn)
+        button_layout.addWidget(save_btn)
+
+        layout.addLayout(button_layout)
+
+        # Enable paste từ clipboard
+        self.setup_clipboard()
+
+    # #(Phương thức load dữ liệu câu hỏi để chỉnh sửa)
+    def load_question_data(self):
+        """Load dữ liệu câu hỏi để chỉnh sửa"""
+        if not self.question_id:
+            return
+
+        try:
+            # Lấy dữ liệu câu hỏi từ database
+            question = self.db.execute_query(
+                "SELECT * FROM question_bank WHERE id=?",
+                (self.question_id,), fetch="one"
+            )
+
+            if not question:
+                QtWidgets.QMessageBox.warning(self, "Lỗi", "Không tìm thấy câu hỏi!")
+                return
+
+            # Convert to dict nếu cần
+            if hasattr(question, 'keys'):
+                q_dict = dict(question)
+            else:
+                q_dict = question
+
+            # Load thông tin cơ bản
+            difficulty = q_dict.get('difficulty_level', 'Dễ')
+            if difficulty.lower() == 'easy':
+                self.difficulty_combo.setCurrentText('Dễ')
+            elif difficulty.lower() == 'medium':
+                self.difficulty_combo.setCurrentText('Trung bình')
+            elif difficulty.lower() == 'hard':
+                self.difficulty_combo.setCurrentText('Khó')
+
+            # Load nội dung câu hỏi
+            content_type = q_dict.get('content_type', 'text')
+            content_text = q_dict.get('content_text', '')
+            content_data = q_dict.get('content_data')
+
+            if content_type == 'text':
+                # Hiển thị text content
+                self.content_widget.setCurrentIndex(0)  # Text editor
+                self.text_editor.setHtml(content_text)
+                self.content_type = 'text'
+
+            elif content_type == 'image':
+                # Hiển thị image content
+                self.content_widget.setCurrentIndex(1)  # Image viewer
+                if content_data:
+                    self.image_viewer.load_image_from_data(content_data)
+                self.content_type = 'image'
+                self.content_data = content_data
+
+            # Load đáp án
+            answer_type = q_dict.get('answer_type', 'text')
+            answer_text = q_dict.get('answer_text', '') or q_dict.get('correct_answer', '')  # Fallback cho data cũ
+            answer_data = q_dict.get('answer_data')
+
+            if answer_type == 'text':
+                self.answer_widget.setCurrentIndex(0)  # Text editor
+                self.answer_text_editor.setHtml(answer_text) if self._has_images_in_html(
+                    answer_text) else self.answer_text_editor.setPlainText(answer_text)
+                self.answer_type = 'text'
+
+            elif answer_type == 'image':
+                self.answer_widget.setCurrentIndex(1)  # Image viewer
+                if answer_data:
+                    self._load_image_to_viewer(self.answer_image_viewer, answer_data)
+                self.answer_type = 'image'
+                self.answer_data = answer_data
+
+            # Load tags
+            tags = self.db.execute_query(
+                "SELECT tag_name FROM question_tags WHERE question_id=?",
+                (self.question_id,), fetch="all"
+            ) or []
+
+            if tags:
+                tag_names = [tag['tag_name'] if hasattr(tag, 'get') else tag[0] for tag in tags]
+                self.tags_edit.setText(', '.join(tag_names))
+
+            print(f"✅ Đã load dữ liệu câu hỏi #{self.question_id}")
+
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể load dữ liệu câu hỏi: {e}")
+            print(f"❌ Lỗi load_question_data: {e}")
+
+    # #(Phương thức hỗ trợ load image từ data)
+    def _load_image_to_viewer(self, viewer, image_data):
+        """Load image data vào viewer"""
+        if not image_data or not viewer:
+            return False
+
+        try:
+            import base64
+
+            # Nếu là bytes
+            if isinstance(image_data, bytes):
+                pixmap = QtGui.QPixmap()
+                if pixmap.loadFromData(image_data):
+                    viewer.set_pixmap(pixmap)
+                    return True
+
+            # Nếu là string (có thể là base64)
+            elif isinstance(image_data, str):
+                if image_data.startswith('data:image'):
+                    # Data URL format
+                    header, data = image_data.split(',', 1)
+                    decoded_data = base64.b64decode(data)
+                else:
+                    # Pure base64
+                    decoded_data = base64.b64decode(image_data)
+
+                pixmap = QtGui.QPixmap()
+                if pixmap.loadFromData(decoded_data):
+                    viewer.set_pixmap(pixmap)
+                    return True
+
+            return False
+
+        except Exception as e:
+            print(f"⚠️ Lỗi load image: {e}")
+            return False
+
+    def _has_images_in_html(self, html_content):
+        """Kiểm tra HTML có chứa ảnh không"""
+        # #(Helper method kiểm tra ảnh trong HTML content)
+        if not html_content:
+            return False
+
+        # Kiểm tra các tag ảnh HTML
+        html_lower = html_content.lower()
+
+        # Kiểm tra tag <img>
+        if '<img' in html_lower:
+            return True
+
+        # Kiểm tra data URI cho ảnh
+        if 'data:image/' in html_lower:
+            return True
+
+        # Kiểm tra các định dạng ảnh base64
+        if 'base64' in html_lower and ('png' in html_lower or 'jpg' in html_lower or 'jpeg' in html_lower):
+            return True
+
+        return False
+
+    def setup_clipboard(self):
+        """Xử lý paste ảnh từ clipboard"""
+        shortcut = QShortcut(QKeySequence.Paste, self)  # ✅ cross-platform (Ctrl+V / Cmd+V)
+        shortcut.activated.connect(self.paste_from_clipboard)
+
+    def paste_from_clipboard(self):
+        """Dán nội dung (ưu tiên ảnh) từ clipboard vào nội dung câu hỏi"""
+        try:
+            cb = QtWidgets.QApplication.clipboard()
+            md = cb.mimeData()
+
+            def qimage_from_clipboard():
+                # 1) Ảnh thuần
+                if md.hasImage():
+                    img = cb.image()
+                    if not img.isNull():
+                        return img
+                # 2) Fallback pixmap (Windows hay dùng)
+                pm = cb.pixmap()
+                if not pm.isNull():
+                    return pm.toImage()
+                # 3) Ảnh nhúng base64 trong HTML
+                if md.hasHtml():
+                    import re, base64
+                    html = md.html()
+                    m = re.search(r'data:image/(png|jpeg|jpg);base64,([A-Za-z0-9+/=]+)', html, re.I)
+                    if m:
+                        fmt = m.group(1).upper()
+                        ba = QtCore.QByteArray.fromBase64(m.group(2).encode('ascii'))
+                        img = QtGui.QImage()
+                        if img.loadFromData(ba, fmt):
+                            return img
+                return None
+
+            image = qimage_from_clipboard()
+
+            if image:
+                # Chuyển sang chế độ ảnh và hiển thị
+                self.content_type = "image"
+                self.content_widget.setCurrentWidget(self.image_viewer)
+                self.image_viewer.set_image(image)
+
+                # Lưu tạm bytes PNG để save xuống DB khi bấm Lưu
+                ba = QtCore.QByteArray()
+                buff = QtCore.QBuffer(ba)
+                buff.open(QtCore.QIODevice.WriteOnly)
+                image.save(buff, "PNG")
+                self.content_data = bytes(ba)
+
+                QtWidgets.QMessageBox.information(self, "Thành công", "Đã dán ảnh từ clipboard!")
+                return
+
+            # Nếu không có ảnh, dán text bình thường vào editor (nếu đang ở chế độ text)
+            if md.hasText():
+                text = md.text()
+                if self.content_widget.currentWidget() != self.text_editor:
+                    # Nếu đang ở màn ảnh, chuyển về text
+                    self.add_content("text")
+                cursor = self.text_editor.textCursor()
+                cursor.insertText(text)
+                return
+
+            QtWidgets.QMessageBox.information(self, "Thông báo", "Clipboard không có nội dung phù hợp để dán.")
+        except Exception as e:
+            QtWidgets.QMessageBox.warning(self, "Lỗi", f"Không thể dán: {e}")
+
+    # (Phương thức paste đáp án giống y hệt paste nội dung câu hỏi)
+    def paste_answer_from_clipboard(self):
+        """Dán nội dung (ưu tiên ảnh) từ clipboard vào đáp án - Logic giống paste nội dung câu hỏi"""
+        try:
+            cb = QtWidgets.QApplication.clipboard()
+            md = cb.mimeData()
+
+            def qimage_from_clipboard():
+                # 1) Ảnh thuần
+                if md.hasImage():
+                    img = cb.image()
+                    if not img.isNull():
+                        return img
+                # 2) Fallback pixmap (Windows hay dùng)
+                pm = cb.pixmap()
+                if not pm.isNull():
+                    return pm.toImage()
+                # 3) Ảnh nhúng base64 trong HTML
+                if md.hasHtml():
+                    import re, base64
+                    html = md.html()
+                    m = re.search(r'data:image/(png|jpeg|jpg);base64,([A-Za-z0-9+/=]+)', html, re.I)
+                    if m:
+                        fmt = m.group(1).upper()
+                        ba = QtCore.QByteArray.fromBase64(m.group(2).encode('ascii'))
+                        img = QtGui.QImage()
+                        if img.loadFromData(ba, fmt):
+                            return img
+                return None
+
+            image = qimage_from_clipboard()
+
+            if image:
+                # Chuyển sang chế độ ảnh và hiển thị
+                self.answer_type = "image"
+                self.answer_widget.setCurrentWidget(self.answer_image_viewer)
+                self.answer_image_viewer.set_image(image)
+
+                # Lưu tạm bytes PNG để save xuống DB khi bấm Lưu
+                ba = QtCore.QByteArray()
+                buff = QtCore.QBuffer(ba)
+                buff.open(QtCore.QIODevice.WriteOnly)
+                image.save(buff, "PNG")
+                self.answer_data = bytes(ba)
+
+                QtWidgets.QMessageBox.information(self, "Thành công", "Đã dán ảnh đáp án từ clipboard!")
+                return
+
+            # Nếu không có ảnh, dán text bình thường vào editor
+            if md.hasText():
+                text = md.text()
+                if self.answer_widget.currentWidget() != self.answer_text_editor:
+                    # Nếu đang ở màn ảnh, chuyển về text
+                    self.add_answer("text")
+                cursor = self.answer_text_editor.textCursor()
+                cursor.insertText(text)
+                return
+
+            QtWidgets.QMessageBox.information(self, "Thông báo", "Clipboard không có nội dung phù hợp để dán.")
+        except Exception as e:
+            QtWidgets.QMessageBox.warning(self, "Lỗi", f"Không thể dán: {e}")
+    def eventFilter(self, obj, event):
+        """Bắt sự kiện keyboard cho text editor - SỬA LỖI ATTRIBUTE"""
+        # Xử lý cho nội dung câu hỏi
+        if obj == self.text_editor and event.type() == QtCore.QEvent.KeyPress:
+            if event.matches(QtGui.QKeySequence.Paste):
+                self.paste_from_clipboard()
+                return True
+
+        # ✅ SỬA: Kiểm tra widget tồn tại trước khi so sánh
+        elif (hasattr(self, 'answer_text_editor') and
+              obj == self.answer_text_editor and
+              event.type() == QtCore.QEvent.KeyPress):
+            if event.matches(QtGui.QKeySequence.Paste):
+                self.paste_answer_from_clipboard()
+                return True
+
+        return super().eventFilter(obj, event)
+
+    def add_content(self, content_type):
+        """Thêm nội dung theo loại"""
+        if content_type == "text":
+            self.content_type = "text"
+            self.content_widget.setCurrentWidget(self.text_editor)
+
+        elif content_type == "image":
+            file_path, _ = QtWidgets.QFileDialog.getOpenFileName(
+                self, "Chọn ảnh", "", "Images (*.png *.jpg *.jpeg *.gif *.bmp)")
+            if file_path:
+                self.content_type = "image"
+                pixmap = QtGui.QPixmap(file_path)
+                self.image_viewer.set_pixmap(pixmap)
+                self.content_widget.setCurrentWidget(self.image_viewer)
+
+        elif content_type == "pdf":
+            file_path, _ = QtWidgets.QFileDialog.getOpenFileName(
+                self, "Chọn PDF", "", "PDF Files (*.pdf)")
+            if file_path:
+                self.content_type = "pdf"
+                self.pdf_viewer.load_pdf(file_path)
+                self.content_widget.setCurrentWidget(self.pdf_viewer)
+
+        elif content_type == "word":
+            QtWidgets.QMessageBox.information(self, "Thông báo",
+                                              "Chức năng import Word đang phát triển")
+
+    def add_answer(self, answer_type):
+        """Thêm đáp án theo loại - GIỐNG PHẦN NỘI DUNG"""
+        if answer_type == "text":
+            self.answer_type = "text"
+            self.answer_widget.setCurrentWidget(self.answer_text_editor)
+
+        elif answer_type == "image":
+            file_path, _ = QtWidgets.QFileDialog.getOpenFileName(
+                self, "Chọn ảnh đáp án", "", "Images (*.png *.jpg *.jpeg *.gif *.bmp)")
+            if file_path:
+                self.content_type = "image"
+                pixmap = QtGui.QPixmap(file_path)
+                self.image_viewer.set_pixmap(pixmap)
+                self.content_widget.setCurrentWidget(self.image_viewer)
+
+        elif answer_type == "pdf":
+            file_path, _ = QtWidgets.QFileDialog.getOpenFileName(
+                self, "Chọn PDF đáp án", "", "PDF Files (*.pdf)")
+            if file_path:
+                self.answer_type = "pdf"
+                self.answer_pdf_viewer.load_pdf(file_path)
+                self.answer_widget.setCurrentWidget(self.answer_pdf_viewer)
+
+        elif answer_type == "word":
+            QtWidgets.QMessageBox.information(self, "Thông báo",
+                                              "Chức năng import Word đang phát triển")
+
+    def insert_latex(self):
+        """Chèn công thức LaTeX"""
+        dialog = LaTeXInputDialog(self)
+        if dialog.exec() == QtWidgets.QDialog.Accepted:
+            latex_code = dialog.get_latex()
+            if self.content_type == "text":
+                cursor = self.text_editor.textCursor()
+                cursor.insertText(f"$${latex_code}$$")
+
+    def insert_answer_latex(self):
+        """Chèn công thức LaTeX vào đáp án"""
+        # #(Phương thức chèn LaTeX cho đáp án)
+        dialog = LaTeXInputDialog(self)
+        if dialog.exec() == QtWidgets.QDialog.Accepted:
+            latex_code = dialog.get_latex()
+            if self.answer_type == "text":
+                cursor = self.answer_text_editor.textCursor()
+                cursor.insertText(f"$${latex_code}$$")
+
+    def save_question(self):
+        """Lưu câu hỏi vào database - ĐÃ SỬA LỖI"""
+
+        try:
+            if not self.tree_id:
+                QtWidgets.QMessageBox.warning(self, "Thiếu thư mục", "Vui lòng chọn vị trí lưu trong cây.")
+                return
+
+            # ✅ SỬA: Chuẩn bị dữ liệu nội dung
+            content_text = None
+            content_data = None
+
+            if self.content_type == "text":
+                content_text = (self.text_editor.toPlainText() or "").strip()
+                if not content_text:
+                    QtWidgets.QMessageBox.warning(self, "Thiếu nội dung", "Nội dung câu hỏi không được để trống.")
+                    return
+
+            elif self.content_type == "image":
+                # Ưu tiên self.content_data (đã set khi dán); nếu chưa có, lấy từ viewer
+                if self.content_data is None and self.image_viewer.current_pixmap:
+                    ba = QtCore.QByteArray()
+                    buff = QtCore.QBuffer(ba)
+                    buff.open(QtCore.QIODevice.WriteOnly)
+                    self.image_viewer.current_pixmap.toImage().save(buff, "PNG")
+                    self.content_data = bytes(ba)
+                content_data = self.content_data
+
+                if content_data is None:
+                    QtWidgets.QMessageBox.warning(self, "Thiếu nội dung", "Vui lòng chọn ảnh cho câu hỏi.")
+                    return
+
+            elif self.content_type == "pdf":
+                # ✅ THÊM: Xử lý PDF
+                if hasattr(self.pdf_viewer, 'pdf_path') and self.pdf_viewer.pdf_path:
+                    content_text = f"[PDF: {self.pdf_viewer.pdf_path}]"
+                else:
+                    QtWidgets.QMessageBox.warning(self, "Thiếu nội dung", "Vui lòng chọn file PDF.")
+                    return
+
+            # Khởi tạo answer_data
+            answer_text = None
+            answer_data = None
+
+            if self.answer_type == "text":
+                answer_text = self.answer_text_editor.toPlainText().strip()
+                if not answer_text:
+                    # Thử lấy HTML nếu có rich content
+                    answer_html = self.answer_text_editor.toHtml().strip()
+                    if self._has_images_in_html(answer_html):
+                        answer_text = answer_html
+
+            elif self.answer_type == "image":
+                # Ưu tiên self.answer_data nếu đã set khi paste
+                if self.answer_data is None and hasattr(self.answer_image_viewer,
+                                                        'current_pixmap') and self.answer_image_viewer.current_pixmap:
+                    ba = QtCore.QByteArray()
+                    buff = QtCore.QBuffer(ba)
+                    buff.open(QtCore.QIODevice.WriteOnly)
+                    self.answer_image_viewer.current_pixmap.toImage().save(buff, "PNG")
+                    self.answer_data = bytes(ba)
+                answer_data = self.answer_data
+
+            elif self.answer_type == "pdf":
+                if hasattr(self.answer_pdf_viewer, 'pdf_path') and self.answer_pdf_viewer.pdf_path:
+                    answer_text = f"[Answer PDF: {self.answer_pdf_viewer.pdf_path}]"
+
+            # Validation đơn giản hơn
+            if not answer_text and not answer_data:
+                QtWidgets.QMessageBox.warning(self, "Lỗi", "Vui lòng nhập đáp án")
+                return
+
+            # ✅ Insert/Update với error handling tốt hơn
+            if self.question_id:
+                # Update existing question
+                result = self.db.execute_query(
+                    """UPDATE question_bank
+                               SET content_text=?, content_type=?, content_data=?,
+                                   answer_text=?, answer_type=?, answer_data=?,
+                                   tree_id=?, modified_date=CURRENT_TIMESTAMP
+                               WHERE id=?""",
+                    (content_text, self.content_type, content_data,
+                     answer_text, self.answer_type, answer_data,
+                     self.tree_id, self.question_id)
+                )
+
+                if not result:
+                    QtWidgets.QMessageBox.critical(self, "Lỗi", "Không thể cập nhật câu hỏi.")
+                    return
+            else:
+                # Insert new question
+                new_id = self.db.execute_query(
+                    """INSERT INTO question_bank
+                        (content_text, content_type, content_data,
+                        answer_text, answer_type, answer_data, tree_id, created_date)
+                        VALUES (?,?,?,?,?,?,?, CURRENT_TIMESTAMP)""",
+                      (content_text, self.content_type, content_data,
+                      answer_text, self.answer_type, answer_data, self.tree_id)
+                )
+
+                if not new_id:
+                    QtWidgets.QMessageBox.critical(self, "Lỗi", "Không thể tạo câu hỏi mới.")
+                    return
+
+                self.question_id = new_id
+
+            QtWidgets.QMessageBox.information(self, "Thành công", "Đã lưu câu hỏi.")
+            self.accept()
+
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể lưu: {e}")
+            print(f"Chi tiết lỗi save_question: {e}")  # Debug log
+

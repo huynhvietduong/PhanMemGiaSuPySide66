@@ -1,0 +1,73 @@
+# Cấu trúc dự án - PhanMemGiaSuPySide6
+Tạo tự động bởi generate_tree.py
+
+app_qt.py/
+constants.py/
+Cấu Trúc Dự Án.py/
+database.py/
+file tổng/
+main_qt.py/
+migration_exercise_tree.py/
+project_structure.txt/
+ui_qt/
+├─ board/ ← Module Bảng vẽ (Drawing Board)
+│  ├─ __init__.py
+│  ├─ core/ ← Lõi render + hợp đồng (không phụ thuộc UI)
+│  │  ├─ canvas_widget.py ← Canvas trung lập: vẽ nền trắng, ảnh, lớp mực (ink)
+│  │  ├─ data_models.py ← Mẫu dữ liệu dùng chung: Stroke, Img
+│  │  ├─ layer_manager.py
+│  │  └─ tool_api.py ← Giao diện Tool (Protocol): on_activate/deactivate, events
+│  ├─ Cấu Trúc.txt
+│  ├─ io/ ← Vào/ra dữ liệu (định dạng file)
+│  │  └─ file_io.py ← Lưu/Mở .board.json với encode/decode ảnh PNG base64
+│  ├─ state/ ← Trạng thái bảng vẽ (không dính UI)
+│  │  └─ board_state.py ← Quản lý pages (strokes + images theo trang)
+│  ├─ tools/ ← Mỗi công cụ 1 file, độc lập engine
+│  │  ├─ brush_effects.py
+│  │  ├─ erase_area_tool.py ← Tẩy theo vùng: Rect/Lasso với overlay
+│  │  ├─ eraser_tool.py ← Tẩy nét freehand với CompositionMode_Clear
+│  │  ├─ pen_tool.py ← Bút vẽ freehand: Ghi Stroke(line) vào state
+│  │  ├─ screen_snip.py ← Chụp màn hình: SnipController + ScreenSnipOverlay
+│  │  ├─ select_tool.py ← Chọn/di chuyển/resize ảnh
+│  │  └─ shape_tool.py ← Vẽ hình cơ bản: line/rect/oval
+│  ├─ ui/ ← Thành phần giao diện tái sử dụng
+│  │  ├─ __init__.py
+│  │  ├─ layer_panel.py
+│  │  ├─ toolbar.py ← QToolBar đóng gói: chọn tool, màu, độ dày
+│  │  └─ width_menu.py ← Popover chọn độ dày (slider + mốc nhanh)
+│  └─ window.py ← DrawingBoardWindowQt (orchestrator): khởi tạo tất cả
+├─ core/ ← Lõi render + hợp đồng (không phụ thuộc UI)
+│  ├─ base_window.py
+│  ├─ models/
+│  │  ├─ groups_model.py
+│  │  └─ students_model.py
+│  ├─ theme.py
+│  └─ widgets/
+│     └─ search_combo.py
+├─ main_window.py
+├─ resources/
+│  └─ resources_rc.py
+└─ windows/
+   ├─ add_exercise_window_qt.py
+   ├─ assign_exercise_window_qt.py
+   ├─ assigned_exercise_manager_window_qt.py
+   ├─ attendance_report_window_qt.py
+   ├─ create_test_window_qt.py
+   ├─ dashboard_window_qt.py
+   ├─ exercise_manager_window_qt.py
+   ├─ exercise_suggestion_window_qt.py
+   ├─ exercise_tree_manager_qt.py
+   ├─ group_suggestion_window_qt.py
+   ├─ group_window_qt.py
+   ├─ package_window_qt.py
+   ├─ progress_report_window_qt.py
+   ├─ question_bank_window_qt.py
+   ├─ salary_window_qt.py
+   ├─ schedule_makeup_window_qt.py
+   ├─ session_detail_window_qt.py
+   ├─ skill_rating_window_qt.py
+   ├─ student_skill_report_window_qt.py
+   ├─ student_window_qt.py
+   ├─ submit_exercise_window_qt.py
+   └─ submitted_exercise_manager_window_qt.py
+utils.py/

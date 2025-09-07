@@ -1,0 +1,649 @@
+# dialogs/tree_manager_dialog.py
+from PySide6 import QtWidgets, QtCore, QtGui
+from PySide6.QtCore import Qt
+from .tree_node_dialog import TreeNodeDialog
+
+
+# #(Dialog quản lý cây thư mục nâng cao với đầy đủ tính năng)
+class TreeManagerDialog(QtWidgets.QDialog):
+    """Dialog quản lý cây thư mục nâng cao"""
+
+    def __init__(self, db_manager, parent=None):
+        super().__init__(parent)
+        self.db = db_manager
+        self.setWindowTitle("⚙️ Quản lý cây thư mục")
+        self.setModal(True)
+        self.resize(900, 700)
+        self.setMinimumSize(800, 600)
+
+        self._build_ui()
+        self._load_tree_data()
+        self._setup_connections()
+
+    def _build_ui(self):
+        """Xây dựng giao diện"""
+        layout = QtWidgets.QVBoxLayout(self)
+        layout.setSpacing(8)
+        layout.setContentsMargins(10, 10, 10, 10)
+
+        # Header title
+        title = QtWidgets.QLabel("🌲 Quản lý cây thư mục nâng cao")
+        title.setStyleSheet("""
+            QLabel {
+                font-size: 18px;
+                font-weight: bold;
+                color: #2E86AB;
+                padding: 10px;
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #f8f9fa, stop:1 #e9ecef);
+                border-radius: 8px;
+                border: 1px solid #dee2e6;
+            }
+        """)
+        title.setAlignment(Qt.AlignCenter)
+        layout.addWidget(title)
+
+        # Thanh tìm kiếm
+        search_layout = QtWidgets.QHBoxLayout()
+        search_layout.addWidget(QtWidgets.QLabel("🔍 Tìm kiếm:"))
+
+        self.search_input = QtWidgets.QLineEdit()
+        self.search_input.setPlaceholderText("Nhập tên node cần tìm...")
+        self.search_input.setStyleSheet("padding: 5px; border-radius: 4px; border: 1px solid #ccc;")
+        search_layout.addWidget(self.search_input)
+
+        clear_search_btn = QtWidgets.QPushButton("❌ Xóa")
+        clear_search_btn.setMaximumWidth(60)
+        clear_search_btn.clicked.connect(lambda: self.search_input.clear())
+        search_layout.addWidget(clear_search_btn)
+
+        layout.addLayout(search_layout)
+
+        # Toolbar
+        self._create_toolbar(layout)
+
+        # Tree widget với styling đẹp
+        self._create_tree_widget(layout)
+
+        # Panel thông tin node được chọn
+        self._create_info_panel(layout)
+
+        # Button layout
+        self._create_button_layout(layout)
+
+    def _create_toolbar(self, parent_layout):
+        """Tạo toolbar với các action"""
+        toolbar = QtWidgets.QToolBar()
+        toolbar.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+        toolbar.setStyleSheet("""
+            QToolBar {
+                background: #f8f9fa;
+                border: 1px solid #dee2e6;
+                border-radius: 6px;
+                padding: 5px;
+                spacing: 5px;
+            }
+            QToolBar QToolButton {
+                padding: 6px 10px;
+                border-radius: 4px;
+                border: 1px solid transparent;
+            }
+            QToolBar QToolButton:hover {
+                background: #e9ecef;
+                border: 1px solid #ced4da;
+            }
+        """)
+
+        # Actions
+        self.add_action = toolbar.addAction("➕ Thêm nhánh")
+        self.add_action.triggered.connect(self._add_node)
+
+        self.edit_action = toolbar.addAction("✏️ Sửa nhánh")
+        self.edit_action.triggered.connect(self._edit_node)
+        self.edit_action.setEnabled(False)
+
+        self.delete_action = toolbar.addAction("🗑️ Xóa nhánh")
+        self.delete_action.triggered.connect(self._delete_node)
+        self.delete_action.setEnabled(False)
+
+        toolbar.addSeparator()
+
+        self.copy_action = toolbar.addAction("📋 Sao chép")
+        self.copy_action.triggered.connect(self._copy_node)
+        self.copy_action.setEnabled(False)
+
+        toolbar.addSeparator()
+
+        self.expand_action = toolbar.addAction("📖 Mở rộng tất cả")
+        self.expand_action.triggered.connect(lambda: self.tree_table.expandAll())
+
+        self.collapse_action = toolbar.addAction("📚 Thu gọn tất cả")
+        self.collapse_action.triggered.connect(lambda: self.tree_table.collapseAll())
+
+        toolbar.addSeparator()
+
+        self.export_action = toolbar.addAction("📤 Xuất cấu trúc")
+        self.export_action.triggered.connect(self._export_structure)
+
+        self.import_action = toolbar.addAction("📥 Nhập cấu trúc")
+        self.import_action.triggered.connect(self._import_structure)
+
+        parent_layout.addWidget(toolbar)
+
+    def _create_tree_widget(self, parent_layout):
+        """Tạo tree widget với styling"""
+        self.tree_table = QtWidgets.QTreeWidget()
+        self.tree_table.setHeaderLabels(["📝 Tên", "🏷️ Cấp độ", "📊 Số câu hỏi", "📄 Mô tả"])
+
+        # Đặt độ rộng cột
+        self.tree_table.setColumnWidth(0, 300)
+        self.tree_table.setColumnWidth(1, 120)
+        self.tree_table.setColumnWidth(2, 100)
+        self.tree_table.setColumnWidth(3, 250)
+
+        # Styling cho tree
+        self.tree_table.setStyleSheet("""
+            QTreeWidget {
+                border: 1px solid #dee2e6;
+                border-radius: 8px;
+                background: white;
+                alternate-background-color: #f8f9fa;
+                font-size: 13px;
+            }
+            QTreeWidget::item {
+                padding: 8px;
+                border-bottom: 1px solid #f0f0f0;
+            }
+            QTreeWidget::item:selected {
+                background: #007bff;
+                color: white;
+            }
+            QTreeWidget::item:hover {
+                background: #e3f2fd;
+            }
+            QTreeWidget::branch:has-children {
+                image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiI+PGNpcmNsZSBjeD0iOCIgY3k9IjgiIHI9IjQiIGZpbGw9IiM2YzU3ZGQiLz48L3N2Zz4=');
+            }
+            QHeaderView::section {
+                background: #f8f9fa;
+                border: 1px solid #dee2e6;
+                padding: 8px;
+                font-weight: bold;
+            }
+        """)
+
+        # Enable features
+        self.tree_table.setAlternatingRowColors(True)
+        self.tree_table.setRootIsDecorated(True)
+        self.tree_table.setExpandsOnDoubleClick(False)
+        self.tree_table.setSortingEnabled(True)
+
+        parent_layout.addWidget(self.tree_table)
+
+    def _create_info_panel(self, parent_layout):
+        """Tạo panel thông tin node được chọn"""
+        info_group = QtWidgets.QGroupBox("ℹ️ Thông tin chi tiết")
+        info_group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                border: 1px solid #ced4da;
+                border-radius: 6px;
+                margin-top: 10px;
+                padding-top: 10px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px 0 5px;
+            }
+        """)
+        info_layout = QtWidgets.QFormLayout(info_group)
+
+        self.info_id = QtWidgets.QLabel("Chưa chọn node")
+        self.info_name = QtWidgets.QLabel("-")
+        self.info_level = QtWidgets.QLabel("-")
+        self.info_parent = QtWidgets.QLabel("-")
+        self.info_children_count = QtWidgets.QLabel("-")
+        self.info_question_count = QtWidgets.QLabel("-")
+        self.info_created = QtWidgets.QLabel("-")
+
+        info_layout.addRow("🆔 ID:", self.info_id)
+        info_layout.addRow("📝 Tên:", self.info_name)
+        info_layout.addRow("🏷️ Cấp độ:", self.info_level)
+        info_layout.addRow("👆 Node cha:", self.info_parent)
+        info_layout.addRow("👶 Số node con:", self.info_children_count)
+        info_layout.addRow("❓ Số câu hỏi:", self.info_question_count)
+        info_layout.addRow("📅 Ngày tạo:", self.info_created)
+
+        info_group.setMaximumHeight(200)
+        parent_layout.addWidget(info_group)
+
+    def _create_button_layout(self, parent_layout):
+        """Tạo button layout"""
+        button_layout = QtWidgets.QHBoxLayout()
+
+        # Thống kê tổng quan
+        self.stats_label = QtWidgets.QLabel()
+        self.stats_label.setStyleSheet("color: #6c757d; font-style: italic;")
+        button_layout.addWidget(self.stats_label)
+
+        button_layout.addStretch()
+
+        # Refresh button
+        refresh_btn = QtWidgets.QPushButton("🔄 Làm mới")
+        refresh_btn.clicked.connect(self._load_tree_data)
+        button_layout.addWidget(refresh_btn)
+
+        # Close button
+        close_btn = QtWidgets.QPushButton("✅ Đóng")
+        close_btn.setStyleSheet("""
+            QPushButton {
+                background: #28a745;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background: #218838;
+            }
+        """)
+        close_btn.clicked.connect(self.accept)
+        button_layout.addWidget(close_btn)
+
+        parent_layout.addLayout(button_layout)
+
+    def _setup_connections(self):
+        """Thiết lập kết nối signals"""
+        # Tree selection changed
+        self.tree_table.itemSelectionChanged.connect(self._on_selection_changed)
+
+        # Double click to edit
+        self.tree_table.itemDoubleClicked.connect(lambda: self._edit_node())
+
+        # Context menu
+        self.tree_table.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.tree_table.customContextMenuRequested.connect(self._show_context_menu)
+
+        # Search
+        self.search_input.textChanged.connect(self._filter_tree)
+
+    def _load_tree_data(self):
+        """Load dữ liệu cây từ database"""
+        try:
+            self.tree_table.clear()
+
+            # Get all nodes
+            rows = self.db.execute_query(
+                """
+                SELECT et.*, 
+                       (SELECT COUNT(*) FROM exercise_tree WHERE parent_id = et.id) as children_count,
+                       (SELECT COUNT(*) FROM question_bank WHERE tree_id = et.id) as question_count
+                FROM exercise_tree et 
+                ORDER BY et.id
+                """,
+                fetch="all"
+            ) or []
+
+            # Build tree structure
+            nodes = {}
+            root_nodes = []
+
+            # Create tree items
+            for row in rows:
+                node_dict = dict(row)
+                item = QtWidgets.QTreeWidgetItem()
+
+                # Set data
+                item.setText(0, node_dict.get('name', ''))
+                item.setText(1, node_dict.get('level', ''))
+                item.setText(2, str(node_dict.get('question_count', 0)))
+                item.setText(3, node_dict.get('description', '')[:50] + '...'
+                if node_dict.get('description') and len(node_dict.get('description', '')) > 50
+                else node_dict.get('description', ''))
+
+                # Store full data
+                item.setData(0, Qt.UserRole, node_dict)
+
+                # Add level-based icons
+                level_icons = {
+                    'Môn': '📚',
+                    'Lớp': '🎓',
+                    'Chủ đề': '📖',
+                    'Dạng': '📝',
+                    'Mức độ': '⭐'
+                }
+                icon = level_icons.get(node_dict.get('level', ''), '📄')
+                item.setText(0, f"{icon} {node_dict.get('name', '')}")
+
+                nodes[node_dict['id']] = item
+
+                if node_dict.get('parent_id') is None:
+                    root_nodes.append(item)
+
+            # Build parent-child relationships
+            for row in rows:
+                node_dict = dict(row)
+                if node_dict.get('parent_id') and node_dict['parent_id'] in nodes:
+                    parent_item = nodes[node_dict['parent_id']]
+                    child_item = nodes[node_dict['id']]
+                    parent_item.addChild(child_item)
+
+            # Add root nodes to tree
+            for root in root_nodes:
+                self.tree_table.addTopLevelItem(root)
+
+            # Update statistics
+            total_nodes = len(nodes)
+            total_questions = sum(dict(row).get('question_count', 0) for row in rows)
+            self.stats_label.setText(f"📊 Tổng: {total_nodes} node, {total_questions} câu hỏi")
+
+            # Expand level 1
+            self.tree_table.expandToDepth(0)
+
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể load dữ liệu cây: {e}")
+
+    def _on_selection_changed(self):
+        """Xử lý khi selection thay đổi"""
+        selected_items = self.tree_table.selectedItems()
+
+        if selected_items:
+            item = selected_items[0]
+            node_data = item.data(0, Qt.UserRole)
+
+            if node_data:
+                # Update info panel
+                self.info_id.setText(str(node_data.get('id', '')))
+                self.info_name.setText(node_data.get('name', ''))
+                self.info_level.setText(node_data.get('level', ''))
+
+                # Get parent name
+                parent_id = node_data.get('parent_id')
+                if parent_id:
+                    parent_row = self.db.execute_query(
+                        "SELECT name FROM exercise_tree WHERE id = ?",
+                        (parent_id,), fetch="one"
+                    )
+                    parent_name = dict(parent_row).get('name', 'Không xác định') if parent_row else 'Không xác định'
+                else:
+                    parent_name = '(Root)'
+                self.info_parent.setText(parent_name)
+
+                self.info_children_count.setText(str(node_data.get('children_count', 0)))
+                self.info_question_count.setText(str(node_data.get('question_count', 0)))
+                self.info_created.setText('N/A')  # Nếu có trường created_at thì dùng
+
+            # Enable/disable actions
+            self.edit_action.setEnabled(True)
+            self.delete_action.setEnabled(node_data.get('children_count', 0) == 0)  # Chỉ xóa được nếu không có con
+            self.copy_action.setEnabled(True)
+        else:
+            # Clear info panel
+            self.info_id.setText("Chưa chọn node")
+            self.info_name.setText("-")
+            self.info_level.setText("-")
+            self.info_parent.setText("-")
+            self.info_children_count.setText("-")
+            self.info_question_count.setText("-")
+            self.info_created.setText("-")
+
+            # Disable actions
+            self.edit_action.setEnabled(False)
+            self.delete_action.setEnabled(False)
+            self.copy_action.setEnabled(False)
+
+    def _filter_tree(self):
+        """Lọc cây theo từ khóa tìm kiếm"""
+        search_text = self.search_input.text().lower().strip()
+
+        if not search_text:
+            # Show all items
+            self._show_all_items()
+        else:
+            # Hide/show items based on search
+            self._filter_items_recursive(self.tree_table.invisibleRootItem(), search_text)
+
+    def _show_all_items(self):
+        """Hiển thị tất cả items"""
+        iterator = QtWidgets.QTreeWidgetItemIterator(self.tree_table)
+        while iterator.value():
+            iterator.value().setHidden(False)
+            iterator += 1
+
+    def _filter_items_recursive(self, parent_item, search_text):
+        """Đệ quy filter items"""
+        for i in range(parent_item.childCount()):
+            child = parent_item.child(i)
+            child_text = child.text(0).lower()
+
+            # Check if this item or any descendant matches
+            should_show = search_text in child_text or self._has_matching_descendant(child, search_text)
+            child.setHidden(not should_show)
+
+            # If showing, expand to show children
+            if should_show:
+                child.setExpanded(True)
+
+            # Continue recursively
+            self._filter_items_recursive(child, search_text)
+
+    def _has_matching_descendant(self, item, search_text):
+        """Kiểm tra có con nào match không"""
+        for i in range(item.childCount()):
+            child = item.child(i)
+            if search_text in child.text(0).lower():
+                return True
+            if self._has_matching_descendant(child, search_text):
+                return True
+        return False
+
+    def _add_node(self):
+        """Thêm node mới"""
+        selected_items = self.tree_table.selectedItems()
+        parent_id = None
+
+        if selected_items:
+            parent_data = selected_items[0].data(0, Qt.UserRole)
+            parent_id = parent_data.get('id') if parent_data else None
+
+        dialog = TreeNodeDialog(self.db, mode="add", parent=self)
+        if parent_id:
+            dialog.set_parent_id(parent_id)
+
+        if dialog.exec() == QtWidgets.QDialog.Accepted:
+            self._load_tree_data()
+            QtWidgets.QMessageBox.information(self, "Thành công", "Đã thêm node mới!")
+
+    def _edit_node(self):
+        """Sửa node được chọn"""
+        selected_items = self.tree_table.selectedItems()
+        if not selected_items:
+            QtWidgets.QMessageBox.warning(self, "Chưa chọn", "Vui lòng chọn node để sửa")
+            return
+
+        node_data = selected_items[0].data(0, Qt.UserRole)
+        if not node_data:
+            return
+
+        dialog = TreeNodeDialog(self.db, mode="edit", node_id=node_data['id'], parent=self)
+        if dialog.exec() == QtWidgets.QDialog.Accepted:
+            self._load_tree_data()
+            QtWidgets.QMessageBox.information(self, "Thành công", "Đã cập nhật node!")
+
+    def _delete_node(self):
+        """Xóa node được chọn"""
+        selected_items = self.tree_table.selectedItems()
+        if not selected_items:
+            QtWidgets.QMessageBox.warning(self, "Chưa chọn", "Vui lòng chọn node để xóa")
+            return
+
+        node_data = selected_items[0].data(0, Qt.UserRole)
+        if not node_data:
+            return
+
+        # Kiểm tra có children không
+        if node_data.get('children_count', 0) > 0:
+            QtWidgets.QMessageBox.warning(
+                self, "Không thể xóa",
+                f"Node '{node_data['name']}' có {node_data['children_count']} node con.\n"
+                "Vui lòng xóa các node con trước."
+            )
+            return
+
+        # Kiểm tra có câu hỏi không
+        if node_data.get('question_count', 0) > 0:
+            reply = QtWidgets.QMessageBox.question(
+                self, "Xác nhận xóa",
+                f"Node '{node_data['name']}' có {node_data['question_count']} câu hỏi.\n"
+                "Bạn có chắc muốn xóa? (Các câu hỏi sẽ không bị xóa nhưng sẽ mất liên kết)",
+                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No
+            )
+        else:
+            reply = QtWidgets.QMessageBox.question(
+                self, "Xác nhận xóa",
+                f"Bạn có chắc muốn xóa node '{node_data['name']}'?",
+                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No
+            )
+
+        if reply == QtWidgets.QMessageBox.Yes:
+            try:
+                self.db.execute_query("DELETE FROM exercise_tree WHERE id = ?", (node_data['id'],))
+                self._load_tree_data()
+                QtWidgets.QMessageBox.information(self, "Thành công", "Đã xóa node!")
+            except Exception as e:
+                QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể xóa node: {e}")
+
+    def _copy_node(self):
+        """Sao chép node được chọn"""
+        selected_items = self.tree_table.selectedItems()
+        if not selected_items:
+            QtWidgets.QMessageBox.warning(self, "Chưa chọn", "Vui lòng chọn node để sao chép")
+            return
+
+        node_data = selected_items[0].data(0, Qt.UserRole)
+        if not node_data:
+            return
+
+        try:
+            new_name = f"{node_data['name']} (Sao chép)"
+            self.db.execute_query(
+                "INSERT INTO exercise_tree (parent_id, name, level, description) VALUES (?, ?, ?, ?)",
+                (node_data.get('parent_id'), new_name, node_data.get('level'), node_data.get('description'))
+            )
+            self._load_tree_data()
+            QtWidgets.QMessageBox.information(self, "Thành công", f"Đã sao chép node '{new_name}'!")
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể sao chép node: {e}")
+
+    def _export_structure(self):
+        """Xuất cấu trúc cây ra file JSON"""
+        try:
+            file_path, _ = QtWidgets.QFileDialog.getSaveFileName(
+                self, "Xuất cấu trúc cây", "tree_structure.json", "JSON files (*.json)"
+            )
+
+            if not file_path:
+                return
+
+            # Get all data
+            rows = self.db.execute_query("SELECT * FROM exercise_tree ORDER BY id", fetch="all") or []
+            data = [dict(row) for row in rows]
+
+            # Save to file
+            import json
+            with open(file_path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+
+            QtWidgets.QMessageBox.information(self, "Thành công", f"Đã xuất cấu trúc ra file:\n{file_path}")
+
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể xuất file: {e}")
+
+    def _import_structure(self):
+        """Nhập cấu trúc cây từ file JSON"""
+        try:
+            file_path, _ = QtWidgets.QFileDialog.getOpenFileName(
+                self, "Nhập cấu trúc cây", "", "JSON files (*.json)"
+            )
+
+            if not file_path:
+                return
+
+            # Confirm import
+            reply = QtWidgets.QMessageBox.question(
+                self, "Xác nhận nhập",
+                "Thao tác này sẽ thêm các node mới vào cây hiện tại.\nBạn có muốn tiếp tục?",
+                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No
+            )
+
+            if reply != QtWidgets.QMessageBox.Yes:
+                return
+
+            # Read and import
+            import json
+            with open(file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+
+            imported_count = 0
+            for item in data:
+                try:
+                    # Check if already exists
+                    existing = self.db.execute_query(
+                        "SELECT id FROM exercise_tree WHERE name = ? AND level = ?",
+                        (item.get('name'), item.get('level')), fetch="one"
+                    )
+
+                    if not existing:
+                        self.db.execute_query(
+                            "INSERT INTO exercise_tree (parent_id, name, level, description) VALUES (?, ?, ?, ?)",
+                            (item.get('parent_id'), item.get('name'), item.get('level'), item.get('description'))
+                        )
+                        imported_count += 1
+                except:
+                    continue  # Skip invalid items
+
+            self._load_tree_data()
+            QtWidgets.QMessageBox.information(self, "Thành công", f"Đã nhập {imported_count} node mới!")
+
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể nhập file: {e}")
+
+    def _show_context_menu(self, position):
+        """Hiển thị context menu"""
+        item = self.tree_table.itemAt(position)
+
+        menu = QtWidgets.QMenu(self)
+
+        # Add actions
+        add_action = menu.addAction("➕ Thêm nhánh")
+        add_action.triggered.connect(self._add_node)
+
+        if item:
+            node_data = item.data(0, Qt.UserRole)
+
+            add_child_action = menu.addAction("👶 Thêm nhánh con")
+            add_child_action.triggered.connect(self._add_node)
+
+            menu.addSeparator()
+
+            edit_action = menu.addAction("✏️ Sửa")
+            edit_action.triggered.connect(self._edit_node)
+
+            copy_action = menu.addAction("📋 Sao chép")
+            copy_action.triggered.connect(self._copy_node)
+
+            if node_data and node_data.get('children_count', 0) == 0:
+                delete_action = menu.addAction("🗑️ Xóa")
+                delete_action.triggered.connect(self._delete_node)
+
+            menu.addSeparator()
+
+            expand_action = menu.addAction("📖 Mở rộng")
+            expand_action.triggered.connect(lambda: item.setExpanded(True))
+
+            collapse_action = menu.addAction("📚 Thu gọn")
+            collapse_action.triggered.connect(lambda: item.setExpanded(False))
+
+        menu.exec(self.tree_table.mapToGlobal(position))

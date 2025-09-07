@@ -1,0 +1,16 @@
+2025-09-06 13:19:45,887 - __main__ - INFO - ======================================================================
+2025-09-06 13:19:45,887 - __main__ - INFO - 🚀 Starting Dashboard Desktop Application
+2025-09-06 13:19:45,887 - __main__ - INFO - ======================================================================
+2025-09-06 13:19:45,910 - __main__ - INFO - ✓ Application initialized
+2025-09-06 13:19:48,018 - __main__ - INFO - ✓ Directory structure ready (mode: main)
+2025-09-06 13:19:48,026 - __main__ - INFO - ✓ Database connected
+2025-09-06 13:19:48,084 - ui_qt.windows.dashboard_window_qt.utils.assets - INFO - Assets manager đã khởi tạo
+2025-09-06 13:19:48,089 - __main__ - INFO - Loading MainDashboard (Desktop-Style)...
+2025-09-06 13:19:48,099 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã load settings từ C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 13:19:48,100 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã load vị trí 4 icons
+2025-09-06 13:19:48,131 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 13:19:48,131 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Wallpaper set: default (mode: fill)
+2025-09-06 13:19:48,131 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Desktop settings loaded
+2025-09-06 13:19:48,131 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Desktop Area initialized
+2025-09-06 13:19:48,131 - __main__ - ERROR - Failed to load dashboard: 'PySide6.QtWidgets.QMdiArea' object has no attribute 'setWidget'
+2025-09-06 13:19:48,151 - __main__ - ERROR - ✗ Failed to create window: 'PySide6.QtWidgets.QMdiArea' object has no attribute 'setWidget'

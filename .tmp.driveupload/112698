@@ -1,0 +1,616 @@
+# utils/__init__.py
+
+# #(Utils package cho question bank - tổng hợp tất cả helper functions)
+
+from .question_helpers import (
+    # Database helpers
+    row_to_dict,
+    safe_get,
+    validate_question_data,
+    format_question_content,
+    extract_text_from_html,
+
+    # Question processing
+    process_question_tags,
+    generate_question_preview,
+    calculate_question_difficulty_score,
+
+    # Tree structure
+    get_tree_path,
+    get_all_subtree_ids,
+    validate_tree_node_data,
+
+    # Date/time helpers
+    format_datetime,
+    get_relative_time,
+
+    # Search & filter
+    create_search_pattern,
+    build_filter_query,
+
+    # Utilities
+    sanitize_filename,
+    generate_unique_id,
+    chunks,
+    deep_merge_dicts
+)
+
+from .import_export import (
+    # JSON import/export
+    export_questions_to_json,
+    import_questions_from_json,
+
+    # Word import/export
+    export_questions_to_word,
+    import_questions_from_word,
+
+    # PDF export
+    export_questions_to_pdf,
+
+    # CSV import/export
+    export_questions_to_csv,
+    import_questions_from_csv,
+
+    # Templates
+    create_import_template,
+
+    # UI helpers
+    show_export_dialog
+)
+import os
+
+# ========== COMBINED UTILITIES ========== #
+
+class QuestionBankUtils:
+    """
+    Utility class tổng hợp tất cả helper functions cho Question Bank
+    """
+
+    def __init__(self, db_manager):
+        self.db = db_manager
+
+    # ========== DATABASE OPERATIONS ========== #
+
+    def get_question_by_id(self, question_id: int) -> dict:
+        """Lấy câu hỏi theo ID với error handling"""
+        try:
+            row = self.db.execute_query(
+                "SELECT * FROM question_bank WHERE id = ?",
+                (question_id,), fetch="one"
+            )
+            return row_to_dict(row) if row else {}
+        except Exception as e:
+            print(f"⚠️ Lỗi get question by ID: {e}")
+            return {}
+
+    def get_questions_by_tree(self, tree_id: int, include_subtrees: bool = False) -> list:
+        """Lấy câu hỏi theo tree ID"""
+        try:
+            if include_subtrees:
+                # Get all subtree IDs
+                all_tree_ids = get_all_subtree_ids(self.db, tree_id)
+                placeholders = ','.join(['?' for _ in all_tree_ids])
+                query = f"SELECT * FROM question_bank WHERE tree_id IN ({placeholders}) ORDER BY created_date DESC"
+                rows = self.db.execute_query(query, all_tree_ids, fetch="all") or []
+            else:
+                rows = self.db.execute_query(
+                    "SELECT * FROM question_bank WHERE tree_id = ? ORDER BY created_date DESC",
+                    (tree_id,), fetch="all"
+                ) or []
+
+            return [row_to_dict(row) for row in rows]
+        except Exception as e:
+            print(f"⚠️ Lỗi get questions by tree: {e}")
+            return []
+
+    def search_questions(self, keyword: str, filters: dict = None) -> list:
+        """Tìm kiếm câu hỏi với filters"""
+        try:
+            base_query = "SELECT * FROM question_bank WHERE 1=1"
+            params = []
+
+            # Add search keyword
+            if keyword:
+                pattern = create_search_pattern(keyword)
+                base_query += " AND (content_text LIKE ? OR correct LIKE ?)"
+                params.extend([pattern, pattern])
+
+            # Add filters
+            if filters:
+                where_clause, filter_params = build_filter_query(filters)
+                if where_clause != "1=1":
+                    base_query += f" AND ({where_clause})"
+                    params.extend(filter_params)
+
+            base_query += " ORDER BY created_date DESC"
+
+            rows = self.db.execute_query(base_query, params, fetch="all") or []
+            return [row_to_dict(row) for row in rows]
+        except Exception as e:
+            print(f"⚠️ Lỗi search questions: {e}")
+            return []
+
+    def duplicate_question(self, question_id: int, new_tree_id: int = None) -> bool:
+        """Sao chép câu hỏi"""
+        try:
+            original = self.get_question_by_id(question_id)
+            if not original:
+                return False
+
+            # Prepare new question data
+            new_question = original.copy()
+            new_question.pop('id', None)  # Remove ID
+            new_question['content_text'] = f"{original.get('content_text', '')} (Sao chép)"
+            if new_tree_id:
+                new_question['tree_id'] = new_tree_id
+
+            # Insert new question
+            fields = ', '.join(new_question.keys())
+            placeholders = ', '.join(['?' for _ in new_question])
+            query = f"INSERT INTO question_bank ({fields}) VALUES ({placeholders})"
+
+            self.db.execute_query(query, list(new_question.values()))
+            return True
+        except Exception as e:
+            print(f"⚠️ Lỗi duplicate question: {e}")
+            return False
+
+    # ========== TREE OPERATIONS ========== #
+
+    def get_tree_node_by_id(self, node_id: int) -> dict:
+        """Lấy tree node theo ID"""
+        try:
+            row = self.db.execute_query(
+                "SELECT * FROM exercise_tree WHERE id = ?",
+                (node_id,), fetch="one"
+            )
+            return row_to_dict(row) if row else {}
+        except Exception as e:
+            print(f"⚠️ Lỗi get tree node: {e}")
+            return {}
+
+    def get_tree_hierarchy(self, root_id: int = None) -> dict:
+        """Lấy cấu trúc cây dạng hierarchy"""
+        try:
+            # Get all nodes
+            if root_id:
+                all_ids = get_all_subtree_ids(self.db, root_id)
+                placeholders = ','.join(['?' for _ in all_ids])
+                query = f"SELECT * FROM exercise_tree WHERE id IN ({placeholders}) ORDER BY parent_id, name"
+                rows = self.db.execute_query(query, all_ids, fetch="all") or []
+            else:
+                rows = self.db.execute_query(
+                    "SELECT * FROM exercise_tree ORDER BY parent_id, name",
+                    fetch="all"
+                ) or []
+
+            # Build hierarchy
+            nodes = {}
+            hierarchy = {}
+
+            for row in rows:
+                node_dict = row_to_dict(row)
+                node_id = node_dict['id']
+                parent_id = node_dict.get('parent_id')
+
+                nodes[node_id] = node_dict
+                nodes[node_id]['children'] = []
+
+                if parent_id is None:
+                    hierarchy[node_id] = node_dict
+                elif parent_id in nodes:
+                    nodes[parent_id]['children'].append(node_dict)
+
+            return hierarchy
+        except Exception as e:
+            print(f"⚠️ Lỗi get tree hierarchy: {e}")
+            return {}
+
+    def move_questions_to_tree(self, question_ids: list, target_tree_id: int) -> bool:
+        """Di chuyển câu hỏi sang tree khác"""
+        try:
+            if not question_ids:
+                return False
+
+            placeholders = ','.join(['?' for _ in question_ids])
+            query = f"UPDATE question_bank SET tree_id = ? WHERE id IN ({placeholders})"
+
+            self.db.execute_query(query, [target_tree_id] + question_ids)
+            return True
+        except Exception as e:
+            print(f"⚠️ Lỗi move questions: {e}")
+            return False
+
+    # ========== STATISTICS ========== #
+
+    def get_question_statistics(self) -> dict:
+        """Lấy thống kê câu hỏi tổng quan"""
+        try:
+            stats = {}
+
+            # Total questions
+            total = self.db.execute_query(
+                "SELECT COUNT(*) as count FROM question_bank WHERE status = 'active'",
+                fetch="one"
+            )
+            stats['total_questions'] = row_to_dict(total).get('count', 0)
+
+            # By difficulty
+            difficulty_stats = self.db.execute_query(
+                "SELECT difficulty_level, COUNT(*) as count FROM question_bank WHERE status = 'active' GROUP BY difficulty_level",
+                fetch="all"
+            ) or []
+            stats['by_difficulty'] = {row_to_dict(row)['difficulty_level']: row_to_dict(row)['count'] for row in
+                                      difficulty_stats}
+
+            # By content type
+            type_stats = self.db.execute_query(
+                "SELECT content_type, COUNT(*) as count FROM question_bank WHERE status = 'active' GROUP BY content_type",
+                fetch="all"
+            ) or []
+            stats['by_type'] = {row_to_dict(row)['content_type']: row_to_dict(row)['count'] for row in type_stats}
+
+            # By tree
+            tree_stats = self.db.execute_query(
+                """
+                SELECT et.name, COUNT(qb.id) as count 
+                FROM exercise_tree et 
+                LEFT JOIN question_bank qb ON et.id = qb.tree_id AND qb.status = 'active'
+                GROUP BY et.id, et.name
+                ORDER BY count DESC
+                """,
+                fetch="all"
+            ) or []
+            stats['by_tree'] = {row_to_dict(row)['name']: row_to_dict(row)['count'] for row in tree_stats}
+
+            return stats
+        except Exception as e:
+            print(f"⚠️ Lỗi get statistics: {e}")
+            return {}
+
+    def get_tree_statistics(self, tree_id: int) -> dict:
+        """Lấy thống kê của một tree cụ thể"""
+        try:
+            stats = {}
+
+            # Question count in this tree
+            count = self.db.execute_query(
+                "SELECT COUNT(*) as count FROM question_bank WHERE tree_id = ? AND status = 'active'",
+                (tree_id,), fetch="one"
+            )
+            stats['question_count'] = row_to_dict(count).get('count', 0)
+
+            # Children count
+            children = self.db.execute_query(
+                "SELECT COUNT(*) as count FROM exercise_tree WHERE parent_id = ?",
+                (tree_id,), fetch="one"
+            )
+            stats['children_count'] = row_to_dict(children).get('count', 0)
+
+            # Path
+            stats['path'] = get_tree_path(self.db, tree_id)
+
+            # Difficulty distribution
+            difficulty_dist = self.db.execute_query(
+                "SELECT difficulty_level, COUNT(*) as count FROM question_bank WHERE tree_id = ? AND status = 'active' GROUP BY difficulty_level",
+                (tree_id,), fetch="all"
+            ) or []
+            stats['difficulty_distribution'] = {row_to_dict(row)['difficulty_level']: row_to_dict(row)['count'] for row
+                                                in difficulty_dist}
+
+            return stats
+        except Exception as e:
+            print(f"⚠️ Lỗi get tree statistics: {e}")
+            return {}
+
+    # ========== VALIDATION ========== #
+
+    def validate_question_import(self, questions_data: list) -> dict:
+        """Validate dữ liệu trước khi import"""
+        results = {
+            'valid': [],
+            'invalid': [],
+            'warnings': [],
+            'total': len(questions_data)
+        }
+
+        for i, question_data in enumerate(questions_data):
+            errors = validate_question_data(question_data)
+
+            if not errors:
+                results['valid'].append(i)
+            else:
+                results['invalid'].append({
+                    'index': i,
+                    'errors': errors,
+                    'data': question_data
+                })
+
+            # Check for warnings
+            warnings = []
+            if not question_data.get('difficulty_level'):
+                warnings.append("Không có độ khó")
+            if not question_data.get('correct'):
+                warnings.append("Không có đáp án")
+
+            if warnings:
+                results['warnings'].append({
+                    'index': i,
+                    'warnings': warnings
+                })
+
+        return results
+
+    def cleanup_questions(self, dry_run: bool = True) -> dict:
+        """Dọn dẹp câu hỏi (xóa duplicate, orphaned, v.v.)"""
+        try:
+            results = {
+                'duplicates_found': 0,
+                'orphaned_found': 0,
+                'invalid_found': 0,
+                'actions_taken': []
+            }
+
+            # Find duplicates (same content)
+            duplicates = self.db.execute_query(
+                """
+                SELECT content_text, COUNT(*) as count, GROUP_CONCAT(id) as ids
+                FROM question_bank 
+                WHERE status = 'active'
+                GROUP BY content_text 
+                HAVING count > 1
+                """,
+                fetch="all"
+            ) or []
+
+            for dup in duplicates:
+                dup_dict = row_to_dict(dup)
+                ids = dup_dict['ids'].split(',')
+                results['duplicates_found'] += len(ids) - 1  # Keep first, count others as duplicates
+
+                if not dry_run:
+                    # Keep first, delete others
+                    ids_to_delete = ids[1:]
+                    placeholders = ','.join(['?' for _ in ids_to_delete])
+                    self.db.execute_query(
+                        f"UPDATE question_bank SET status = 'deleted' WHERE id IN ({placeholders})",
+                        ids_to_delete
+                    )
+                    results['actions_taken'].append(f"Deleted {len(ids_to_delete)} duplicate questions")
+
+            # Find orphaned questions (invalid tree_id)
+            orphaned = self.db.execute_query(
+                """
+                SELECT qb.id FROM question_bank qb
+                LEFT JOIN exercise_tree et ON qb.tree_id = et.id
+                WHERE et.id IS NULL AND qb.status = 'active'
+                """,
+                fetch="all"
+            ) or []
+
+            results['orphaned_found'] = len(orphaned)
+
+            if not dry_run and orphaned:
+                orphaned_ids = [row_to_dict(row)['id'] for row in orphaned]
+                placeholders = ','.join(['?' for _ in orphaned_ids])
+                self.db.execute_query(
+                    f"UPDATE question_bank SET status = 'orphaned' WHERE id IN ({placeholders})",
+                    orphaned_ids
+                )
+                results['actions_taken'].append(f"Marked {len(orphaned_ids)} orphaned questions")
+
+            return results
+        except Exception as e:
+            print(f"⚠️ Lỗi cleanup questions: {e}")
+            return {'error': str(e)}
+
+
+# ========== QUICK ACCESS FUNCTIONS ========== #
+
+def quick_export_questions(db_manager, tree_id: int, file_format: str, file_path: str, **options) -> bool:
+    """
+    Quick export function
+
+    Args:
+        db_manager: Database manager
+        tree_id: Tree ID to export from
+        file_format: 'json', 'word', 'pdf', 'csv'
+        file_path: Output file path
+        **options: Additional options for export
+
+    Returns:
+        bool: Success status
+    """
+    try:
+        utils = QuestionBankUtils(db_manager)
+        questions = utils.get_questions_by_tree(tree_id, options.get('include_subtrees', False))
+
+        if not questions:
+            return False
+
+        if file_format.lower() == 'json':
+            content = export_questions_to_json(questions, options.get('include_metadata', True))
+            with open(file_path, 'w', encoding='utf-8') as f:
+                f.write(content)
+        elif file_format.lower() == 'word':
+            return export_questions_to_word(questions, file_path, options.get('include_answers', True))
+        elif file_format.lower() == 'pdf':
+            return export_questions_to_pdf(questions, file_path,
+                                           options.get('include_answers', True),
+                                           options.get('separate_answers', False))
+        elif file_format.lower() == 'csv':
+            return export_questions_to_csv(questions, file_path, options.get('delimiter', ','))
+
+        return True
+    except Exception as e:
+        print(f"⚠️ Lỗi quick export: {e}")
+        return False
+
+
+def quick_import_questions(db_manager, file_path: str, target_tree_id: int, **options) -> dict:
+    """
+    Quick import function with auto-detect format
+
+    Args:
+        db_manager: Database manager
+        file_path: Input file path
+        target_tree_id: Target tree ID
+        **options: Additional options
+
+    Returns:
+        dict: Import results
+    """
+    try:
+        file_ext = os.path.splitext(file_path)[1].lower()
+
+        if file_ext == '.json':
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            return import_questions_from_json(content, db_manager, target_tree_id)
+
+        elif file_ext == '.docx':
+            return import_questions_from_word(file_path, db_manager, target_tree_id,
+                                              options.get('pattern_config'))
+
+        elif file_ext == '.csv':
+            return import_questions_from_csv(file_path, db_manager, target_tree_id,
+                                             options.get('delimiter', ','),
+                                             options.get('mapping'))
+
+        else:
+            raise ValueError(f"Định dạng file không được hỗ trợ: {file_ext}")
+
+    except Exception as e:
+        return {
+            'success': 0,
+            'errors': 1,
+            'error_details': [str(e)],
+            'total': 1
+        }
+
+
+def batch_process_questions(db_manager, question_ids: list, operation: str, **params) -> dict:
+    """
+    Batch process multiple questions
+
+    Args:
+        db_manager: Database manager
+        question_ids: List of question IDs
+        operation: 'move', 'delete', 'update_difficulty', 'add_tags'
+        **params: Operation parameters
+
+    Returns:
+        dict: Process results
+    """
+    try:
+        utils = QuestionBankUtils(db_manager)
+        success_count = 0
+        error_count = 0
+        errors = []
+
+        for question_id in question_ids:
+            try:
+                if operation == 'move':
+                    if utils.move_questions_to_tree([question_id], params['target_tree_id']):
+                        success_count += 1
+                    else:
+                        error_count += 1
+
+                elif operation == 'delete':
+                    db_manager.execute_query(
+                        "UPDATE question_bank SET status = 'deleted' WHERE id = ?",
+                        (question_id,)
+                    )
+                    success_count += 1
+
+                elif operation == 'update_difficulty':
+                    db_manager.execute_query(
+                        "UPDATE question_bank SET difficulty_level = ? WHERE id = ?",
+                        (params['difficulty'], question_id)
+                    )
+                    success_count += 1
+
+                elif operation == 'add_tags':
+                    for tag in params['tags']:
+                        db_manager.execute_query(
+                            "INSERT OR IGNORE INTO question_tags (question_id, tag_name) VALUES (?, ?)",
+                            (question_id, tag)
+                        )
+                    success_count += 1
+
+            except Exception as e:
+                errors.append(f"Question {question_id}: {str(e)}")
+                error_count += 1
+
+        return {
+            'success': success_count,
+            'errors': error_count,
+            'error_details': errors,
+            'total': len(question_ids)
+        }
+
+    except Exception as e:
+        return {
+            'success': 0,
+            'errors': len(question_ids),
+            'error_details': [str(e)],
+            'total': len(question_ids)
+        }
+
+
+# ========== EXPORTS ========== #
+
+__all__ = [
+    # Question helpers
+    'row_to_dict',
+    'safe_get',
+    'validate_question_data',
+    'format_question_content',
+    'extract_text_from_html',
+    'process_question_tags',
+    'generate_question_preview',
+    'calculate_question_difficulty_score',
+
+    # Tree helpers
+    'get_tree_path',
+    'get_all_subtree_ids',
+    'validate_tree_node_data',
+
+    # Date/time
+    'format_datetime',
+    'get_relative_time',
+
+    # Search & filter
+    'create_search_pattern',
+    'build_filter_query',
+
+    # Import/Export
+    'export_questions_to_json',
+    'import_questions_from_json',
+    'export_questions_to_word',
+    'import_questions_from_word',
+    'export_questions_to_pdf',
+    'export_questions_to_csv',
+    'import_questions_from_csv',
+    'create_import_template',
+    'show_export_dialog',
+
+    # Utilities
+    'sanitize_filename',
+    'generate_unique_id',
+    'chunks',
+    'deep_merge_dicts',
+
+    # Main utility class
+    'QuestionBankUtils',
+
+    # Quick functions
+    'quick_export_questions',
+    'quick_import_questions',
+    'batch_process_questions'
+]
+
+# ========== VERSION INFO ========== #
+__version__ = '1.0.0'
+__author__ = 'Question Bank Team'
+__description__ = 'Comprehensive utilities package for Question Bank operations'

@@ -1,0 +1,96 @@
+C:\Users\lenovo\PycharmProjects\PhanMemGiaSuPySide6\.venv\Scripts\python.exe C:\Users\lenovo\PycharmProjects\PhanMemGiaSuPySide6\ui_qt\windows\question_bank_module\tree_folder.py
+🔍 Đang quét thư mục: C:\Users\lenovo\PycharmProjects\PhanMemGiaSuPySide6\ui_qt\windows\question_bank_module
+📁 question_bank_module/
+│
+├── 📁 core/
+│   ├── 🐍 __init__.py
+│   ├── 🐍 base_widgets.py
+│   ├── 🐍 constants.py
+│   └── 🐍 exceptions.py
+├── 📁 database/
+│   ├── 🐍 __init__.py
+│   ├── 🐍 models.py
+│   └── 🐍 queries.py
+├── 📁 manager/
+│   ├── 🐍 __init__.py
+│   ├── 🐍 import_export_manager.py
+│   ├── 🐍 preview_manager.py
+│   ├── 🐍 question_manager.py
+│   ├── 🐍 search_manager.py
+│   └── 🐍 tree_manager.py
+├── 📁 resources/
+│   ├── 🐍 __init__.py
+│   ├── 🐍 icons.py
+│   ├── 🐍 templates.py
+│   └── 🐍 translation.py
+├── 📁 services/
+│   ├── 🐍 __init__.py
+│   ├── 🐍 export_service.py
+│   ├── 🐍 import_service.py
+│   └── 🐍 template_service.py
+├── 📁 styles/
+│   ├── 🐍 __init__.py
+│   ├── 🐍 stylesheets.py
+│   └── 🐍 themes.py
+├── 📁 tests/
+│   ├── 🐍 __init__.py
+│   ├── 🐍 fixtures.py
+│   ├── 🐍 test_utils.py
+│   ├── 🐍 test_widgets.py
+│   └── 🐍 tets_managers.py
+├── 📁 ui/
+│   ├── 📁 dialogs/
+│   │   ├── 🐍 __init__.py
+│   │   ├── 🐍 folder_select_dialog.py
+│   │   ├── 🐍 question_detail_dialog.py
+│   │   ├── 🐍 question_edit_dialog.py
+│   │   ├── 🐍 tags_manager_dialog.py
+│   │   ├── 🐍 tree_manager_dialog.py
+│   │   └── 🐍 tree_note_dialog.py
+│   ├── 📁 panels/
+│   │   ├── 🐍 __init__.py
+│   │   ├── 🐍 preview_panel.py
+│   │   ├── 🐍 question_list_panel.py
+│   │   └── 🐍 tree_panel.py
+│   ├── 📁 toolbars/
+│   │   ├── 🐍 __init__.py
+│   │   ├── 🐍 filter_toolbar.py
+│   │   └── 🐍 main_toolbar.py
+│   ├── 🐍 __init__.py
+│   └── 🐍 main_window.py
+├── 📁 utils/
+│   ├── 🐍 __init__.py
+│   ├── 🐍 clipboard_utils.py
+│   ├── 🐍 file_utils.py
+│   ├── 🐍 image_utils.py
+│   ├── 🐍 ui_utils.py
+│   └── 🐍 validation_utils.py
+├── 📁 widgets/
+│   ├── 📁 editors/
+│   │   ├── 🐍 __init__.py
+│   │   ├── 🐍 latex_input_dialog.py
+│   │   └── 🐍 rich_text_editor.py
+│   ├── 📁 tables/
+│   │   ├── 🐍 __init__.py
+│   │   └── 🐍 question_table.py
+│   ├── 📁 viewers/
+│   │   ├── 🐍 __init__.py
+│   │   ├── 🐍 adaptive_image_viewer.py
+│   │   ├── 🐍 html_viewer.py
+│   │   ├── 🐍 image_viewer.py
+│   │   ├── 🐍 image_viewer_dialog.py
+│   │   └── 🐍 pdf_viewer.py
+│   └── 🐍 __init__.py
+├── 🐍 __init__.py
+├── 📄 Cấu trúc question_bank_modile.txt
+└── 🐍 tree_folder.py
+
+==================================================
+📊 THỐNG KÊ THƯ MỤC
+==================================================
+📁 Tổng số thư mục: 16
+📄 Tổng số file: 66
+💾 Tổng dung lượng: 0B
+==================================================
+
+Process finished with exit code 0

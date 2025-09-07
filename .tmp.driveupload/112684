@@ -1,0 +1,582 @@
+# dialogs/tree_node_dialog.py
+from PySide6 import QtWidgets, QtCore, QtGui
+from PySide6.QtCore import Qt
+
+
+# #(Dialog quản lý node trong cây thư mục - thêm/sửa node)
+class TreeNodeDialog(QtWidgets.QDialog):
+    """Dialog thêm/sửa node cây thư mục"""
+
+    def __init__(self, db_manager, mode="add", node_id=None, parent=None):
+        super().__init__(parent)
+        self.db = db_manager
+        self.mode = mode  # "add" hoặc "edit"
+        self.node_id = node_id
+        self.parent_id = None
+
+        self._setup_dialog()
+        self._build_ui()
+        self._load_data()
+
+    def _setup_dialog(self):
+        """Thiết lập dialog"""
+        if self.mode == "add":
+            self.setWindowTitle("➕ Thêm nhánh mới")
+        else:
+            self.setWindowTitle("✏️ Sửa nhánh")
+
+        self.setModal(True)
+        self.resize(500, 450)
+        self.setMinimumSize(450, 400)
+
+    def _build_ui(self):
+        """Xây dựng giao diện"""
+        layout = QtWidgets.QVBoxLayout(self)
+        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
+
+        # Header với icon và title
+        header = QtWidgets.QLabel()
+        if self.mode == "add":
+            header.setText("🌿 Thêm nhánh mới vào cây thư mục")
+        else:
+            header.setText("✏️ Chỉnh sửa thông tin nhánh")
+
+        header.setStyleSheet("""
+            QLabel {
+                font-size: 16px;
+                font-weight: bold;
+                color: #2E86AB;
+                padding: 15px;
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #f8f9fa, stop:1 #e9ecef);
+                border-radius: 8px;
+                border: 1px solid #dee2e6;
+                margin-bottom: 10px;
+            }
+        """)
+        header.setAlignment(Qt.AlignCenter)
+        layout.addWidget(header)
+
+        # Form container với styling
+        form_container = QtWidgets.QWidget()
+        form_container.setStyleSheet("""
+            QWidget {
+                background-color: #ffffff;
+                border: 1px solid #e0e0e0;
+                border-radius: 8px;
+                padding: 20px;
+            }
+        """)
+        form_layout = QtWidgets.QFormLayout(form_container)
+        form_layout.setSpacing(12)
+        form_layout.setLabelAlignment(Qt.AlignRight | Qt.AlignVCenter)
+
+        # Parent selection combo
+        parent_label = QtWidgets.QLabel("🌳 Node cha:")
+        parent_label.setStyleSheet("font-weight: bold; color: #495057;")
+
+        self.parent_combo = QtWidgets.QComboBox()
+        self.parent_combo.addItem("🏠 (Root - Không có cha)", None)
+        self.parent_combo.setStyleSheet("""
+            QComboBox {
+                padding: 8px;
+                border: 2px solid #ced4da;
+                border-radius: 4px;
+                background: white;
+                min-height: 20px;
+            }
+            QComboBox:focus {
+                border-color: #007bff;
+            }
+            QComboBox::drop-down {
+                border: none;
+                width: 20px;
+            }
+            QComboBox::down-arrow {
+                image: none;
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-top: 5px solid #6c757d;
+            }
+        """)
+        self._load_parent_options()
+        form_layout.addRow(parent_label, self.parent_combo)
+
+        # Name input
+        name_label = QtWidgets.QLabel("📝 Tên nhánh:")
+        name_label.setStyleSheet("font-weight: bold; color: #495057;")
+
+        self.name_edit = QtWidgets.QLineEdit()
+        self.name_edit.setPlaceholderText("Nhập tên cho nhánh mới...")
+        self.name_edit.setMaxLength(100)
+        self.name_edit.setStyleSheet("""
+            QLineEdit {
+                padding: 10px;
+                border: 2px solid #ced4da;
+                border-radius: 4px;
+                font-size: 14px;
+                background: white;
+            }
+            QLineEdit:focus {
+                border-color: #007bff;
+                background: #f8f9ff;
+            }
+            QLineEdit:invalid {
+                border-color: #dc3545;
+            }
+        """)
+        form_layout.addRow(name_label, self.name_edit)
+
+        # Level combo
+        level_label = QtWidgets.QLabel("🏷️ Cấp độ:")
+        level_label.setStyleSheet("font-weight: bold; color: #495057;")
+
+        self.level_combo = QtWidgets.QComboBox()
+        levels = [
+            ("📚", "Môn"),
+            ("🎓", "Lớp"),
+            ("📖", "Chủ đề"),
+            ("📝", "Dạng"),
+            ("⭐", "Mức độ")
+        ]
+
+        for icon, level in levels:
+            self.level_combo.addItem(f"{icon} {level}", level)
+
+        self.level_combo.setStyleSheet("""
+            QComboBox {
+                padding: 8px;
+                border: 2px solid #ced4da;
+                border-radius: 4px;
+                background: white;
+                min-height: 20px;
+            }
+            QComboBox:focus {
+                border-color: #007bff;
+            }
+        """)
+        form_layout.addRow(level_label, self.level_combo)
+
+        # Description text area
+        desc_label = QtWidgets.QLabel("📄 Mô tả:")
+        desc_label.setStyleSheet("font-weight: bold; color: #495057;")
+
+        self.description_edit = QtWidgets.QTextEdit()
+        self.description_edit.setPlaceholderText("Nhập mô tả chi tiết cho nhánh này (không bắt buộc)...")
+        self.description_edit.setMaximumHeight(120)
+        self.description_edit.setStyleSheet("""
+            QTextEdit {
+                padding: 10px;
+                border: 2px solid #ced4da;
+                border-radius: 4px;
+                font-size: 14px;
+                background: white;
+                font-family: 'Segoe UI', Arial, sans-serif;
+            }
+            QTextEdit:focus {
+                border-color: #007bff;
+                background: #f8f9ff;
+            }
+        """)
+        form_layout.addRow(desc_label, self.description_edit)
+
+        layout.addWidget(form_container)
+
+        # Preview/Info section cho edit mode
+        if self.mode == "edit":
+            self._add_info_section(layout)
+
+        # Button layout với styling đẹp
+        self._create_button_layout(layout)
+
+        # Validation
+        self.name_edit.textChanged.connect(self._validate_form)
+
+    def _add_info_section(self, parent_layout):
+        """Thêm section thông tin cho edit mode"""
+        info_group = QtWidgets.QGroupBox("ℹ️ Thông tin hiện tại")
+        info_group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                border: 2px solid #17a2b8;
+                border-radius: 8px;
+                margin-top: 12px;
+                padding-top: 12px;
+                background: #e7f3ff;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 8px 0 8px;
+                color: #17a2b8;
+            }
+        """)
+
+        info_layout = QtWidgets.QFormLayout(info_group)
+
+        self.info_id = QtWidgets.QLabel()
+        self.info_current_parent = QtWidgets.QLabel()
+        self.info_children_count = QtWidgets.QLabel()
+        self.info_question_count = QtWidgets.QLabel()
+
+        # Style cho info labels
+        info_style = "color: #495057; font-weight: normal; padding: 4px;"
+        self.info_id.setStyleSheet(info_style)
+        self.info_current_parent.setStyleSheet(info_style)
+        self.info_children_count.setStyleSheet(info_style)
+        self.info_question_count.setStyleSheet(info_style)
+
+        info_layout.addRow("🆔 ID:", self.info_id)
+        info_layout.addRow("👆 Cha hiện tại:", self.info_current_parent)
+        info_layout.addRow("👶 Số node con:", self.info_children_count)
+        info_layout.addRow("❓ Số câu hỏi:", self.info_question_count)
+
+        parent_layout.addWidget(info_group)
+
+    def _create_button_layout(self, parent_layout):
+        """Tạo button layout với styling"""
+        button_layout = QtWidgets.QHBoxLayout()
+        button_layout.setSpacing(10)
+
+        # Help/Info button
+        if self.mode == "add":
+            help_btn = QtWidgets.QPushButton("💡 Gợi ý")
+            help_btn.setToolTip("Xem hướng dẫn tạo cấu trúc cây")
+            help_btn.clicked.connect(self._show_help)
+            help_btn.setStyleSheet("""
+                QPushButton {
+                    background: #17a2b8;
+                    color: white;
+                    border: none;
+                    padding: 10px 16px;
+                    border-radius: 4px;
+                    font-weight: bold;
+                }
+                QPushButton:hover {
+                    background: #138496;
+                }
+            """)
+            button_layout.addWidget(help_btn)
+
+        button_layout.addStretch()
+
+        # Cancel button
+        cancel_btn = QtWidgets.QPushButton("❌ Hủy")
+        cancel_btn.clicked.connect(self.reject)
+        cancel_btn.setStyleSheet("""
+            QPushButton {
+                background: #6c757d;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 4px;
+                font-weight: bold;
+                min-width: 80px;
+            }
+            QPushButton:hover {
+                background: #545b62;
+            }
+        """)
+        button_layout.addWidget(cancel_btn)
+
+        # Save button
+        save_text = "➕ Thêm" if self.mode == "add" else "💾 Cập nhật"
+        self.save_btn = QtWidgets.QPushButton(save_text)
+        self.save_btn.clicked.connect(self.accept)
+        self.save_btn.setDefault(True)
+        self.save_btn.setStyleSheet("""
+            QPushButton {
+                background: #28a745;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 4px;
+                font-weight: bold;
+                min-width: 80px;
+            }
+            QPushButton:hover {
+                background: #218838;
+            }
+            QPushButton:disabled {
+                background: #6c757d;
+            }
+        """)
+        button_layout.addWidget(self.save_btn)
+
+        parent_layout.addLayout(button_layout)
+
+    def _load_parent_options(self):
+        """Load danh sách parent có thể chọn"""
+        try:
+            rows = self.db.execute_query(
+                "SELECT id, name, level FROM exercise_tree ORDER BY level, name",
+                fetch="all"
+            ) or []
+
+            # Nếu là edit mode, loại trừ chính nó và các con
+            excluded_ids = set()
+            if self.mode == "edit" and self.node_id:
+                excluded_ids = self._get_all_descendants(self.node_id)
+                excluded_ids.add(self.node_id)
+
+            # Level icons
+            level_icons = {
+                'Môn': '📚',
+                'Lớp': '🎓',
+                'Chủ đề': '📖',
+                'Dạng': '📝',
+                'Mức độ': '⭐'
+            }
+
+            for row in rows:
+                row_dict = dict(row)
+                if row_dict["id"] not in excluded_ids:
+                    icon = level_icons.get(row_dict.get('level', ''), '📄')
+                    display_text = f"{icon} {row_dict['name']} ({row_dict['level']})"
+                    self.parent_combo.addItem(display_text, row_dict["id"])
+
+        except Exception as e:
+            print(f"⚠️ Lỗi load parent options: {e}")
+
+    def _get_all_descendants(self, node_id):
+        """Lấy tất cả descendants của một node (đệ quy)"""
+        descendants = set()
+
+        try:
+            children = self.db.execute_query(
+                "SELECT id FROM exercise_tree WHERE parent_id = ?",
+                (node_id,), fetch="all"
+            ) or []
+
+            for child in children:
+                child_id = dict(child)["id"]
+                descendants.add(child_id)
+                # Đệ quy lấy con của con
+                descendants.update(self._get_all_descendants(child_id))
+
+        except Exception as e:
+            print(f"⚠️ Lỗi get descendants: {e}")
+
+        return descendants
+
+    def _load_data(self):
+        """Load dữ liệu khi edit"""
+        if self.mode == "edit" and self.node_id:
+            try:
+                row = self.db.execute_query(
+                    "SELECT * FROM exercise_tree WHERE id = ?",
+                    (self.node_id,), fetch="one"
+                )
+
+                if row:
+                    row_dict = dict(row)
+
+                    # Fill form
+                    self.name_edit.setText(row_dict.get('name', ''))
+
+                    # Set level combo
+                    level = row_dict.get('level', '')
+                    for i in range(self.level_combo.count()):
+                        if self.level_combo.itemData(i) == level:
+                            self.level_combo.setCurrentIndex(i)
+                            break
+
+                    # Set parent combo
+                    parent_id = row_dict.get('parent_id')
+                    for i in range(self.parent_combo.count()):
+                        if self.parent_combo.itemData(i) == parent_id:
+                            self.parent_combo.setCurrentIndex(i)
+                            break
+
+                    self.description_edit.setPlainText(row_dict.get('description', ''))
+
+                    # Update info section
+                    if hasattr(self, 'info_id'):
+                        self._update_info_section(row_dict)
+
+            except Exception as e:
+                QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể load dữ liệu: {e}")
+
+    def _update_info_section(self, node_data):
+        """Cập nhật thông tin section"""
+        try:
+            self.info_id.setText(str(node_data.get('id', '')))
+
+            # Get parent name
+            parent_id = node_data.get('parent_id')
+            if parent_id:
+                parent_row = self.db.execute_query(
+                    "SELECT name FROM exercise_tree WHERE id = ?",
+                    (parent_id,), fetch="one"
+                )
+                parent_name = dict(parent_row).get('name', 'Không xác định') if parent_row else 'Không xác định'
+            else:
+                parent_name = '(Root)'
+            self.info_current_parent.setText(parent_name)
+
+            # Count children
+            children_count = self.db.execute_query(
+                "SELECT COUNT(*) as count FROM exercise_tree WHERE parent_id = ?",
+                (self.node_id,), fetch="one"
+            )
+            count = dict(children_count).get('count', 0) if children_count else 0
+            self.info_children_count.setText(str(count))
+
+            # Count questions
+            question_count = self.db.execute_query(
+                "SELECT COUNT(*) as count FROM question_bank WHERE tree_id = ?",
+                (self.node_id,), fetch="one"
+            )
+            q_count = dict(question_count).get('count', 0) if question_count else 0
+            self.info_question_count.setText(str(q_count))
+
+        except Exception as e:
+            print(f"⚠️ Lỗi update info section: {e}")
+
+    def _validate_form(self):
+        """Validate form và enable/disable save button"""
+        name = self.name_edit.text().strip()
+        is_valid = bool(name)
+
+        self.save_btn.setEnabled(is_valid)
+
+        # Visual feedback
+        if name:
+            self.name_edit.setStyleSheet(
+                self.name_edit.styleSheet().replace("border-color: #dc3545", "border-color: #ced4da"))
+        else:
+            current_style = self.name_edit.styleSheet()
+            if "border-color: #dc3545" not in current_style:
+                self.name_edit.setStyleSheet(current_style.replace("border-color: #ced4da", "border-color: #dc3545"))
+
+    def _show_help(self):
+        """Hiển thị help dialog"""
+        help_text = """
+        🌳 <b>Hướng dẫn tạo cấu trúc cây thư mục:</b>
+
+        📚 <b>Môn:</b> Toán, Lý, Hóa, Văn...
+        🎓 <b>Lớp:</b> Lớp 10, Lớp 11, Lớp 12...
+        📖 <b>Chủ đề:</b> Hàm số, Phương trình, Hình học...
+        📝 <b>Dạng:</b> Dạng 1, Dạng 2, Bài tập cơ bản...
+        ⭐ <b>Mức độ:</b> Nhận biết, Thông hiểu, Vận dụng...
+
+        <b>Ví dụ cấu trúc:</b>
+        📚 Toán
+        └── 🎓 Lớp 12
+            └── 📖 Hàm số
+                ├── 📝 Tính đạo hàm
+                │   ├── ⭐ Nhận biết
+                │   └── ⭐ Vận dụng
+                └── 📝 Khảo sát hàm số
+
+        💡 <b>Lưu ý:</b> Chọn node cha phù hợp để tạo cấu trúc logic!
+        """
+
+        QtWidgets.QMessageBox.information(self, "💡 Hướng dẫn", help_text)
+
+    def set_parent_id(self, parent_id):
+        """Set parent ID mặc định"""
+        self.parent_id = parent_id
+
+        # Tìm và chọn parent trong combo
+        for i in range(self.parent_combo.count()):
+            if self.parent_combo.itemData(i) == parent_id:
+                self.parent_combo.setCurrentIndex(i)
+                break
+
+    def _validate_input(self):
+        """Validate dữ liệu đầu vào"""
+        name = self.name_edit.text().strip()
+
+        if not name:
+            QtWidgets.QMessageBox.warning(
+                self, "Lỗi",
+                "Tên nhánh không được để trống!"
+            )
+            self.name_edit.setFocus()
+            return False
+
+        if len(name) > 100:
+            QtWidgets.QMessageBox.warning(
+                self, "Lỗi",
+                "Tên nhánh không được quá 100 ký tự!"
+            )
+            self.name_edit.setFocus()
+            return False
+
+        # Check duplicate name at same level
+        parent_id = self.parent_combo.currentData()
+        existing = self.db.execute_query(
+            "SELECT id FROM exercise_tree WHERE parent_id = ? AND name = ? AND id != ?",
+            (parent_id, name, self.node_id or -1), fetch="one"
+        )
+
+        if existing:
+            QtWidgets.QMessageBox.warning(
+                self, "Lỗi",
+                f"Đã tồn tại nhánh '{name}' trong cùng cấp độ!"
+            )
+            self.name_edit.setFocus()
+            return False
+
+        return True
+
+    def accept(self):
+        """Xử lý khi nhấn Save"""
+        if not self._validate_input():
+            return
+
+        try:
+            name = self.name_edit.text().strip()
+            level = self.level_combo.currentData()
+            description = self.description_edit.toPlainText().strip()
+            parent_id = self.parent_combo.currentData()
+
+            if self.mode == "add":
+                # Insert new node
+                self.db.execute_query(
+                    "INSERT INTO exercise_tree (parent_id, name, level, description) VALUES (?, ?, ?, ?)",
+                    (parent_id, name, level, description)
+                )
+                QtWidgets.QMessageBox.information(
+                    self, "Thành công",
+                    f"Đã thêm nhánh '{name}' thành công!"
+                )
+            else:
+                # Update existing node
+                self.db.execute_query(
+                    "UPDATE exercise_tree SET parent_id = ?, name = ?, level = ?, description = ? WHERE id = ?",
+                    (parent_id, name, level, description, self.node_id)
+                )
+                QtWidgets.QMessageBox.information(
+                    self, "Thành công",
+                    f"Đã cập nhật nhánh '{name}' thành công!"
+                )
+
+            super().accept()
+
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(
+                self, "Lỗi",
+                f"Không thể lưu nhánh: {e}"
+            )
+
+    def reject(self):
+        """Xử lý khi nhấn Cancel"""
+        if self.mode == "add":
+            # Check if user entered any data
+            if (self.name_edit.text().strip() or
+                    self.description_edit.toPlainText().strip() or
+                    self.parent_combo.currentIndex() > 0):
+
+                reply = QtWidgets.QMessageBox.question(
+                    self, "Xác nhận",
+                    "Bạn có muốn hủy bỏ những thay đổi?",
+                    QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No
+                )
+
+                if reply != QtWidgets.QMessageBox.Yes:
+                    return
+
+        super().reject()

@@ -1,0 +1,35 @@
+2025-09-07 11:32:07,165 - __main__ - INFO - ======================================================================
+2025-09-07 11:32:07,165 - __main__ - INFO - 🚀 Starting Dashboard Desktop Application
+2025-09-07 11:32:07,165 - __main__ - INFO - ======================================================================
+2025-09-07 11:32:07,192 - __main__ - INFO - ✓ Application initialized
+2025-09-07 11:32:08,488 - __main__ - INFO - ✓ Directory structure ready (mode: main)
+2025-09-07 11:32:08,494 - __main__ - INFO - ✓ Database connected
+2025-09-07 11:32:08,554 - ui_qt.windows.dashboard_window_qt.utils.assets - INFO - Assets manager đã khởi tạo
+2025-09-07 11:32:08,558 - __main__ - INFO - Loading MainDashboard (Desktop-Style)...
+2025-09-07 11:32:08,896 - ui_qt.windows.dashboard_window_qt.repositories.app_repository - INFO - Storage path: dashboard_apps.json
+2025-09-07 11:32:08,896 - ui_qt.windows.dashboard_window_qt.repositories.app_repository - INFO - Storage exists: True
+2025-09-07 11:32:08,897 - ui_qt.windows.dashboard_window_qt.repositories.app_repository - INFO - Total apps in storage: 17
+2025-09-07 11:32:08,897 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - WARNING - Have 17 apps but may only show some!
+2025-09-07 11:32:09,311 - __main__ - INFO - ✓ Dashboard loaded (main)
+2025-09-07 11:32:09,664 - __main__ - INFO - Assets manager initialized
+2025-09-07 11:32:09,667 - __main__ - INFO - Settings loaded
+2025-09-07 11:32:09,672 - __main__ - INFO - All services initialized successfully
+2025-09-07 11:32:09,674 - __main__ - INFO - ✓ Application ready - Starting event loop
+2025-09-07 11:32:13,528 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - Đang khởi chạy app: question_bank
+2025-09-07 11:32:13,528 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - Importing module: ui_qt.windows.question_bank.views.main_window
+2025-09-07 11:32:13,975 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - App launched: question_bank
+2025-09-07 11:32:13,976 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - ERROR - Error adding button to taskbar: 'PySide6.QtWidgets.QWidget' object has no attribute 'add_app_button'
+2025-09-07 11:32:13,993 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - App launched: question_bank
+2025-09-07 11:32:13,993 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - ERROR - Error adding button to taskbar: 'PySide6.QtWidgets.QWidget' object has no attribute 'add_app_button'
+2025-09-07 11:32:13,993 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - Đã khởi chạy app thành công: question_bank
+2025-09-07 11:33:08,965 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 0 icons
+2025-09-07 11:34:08,959 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 0 icons
+2025-09-07 11:35:08,970 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 0 icons
+2025-09-07 11:36:08,958 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 0 icons
+2025-09-07 11:37:08,966 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 0 icons
+2025-09-07 11:38:08,985 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 0 icons
+2025-09-07 11:39:08,990 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 0 icons
+2025-09-07 11:40:08,988 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 0 icons
+2025-09-07 11:41:08,992 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 0 icons
+2025-09-07 11:42:09,005 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 0 icons
+2025-09-07 11:43:09,041 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 0 icons

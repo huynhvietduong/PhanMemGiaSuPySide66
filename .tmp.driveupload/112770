@@ -1,0 +1,22 @@
+# Controller xử lý câu hỏi
+from models.question import Question
+
+class QuestionController:
+    def __init__(self, question_service):
+        self.question_service = question_service
+
+    def create_question(self, data):
+        """Tạo câu hỏi mới"""
+        pass
+
+    def get_questions(self, filters=None):
+        """Lấy danh sách câu hỏi"""
+        pass
+
+    def update_question(self, question_id, data):
+        """Cập nhật câu hỏi"""
+        pass
+
+    def delete_question(self, question_id):
+        """Xóa câu hỏi"""
+        pass

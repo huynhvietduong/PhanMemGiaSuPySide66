@@ -1,0 +1,10 @@
+2025-09-04 01:24:50,888 - __main__ - INFO - ======================================================================
+2025-09-04 01:24:50,889 - __main__ - INFO - 🚀 Starting Dashboard Desktop Application
+2025-09-04 01:24:50,889 - __main__ - INFO - ======================================================================
+2025-09-04 01:24:50,925 - __main__ - INFO - ✓ Application initialized
+2025-09-04 01:24:53,136 - __main__ - INFO - ✓ Directory structure ready (mode: main)
+2025-09-04 01:24:53,144 - __main__ - INFO - ✓ Database connected
+2025-09-04 01:24:53,192 - __main__ - INFO - Loading MainDashboard (Desktop-Style)...
+2025-09-04 01:24:53,207 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - WARNING - Desktop area module not found, using basic MDI
+2025-09-04 01:24:53,225 - __main__ - ERROR - Failed to load dashboard: 'NoneType' object is not iterable
+2025-09-04 01:24:53,247 - __main__ - ERROR - ✗ Failed to create window: 'NoneType' object is not iterable

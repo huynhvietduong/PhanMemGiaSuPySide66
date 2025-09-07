@@ -1,0 +1,254 @@
+# dialogs/latex_input_dialog.py
+from PySide6 import QtWidgets, QtCore, QtGui
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont, QSyntaxHighlighter, QTextCharFormat, QColor
+
+
+class LaTeXSyntaxHighlighter(QSyntaxHighlighter):
+    """Syntax highlighter cho LaTeX"""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.highlighting_rules = []
+
+        # LaTeX commands
+        command_format = QTextCharFormat()
+        command_format.setForeground(QColor("#0066CC"))
+        command_format.setFontWeight(QFont.Bold)
+        self.highlighting_rules.append((r'\\[a-zA-Z]+', command_format))
+
+        # Math delimiters
+        math_format = QTextCharFormat()
+        math_format.setForeground(QColor("#CC6600"))
+        self.highlighting_rules.append((r'\$.*?\$', math_format))
+
+        # Braces
+        brace_format = QTextCharFormat()
+        brace_format.setForeground(QColor("#666666"))
+        self.highlighting_rules.append((r'[{}]', brace_format))
+
+        # Comments
+        comment_format = QTextCharFormat()
+        comment_format.setForeground(QColor("#999999"))
+        comment_format.setFontItalic(True)
+        self.highlighting_rules.append((r'%.*$', comment_format))
+
+    def highlightBlock(self, text):
+        """Highlight một block text"""
+        import re
+        for pattern, format_obj in self.highlighting_rules:
+            for match in re.finditer(pattern, text):
+                start = match.start()
+                length = match.end() - start
+                self.setFormat(start, length, format_obj)
+
+
+class LaTeXInputDialog(QtWidgets.QDialog):
+    """Dialog nhập công thức LaTeX"""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.latex_code = ""
+        self._setup_ui()
+        self._load_templates()
+
+    def _setup_ui(self):
+        """Thiết lập giao diện"""
+        self.setWindowTitle("∑ Nhập công thức LaTeX")
+        self.setModal(True)
+        self.resize(600, 500)
+
+        layout = QtWidgets.QVBoxLayout(self)
+
+        # #(Toolbar với các template thường dùng)
+        toolbar = QtWidgets.QToolBar()
+        toolbar.addAction("∑", lambda: self.insert_template("\\sum_{i=1}^{n}"))
+        toolbar.addAction("∫", lambda: self.insert_template("\\int_{a}^{b}"))
+        toolbar.addAction("√", lambda: self.insert_template("\\sqrt{}"))
+        toolbar.addAction("^", lambda: self.insert_template("x^{}")
+        toolbar.addAction("_", lambda: self.insert_template("x_{}")
+        toolbar.addAction("÷", lambda: self.insert_template("\\frac{}{}")
+        toolbar.addAction("≈", lambda: self.insert_template("\\approx"))
+        toolbar.addAction("≠", lambda: self.insert_template("\\neq"))
+        toolbar.addAction("≤", lambda: self.insert_template("\\leq"))
+        toolbar.addAction("≥", lambda: self.insert_template("\\geq"))
+        toolbar.addAction("∞", lambda: self.insert_template("\\infty"))
+        toolbar.addAction("α", lambda: self.insert_template("\\alpha"))
+        toolbar.addAction("β", lambda: self.insert_template("\\beta"))
+        toolbar.addAction("π", lambda: self.insert_template("\\pi"))
+        layout.addWidget(toolbar)
+
+        # #(Template dropdown)
+        template_layout = QtWidgets.QHBoxLayout()
+        template_layout.addWidget(QtWidgets.QLabel("Mẫu:"))
+
+        self.template_combo = QtWidgets.QComboBox()
+        self.template_combo.currentTextChanged.connect(self.load_template)
+        template_layout.addWidget(self.template_combo)
+
+        clear_btn = QtWidgets.QPushButton("🗑️ Xóa")
+        clear_btn.clicked.connect(self.clear_latex)
+        template_layout.addWidget(clear_btn)
+
+        template_layout.addStretch()
+        layout.addLayout(template_layout)
+
+        # #(LaTeX input area với syntax highlighting)
+        input_group = QtWidgets.QGroupBox("📝 Nhập công thức LaTeX:")
+        input_layout = QtWidgets.QVBoxLayout(input_group)
+
+        self.latex_input = QtWidgets.QTextEdit()
+        self.latex_input.setFont(QFont("Consolas, Monaco, monospace", 11))
+        self.latex_input.setPlaceholderText("Nhập công thức LaTeX ở đây...\nVí dụ: x^2 + y^2 = z^2")
+
+        # Syntax highlighting
+        self.highlighter = LaTeXSyntaxHighlighter(self.latex_input.document())
+
+        input_layout.addWidget(self.latex_input)
+        layout.addWidget(input_group)
+
+        # #(Preview area)
+        preview_group = QtWidgets.QGroupBox("👁️ Xem trước:")
+        preview_layout = QtWidgets.QVBoxLayout(preview_group)
+
+        self.preview_label = QtWidgets.QLabel("(Chưa có công thức để preview)")
+        self.preview_label.setAlignment(Qt.AlignCenter)
+        self.preview_label.setStyleSheet("""
+            QLabel {
+                border: 2px dashed #ccc;
+                padding: 20px;
+                background-color: #f9f9f9;
+                min-height: 80px;
+            }
+        """)
+        preview_layout.addWidget(self.preview_label)
+
+        # Preview button
+        preview_btn = QtWidgets.QPushButton("🔄 Cập nhật preview")
+        preview_btn.clicked.connect(self.update_preview)
+        preview_layout.addWidget(preview_btn)
+
+        layout.addWidget(preview_group)
+
+        # #(Buttons)
+        button_layout = QtWidgets.QHBoxLayout()
+
+        help_btn = QtWidgets.QPushButton("❓ Trợ giúp")
+        help_btn.clicked.connect(self.show_help)
+        button_layout.addWidget(help_btn)
+
+        button_layout.addStretch()
+
+        cancel_btn = QtWidgets.QPushButton("❌ Hủy")
+        cancel_btn.clicked.connect(self.reject)
+        button_layout.addWidget(cancel_btn)
+
+        ok_btn = QtWidgets.QPushButton("✅ OK")
+        ok_btn.setDefault(True)
+        ok_btn.clicked.connect(self.accept)
+        button_layout.addWidget(ok_btn)
+
+        layout.addLayout(button_layout)
+
+    def _load_templates(self):
+        """Load các template LaTeX thường dùng"""
+        templates = {
+            "-- Chọn mẫu --": "",
+            "Phân số": "\\frac{a}{b}",
+            "Căn bậc hai": "\\sqrt{x}",
+            "Căn bậc n": "\\sqrt[n]{x}",
+            "Lũy thừa": "x^{n}",
+            "Chỉ số dưới": "x_{i}",
+            "Tổng": "\\sum_{i=1}^{n} a_i",
+            "Tích phân": "\\int_{a}^{b} f(x) dx",
+            "Giới hạn": "\\lim_{x \\to \\infty} f(x)",
+            "Ma trận 2x2": "\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}",
+            "Hệ phương trình": "\\begin{cases} x + y = 1 \\\\ x - y = 0 \\end{cases}",
+            "Phương trình bậc 2": "ax^2 + bx + c = 0",
+            "Công thức nghiệm": "x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}",
+            "Định lý Pythagoras": "a^2 + b^2 = c^2",
+            "Công thức diện tích": "S = \\pi r^2"
+        }
+
+        for name, code in templates.items():
+            self.template_combo.addItem(name, code)
+
+    def insert_template(self, template):
+        """Chèn template vào vị trí cursor"""
+        cursor = self.latex_input.textCursor()
+        cursor.insertText(template)
+        self.latex_input.setFocus()
+
+    def load_template(self, template_name):
+        """Load template được chọn"""
+        if template_name and template_name != "-- Chọn mẫu --":
+            template_code = self.template_combo.currentData()
+            if template_code:
+                self.latex_input.setPlainText(template_code)
+                self.update_preview()
+
+    def clear_latex(self):
+        """Xóa nội dung LaTeX"""
+        self.latex_input.clear()
+        self.preview_label.setText("(Chưa có công thức để preview)")
+        self.template_combo.setCurrentIndex(0)
+
+    def update_preview(self):
+        """Cập nhật preview (placeholder - cần MathJax hoặc thư viện render)"""
+        latex_code = self.latex_input.toPlainText().strip()
+        if latex_code:
+            # Placeholder preview - trong thực tế sẽ render LaTeX
+            self.preview_label.setText(f"LaTeX Preview:\n{latex_code}")
+            self.preview_label.setStyleSheet("""
+                QLabel {
+                    border: 2px solid #4CAF50;
+                    padding: 20px;
+                    background-color: #f0f8f0;
+                    min-height: 80px;
+                    font-family: monospace;
+                }
+            """)
+        else:
+            self.preview_label.setText("(Chưa có công thức để preview)")
+            self.preview_label.setStyleSheet("""
+                QLabel {
+                    border: 2px dashed #ccc;
+                    padding: 20px;
+                    background-color: #f9f9f9;
+                    min-height: 80px;
+                }
+            """)
+
+    def show_help(self):
+        """Hiển thị trợ giúp LaTeX"""
+        help_text = """
+        <h3>🔤 Hướng dẫn LaTeX cơ bản:</h3>
+        <table>
+        <tr><td><b>Cú pháp</b></td><td><b>Kết quả</b></td><td><b>Mô tả</b></td></tr>
+        <tr><td>x^2</td><td>x²</td><td>Lũy thừa</td></tr>
+        <tr><td>x_i</td><td>xᵢ</td><td>Chỉ số dưới</td></tr>
+        <tr><td>\\frac{a}{b}</td><td>a/b</td><td>Phân số</td></tr>
+        <tr><td>\\sqrt{x}</td><td>√x</td><td>Căn bậc hai</td></tr>
+        <tr><td>\\sqrt[n]{x}</td><td>ⁿ√x</td><td>Căn bậc n</td></tr>
+        <tr><td>\\sum_{i=1}^{n}</td><td>∑</td><td>Tổng</td></tr>
+        <tr><td>\\int_{a}^{b}</td><td>∫</td><td>Tích phân</td></tr>
+        <tr><td>\\alpha, \\beta, \\pi</td><td>α, β, π</td><td>Chữ cái Hy Lạp</td></tr>
+        <tr><td>\\leq, \\geq, \\neq</td><td>≤, ≥, ≠</td><td>So sánh</td></tr>
+        </table>
+
+        <p><b>Mẹo:</b> Sử dụng {} để nhóm các ký tự lại với nhau.</p>
+        """
+
+        QtWidgets.QMessageBox.information(self, "LaTeX Help", help_text)
+
+    def get_latex(self):
+        """Lấy mã LaTeX đã nhập"""
+        return self.latex_input.toPlainText().strip()
+
+    def accept(self):
+        """Xử lý khi nhấn OK"""
+        self.latex_code = self.get_latex()
+        if not self.latex_code:
+            QtWidgets.QMessageBox.warning(self, "Cảnh báo", "Vui lòng nhập công thức LaTeX!")
+            return
+        super().accept()

@@ -7,7 +7,6 @@ from PySide6.QtWidgets import (
 )
 import os
 import json
-
 class AddExerciseWindowQt(QWidget):
     """
     Thêm bài tập vào bảng exercises.

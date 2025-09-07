@@ -1,0 +1,104 @@
+2025-09-07 00:49:26,197 - __main__ - INFO - ======================================================================
+2025-09-07 00:49:26,197 - __main__ - INFO - 🚀 Starting Dashboard Desktop Application
+2025-09-07 00:49:26,198 - __main__ - INFO - ======================================================================
+2025-09-07 00:49:26,220 - __main__ - INFO - ✓ Application initialized
+2025-09-07 00:49:27,632 - __main__ - INFO - ✓ Directory structure ready (mode: main)
+2025-09-07 00:49:27,638 - __main__ - INFO - ✓ Database connected
+2025-09-07 00:49:27,686 - ui_qt.windows.dashboard_window_qt.utils.assets - INFO - Assets manager đã khởi tạo
+2025-09-07 00:49:27,693 - __main__ - INFO - Loading MainDashboard (Desktop-Style)...
+2025-09-07 00:49:27,702 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã load settings từ C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-07 00:49:27,704 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã load vị trí 0 icons
+2025-09-07 00:49:27,714 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-07 00:49:27,715 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Wallpaper set: default (mode: fill)
+2025-09-07 00:49:27,715 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Desktop settings loaded
+2025-09-07 00:49:27,715 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Desktop Area initialized
+2025-09-07 00:49:27,715 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Desktop area created successfully
+2025-09-07 00:49:27,743 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đang load desktop icons...
+2025-09-07 00:49:27,743 - ui_qt.windows.dashboard_window_qt.repositories.app_repository - INFO - Storage path: dashboard_apps.json
+2025-09-07 00:49:27,743 - ui_qt.windows.dashboard_window_qt.repositories.app_repository - INFO - Storage exists: True
+2025-09-07 00:49:27,744 - ui_qt.windows.dashboard_window_qt.repositories.app_repository - INFO - Total apps in storage: 17
+2025-09-07 00:49:27,744 - ui_qt.windows.dashboard_window_qt.repositories.app_repository - INFO - Apps with pinned=True: 17
+2025-09-07 00:49:27,744 - ui_qt.windows.dashboard_window_qt.repositories.app_repository - INFO -   Pinned: student_manager (rank=9)
+2025-09-07 00:49:27,744 - ui_qt.windows.dashboard_window_qt.repositories.app_repository - INFO -   Pinned: group_manager (rank=8)
+2025-09-07 00:49:27,744 - ui_qt.windows.dashboard_window_qt.repositories.app_repository - INFO -   Pinned: package_manager (rank=0)
+2025-09-07 00:49:27,744 - ui_qt.windows.dashboard_window_qt.repositories.app_repository - INFO -   Pinned: attendance_report (rank=0)
+2025-09-07 00:49:27,744 - ui_qt.windows.dashboard_window_qt.repositories.app_repository - INFO -   Pinned: main_calendar (rank=10)
+2025-09-07 00:49:27,744 - ui_qt.windows.dashboard_window_qt.repositories.app_repository - INFO - Returning 17 pinned apps
+2025-09-07 00:49:27,744 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Got 17 pinned apps from repository
+2025-09-07 00:49:27,744 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 0: group_manager
+2025-09-07 00:49:27,744 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 1: student_manager
+2025-09-07 00:49:27,744 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 2: question_bank
+2025-09-07 00:49:27,744 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 3: main_calendar
+2025-09-07 00:49:27,744 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 4: package_manager
+2025-09-07 00:49:27,744 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 5: attendance_report
+2025-09-07 00:49:27,744 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 6: assign_exercise
+2025-09-07 00:49:27,744 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 7: submit_exercise
+2025-09-07 00:49:27,744 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 8: submitted_exercises
+2025-09-07 00:49:27,744 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 9: exercise_suggestion
+2025-09-07 00:49:27,744 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 10: create_test
+2025-09-07 00:49:27,744 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 11: exercise_tree
+2025-09-07 00:49:27,745 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 12: progress_report
+2025-09-07 00:49:27,745 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 13: skill_report
+2025-09-07 00:49:27,745 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 14: skill_rating
+2025-09-07 00:49:27,745 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 15: group_suggestion
+2025-09-07 00:49:27,745 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   App 16: salary_report
+2025-09-07 00:49:27,745 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - WARNING - Have 17 apps but may only show some!
+2025-09-07 00:49:27,745 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Sẽ load 17 icons lên desktop
+2025-09-07 00:49:27,764 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-07 00:49:27,764 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo icon: Quản lý nhóm học tại PySide6.QtCore.QPoint(20, 20)
+2025-09-07 00:49:27,772 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-07 00:49:27,772 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo icon: Quản lý học sinh tại PySide6.QtCore.QPoint(110, 20)
+2025-09-07 00:49:27,774 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-07 00:49:27,774 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo icon: Ngân hàng câu hỏi tại PySide6.QtCore.QPoint(200, 20)
+2025-09-07 00:49:27,783 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-07 00:49:27,784 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo icon: Lịch dạy (Main) tại PySide6.QtCore.QPoint(290, 20)
+2025-09-07 00:49:27,785 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-07 00:49:27,785 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo icon: Quản lý gói học tại PySide6.QtCore.QPoint(380, 20)
+2025-09-07 00:49:27,793 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-07 00:49:27,793 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo icon: Báo cáo chuyên cần tại PySide6.QtCore.QPoint(470, 20)
+2025-09-07 00:49:27,803 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-07 00:49:27,803 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo icon: Giao bài tập tại PySide6.QtCore.QPoint(560, 20)
+2025-09-07 00:49:27,812 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-07 00:49:27,812 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo icon: Nộp bài tập tại PySide6.QtCore.QPoint(650, 20)
+2025-09-07 00:49:27,820 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-07 00:49:27,821 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo icon: Bài tập đã nộp tại PySide6.QtCore.QPoint(20, 120)
+2025-09-07 00:49:27,828 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-07 00:49:27,829 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo icon: Gợi ý bài tập tại PySide6.QtCore.QPoint(110, 120)
+2025-09-07 00:49:27,837 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-07 00:49:27,837 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo icon: Tạo đề thi PDF tại PySide6.QtCore.QPoint(200, 120)
+2025-09-07 00:49:27,846 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-07 00:49:27,846 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo icon: Cây thư mục bài tập tại PySide6.QtCore.QPoint(290, 120)
+2025-09-07 00:49:27,855 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-07 00:49:27,855 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo icon: Báo cáo tiến độ tại PySide6.QtCore.QPoint(380, 120)
+2025-09-07 00:49:27,879 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-07 00:49:27,879 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo icon: Báo cáo năng lực tại PySide6.QtCore.QPoint(470, 120)
+2025-09-07 00:49:27,889 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-07 00:49:27,889 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo icon: Đánh giá kỹ năng tại PySide6.QtCore.QPoint(560, 120)
+2025-09-07 00:49:27,898 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-07 00:49:27,899 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo icon: Gợi ý phân nhóm tại PySide6.QtCore.QPoint(650, 120)
+2025-09-07 00:49:27,911 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-07 00:49:27,911 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo icon: Báo cáo học phí tại PySide6.QtCore.QPoint(20, 220)
+2025-09-07 00:49:27,911 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo thành công 17 icons
+2025-09-07 00:49:27,929 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-07 00:49:27,930 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Wallpaper set: default (mode: fill)
+2025-09-07 00:49:27,930 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã set wallpaper cho desktop area: default
+2025-09-07 00:49:27,943 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-07 00:49:27,943 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Wallpaper set: default (mode: fill)
+2025-09-07 00:49:27,943 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã set wallpaper cho desktop area: default
+2025-09-07 00:49:27,957 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Dashboard window hiển thị thành công
+2025-09-07 00:49:27,958 - __main__ - INFO - ✓ Dashboard loaded (main)
+2025-09-07 00:49:27,968 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-07 00:49:27,969 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Wallpaper set: default (mode: fill)
+2025-09-07 00:49:27,969 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã set wallpaper cho desktop area: default
+2025-09-07 00:49:28,004 - __main__ - INFO - Assets manager initialized
+2025-09-07 00:49:28,007 - __main__ - INFO - Settings loaded
+2025-09-07 00:49:28,013 - __main__ - INFO - All services initialized successfully
+2025-09-07 00:49:28,015 - __main__ - INFO - ✓ Application ready - Starting event loop
+2025-09-07 00:49:29,624 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-07 00:49:29,624 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Wallpaper set: default (mode: fill)
+2025-09-07 00:49:29,625 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã set wallpaper cho desktop area: default
+2025-09-07 00:50:27,693 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-07 00:50:27,930 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-07 00:50:27,931 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-07 00:50:27,931 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 0 icons
+2025-09-07 00:50:27,932 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Auto-saved settings

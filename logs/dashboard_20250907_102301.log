@@ -1,0 +1,28 @@
+2025-09-07 10:23:01,724 - __main__ - INFO - ======================================================================
+2025-09-07 10:23:01,724 - __main__ - INFO - 🚀 Starting Dashboard Desktop Application
+2025-09-07 10:23:01,724 - __main__ - INFO - ======================================================================
+2025-09-07 10:23:01,745 - __main__ - INFO - ✓ Application initialized
+2025-09-07 10:23:03,202 - __main__ - INFO - ✓ Directory structure ready (mode: main)
+2025-09-07 10:23:03,213 - __main__ - INFO - ✓ Database connected
+2025-09-07 10:23:03,265 - ui_qt.windows.dashboard_window_qt.utils.assets - INFO - Assets manager đã khởi tạo
+2025-09-07 10:23:03,269 - __main__ - INFO - Loading MainDashboard (Desktop-Style)...
+2025-09-07 10:23:03,280 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã load vị trí 0 icons
+2025-09-07 10:23:03,579 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Desktop area created successfully
+2025-09-07 10:23:03,605 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đang load desktop icons...
+2025-09-07 10:23:03,605 - ui_qt.windows.dashboard_window_qt.repositories.app_repository - INFO - Storage path: dashboard_apps.json
+2025-09-07 10:23:03,605 - ui_qt.windows.dashboard_window_qt.repositories.app_repository - INFO - Storage exists: True
+2025-09-07 10:23:03,605 - ui_qt.windows.dashboard_window_qt.repositories.app_repository - INFO - Total apps in storage: 17
+2025-09-07 10:23:03,606 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Got 17 pinned apps from repository
+2025-09-07 10:23:03,606 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - WARNING - Have 17 apps but may only show some!
+2025-09-07 10:23:03,606 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Sẽ load 17 icons lên desktop
+2025-09-07 10:23:03,659 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo thành công 17 icons
+2025-09-07 10:23:03,672 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã set wallpaper cho desktop area: C:/Users/lenovo/Downloads/hinh-nen-may-tinh-6.jpg
+2025-09-07 10:23:03,687 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã set wallpaper cho desktop area: C:/Users/lenovo/Downloads/hinh-nen-may-tinh-6.jpg
+2025-09-07 10:23:04,000 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Dashboard window hiển thị thành công
+2025-09-07 10:23:04,000 - __main__ - INFO - ✓ Dashboard loaded (main)
+2025-09-07 10:23:04,325 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã set wallpaper cho desktop area: C:/Users/lenovo/Downloads/hinh-nen-may-tinh-6.jpg
+2025-09-07 10:23:04,359 - __main__ - INFO - Assets manager initialized
+2025-09-07 10:23:04,361 - __main__ - INFO - Settings loaded
+2025-09-07 10:23:04,366 - __main__ - INFO - All services initialized successfully
+2025-09-07 10:23:04,367 - __main__ - INFO - ✓ Application ready - Starting event loop
+2025-09-07 10:23:05,998 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã set wallpaper cho desktop area: C:/Users/lenovo/Downloads/hinh-nen-may-tinh-6.jpg

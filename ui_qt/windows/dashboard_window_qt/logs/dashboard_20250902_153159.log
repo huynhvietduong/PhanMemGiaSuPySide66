@@ -1,0 +1,18 @@
+2025-09-02 15:31:59,832 - __main__ - INFO - ======================================================================
+2025-09-02 15:31:59,832 - __main__ - INFO - 🚀 Starting Dashboard Desktop Application
+2025-09-02 15:31:59,832 - __main__ - INFO - ======================================================================
+2025-09-02 15:31:59,899 - __main__ - INFO - ✓ Application initialized
+2025-09-02 15:32:01,556 - __main__ - INFO - Created directory: ui_qt\windows\dashboard_window_qt\assets\wallpapers
+2025-09-02 15:32:01,557 - __main__ - INFO - Created directory: ui_qt\windows\dashboard_window_qt\assets\themes
+2025-09-02 15:32:01,558 - __main__ - INFO - Created directory: ui_qt\windows\dashboard_window_qt\assets\sounds
+2025-09-02 15:32:01,558 - __main__ - INFO - Created directory: ui_qt\windows\dashboard_window_qt\repositories
+2025-09-02 15:32:01,559 - __main__ - INFO - Created directory: ui_qt\windows\dashboard_window_qt\services
+2025-09-02 15:32:01,560 - __main__ - INFO - Created directory: ui_qt\windows\dashboard_window_qt\utils
+2025-09-02 15:32:01,560 - __main__ - INFO - Created directory: ui_qt\windows\dashboard_window_qt\views
+2025-09-02 15:32:01,561 - __main__ - INFO - Created directory: ui_qt\windows\dashboard_window_qt\views\desktop
+2025-09-02 15:32:01,561 - __main__ - INFO - Created directory: ui_qt\windows\dashboard_window_qt\views\taskbar
+2025-09-02 15:32:01,563 - __main__ - INFO - Created directory: ui_qt\windows\dashboard_window_qt\views\start_menu
+2025-09-02 15:32:01,563 - __main__ - INFO - Created directory: ui_qt\windows\dashboard_window_qt\views\widgets
+2025-09-02 15:32:01,563 - __main__ - WARNING - Main dashboard file not found: ui_qt\windows\dashboard_window_qt\views\main_dashboard.py
+2025-09-02 15:32:01,563 - __main__ - INFO - ✓ Directory structure ready (mode: main)
+2025-09-02 15:32:01,586 - __main__ - ERROR - ✗ Database error: 'NoneType' object has no attribute 'cursor'

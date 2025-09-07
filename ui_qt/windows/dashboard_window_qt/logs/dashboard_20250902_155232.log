@@ -1,0 +1,7 @@
+2025-09-02 15:52:32,545 - __main__ - INFO - ======================================================================
+2025-09-02 15:52:32,545 - __main__ - INFO - 🚀 Starting Dashboard Desktop Application
+2025-09-02 15:52:32,545 - __main__ - INFO - ======================================================================
+2025-09-02 15:52:32,566 - __main__ - INFO - ✓ Application initialized
+2025-09-02 15:52:33,800 - __main__ - WARNING - Main dashboard file not found: ui_qt\windows\dashboard_window_qt\views\main_dashboard.py
+2025-09-02 15:52:33,800 - __main__ - INFO - ✓ Directory structure ready (mode: main)
+2025-09-02 15:52:33,813 - __main__ - ERROR - ✗ Database error: 'NoneType' object has no attribute 'cursor'

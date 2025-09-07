@@ -1,0 +1,117 @@
+2025-09-06 14:15:22,909 - __main__ - INFO - ======================================================================
+2025-09-06 14:15:22,909 - __main__ - INFO - 🚀 Starting Dashboard Desktop Application
+2025-09-06 14:15:22,910 - __main__ - INFO - ======================================================================
+2025-09-06 14:15:22,938 - __main__ - INFO - ✓ Application initialized
+2025-09-06 14:15:24,434 - __main__ - INFO - ✓ Directory structure ready (mode: main)
+2025-09-06 14:15:24,440 - __main__ - INFO - ✓ Database connected
+2025-09-06 14:15:24,501 - ui_qt.windows.dashboard_window_qt.utils.assets - INFO - Assets manager đã khởi tạo
+2025-09-06 14:15:24,505 - __main__ - INFO - Loading MainDashboard (Desktop-Style)...
+2025-09-06 14:15:24,515 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã load settings từ C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 14:15:24,516 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã load vị trí 0 icons
+2025-09-06 14:15:24,535 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 14:15:24,535 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Wallpaper set: default (mode: fill)
+2025-09-06 14:15:24,535 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Desktop settings loaded
+2025-09-06 14:15:24,535 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Đang load desktop icons...
+2025-09-06 14:15:24,542 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Added desktop icon: Quản lý học sinh
+2025-09-06 14:15:24,543 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Added desktop icon: Quản lý nhóm học
+2025-09-06 14:15:24,544 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Added desktop icon: Lịch dạy (Main)
+2025-09-06 14:15:24,545 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Added desktop icon: Ngân hàng câu hỏi
+2025-09-06 14:15:24,545 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Đã load 4 desktop icons
+2025-09-06 14:15:24,545 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Desktop Area initialized
+2025-09-06 14:15:24,545 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Desktop area created successfully
+2025-09-06 14:15:24,568 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đang load desktop icons...
+2025-09-06 14:15:24,569 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Sẽ load 4 icons lên desktop
+2025-09-06 14:15:24,570 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo icon: Quản lý học sinh tại PySide6.QtCore.QPoint(50, 50)
+2025-09-06 14:15:24,571 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo icon: Quản lý nhóm học tại PySide6.QtCore.QPoint(170, 50)
+2025-09-06 14:15:24,572 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo icon: Lịch dạy (Main) tại PySide6.QtCore.QPoint(290, 50)
+2025-09-06 14:15:24,572 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo icon: Ngân hàng câu hỏi tại PySide6.QtCore.QPoint(410, 50)
+2025-09-06 14:15:24,572 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo thành công 4 icons
+2025-09-06 14:15:24,609 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Dashboard window hiển thị thành công
+2025-09-06 14:15:24,610 - __main__ - INFO - ✓ Dashboard loaded (main)
+2025-09-06 14:15:24,668 - __main__ - INFO - Assets manager initialized
+2025-09-06 14:15:24,671 - __main__ - INFO - Settings loaded
+2025-09-06 14:15:24,680 - __main__ - INFO - All services initialized successfully
+2025-09-06 14:15:24,681 - __main__ - INFO - ✓ Application ready - Starting event loop
+2025-09-06 14:15:25,600 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - === DEBUG DESKTOP ICONS ===
+2025-09-06 14:15:25,600 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Desktop area type: <class 'ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area.DesktopArea'>
+2025-09-06 14:15:25,601 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Icon container exists: <PySide6.QtWidgets.QWidget(0x12fa1d3aa10) at 0x0000012FBED613C0>
+2025-09-06 14:15:25,601 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Container visible: True
+2025-09-06 14:15:25,601 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Container size: PySide6.QtCore.QSize(1536, 600)
+2025-09-06 14:15:25,601 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Desktop icons count: 4
+2025-09-06 14:15:25,601 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   - student_manager: visible=True, pos=PySide6.QtCore.QPoint(50, 50)
+2025-09-06 14:15:25,601 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   - group_manager: visible=True, pos=PySide6.QtCore.QPoint(170, 50)
+2025-09-06 14:15:25,602 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   - main_calendar: visible=True, pos=PySide6.QtCore.QPoint(290, 50)
+2025-09-06 14:15:25,602 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   - question_bank: visible=True, pos=PySide6.QtCore.QPoint(410, 50)
+2025-09-06 14:15:25,602 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - === END DEBUG ===
+2025-09-06 14:15:25,602 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đang load desktop icons...
+2025-09-06 14:15:25,604 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Sẽ load 4 icons lên desktop
+2025-09-06 14:15:25,606 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo icon: Quản lý học sinh tại PySide6.QtCore.QPoint(50, 50)
+2025-09-06 14:15:25,607 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo icon: Quản lý nhóm học tại PySide6.QtCore.QPoint(170, 50)
+2025-09-06 14:15:25,609 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo icon: Lịch dạy (Main) tại PySide6.QtCore.QPoint(290, 50)
+2025-09-06 14:15:25,610 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo icon: Ngân hàng câu hỏi tại PySide6.QtCore.QPoint(410, 50)
+2025-09-06 14:15:25,610 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo thành công 4 icons
+2025-09-06 14:15:26,606 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - === DEBUG DESKTOP STATE ===
+2025-09-06 14:15:26,606 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Desktop area exists: True
+2025-09-06 14:15:26,606 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Desktop area visible: True
+2025-09-06 14:15:26,606 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Desktop area size: PySide6.QtCore.QSize(1536, 600)
+2025-09-06 14:15:26,606 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Desktop area children: 2
+2025-09-06 14:15:26,606 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Desktop icons count: 4
+2025-09-06 14:15:26,606 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   - Icon student_manager: visible=True, pos=PySide6.QtCore.QPoint(50, 50), size=PySide6.QtCore.QSize(75, 90)
+2025-09-06 14:15:26,606 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   - Icon group_manager: visible=True, pos=PySide6.QtCore.QPoint(170, 50), size=PySide6.QtCore.QSize(75, 90)
+2025-09-06 14:15:26,607 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   - Icon main_calendar: visible=True, pos=PySide6.QtCore.QPoint(290, 50), size=PySide6.QtCore.QSize(75, 90)
+2025-09-06 14:15:26,607 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   - Icon question_bank: visible=True, pos=PySide6.QtCore.QPoint(410, 50), size=PySide6.QtCore.QSize(75, 90)
+2025-09-06 14:15:26,608 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Total apps in repository: 17
+2025-09-06 14:15:26,609 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Pinned apps: 4
+2025-09-06 14:15:26,610 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   - App 0: Quản lý học sinh (pinned: True)
+2025-09-06 14:15:26,610 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   - App 1: Quản lý nhóm học (pinned: True)
+2025-09-06 14:15:26,610 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   - App 2: Quản lý gói học (pinned: False)
+2025-09-06 14:15:26,610 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - === END DEBUG ===
+2025-09-06 14:15:27,595 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - === CHECK AND FIX DESKTOP ===
+2025-09-06 14:15:27,596 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Icon count: 4
+2025-09-06 14:15:27,596 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - === END CHECK ===
+2025-09-06 14:15:32,524 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Handle app launch: question_bank
+2025-09-06 14:15:32,526 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - Đang khởi chạy app: question_bank
+2025-09-06 14:15:32,526 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - Importing module: ui_qt.windows.question_bank.views.main_window
+2025-09-06 14:15:33,426 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - ERROR - Lỗi save settings: Object of type QPoint is not JSON serializable
+2025-09-06 14:15:33,426 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - App launched: question_bank
+2025-09-06 14:15:33,426 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - Đã khởi chạy app thành công: question_bank
+2025-09-06 14:15:42,270 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Handle app launch: question_bank
+2025-09-06 14:15:42,273 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - Đang khởi chạy app: question_bank
+2025-09-06 14:15:42,725 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - ERROR - Lỗi save settings: Object of type QPoint is not JSON serializable
+2025-09-06 14:15:42,725 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - App launched: question_bank
+2025-09-06 14:15:42,725 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - Đã khởi chạy app thành công: question_bank
+2025-09-06 14:16:13,758 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Handle app launch: main_calendar
+2025-09-06 14:16:13,761 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - Đang khởi chạy app: main_calendar
+2025-09-06 14:16:13,761 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - Importing module: ui_qt.main_window
+2025-09-06 14:16:13,880 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - ERROR - Lỗi save settings: Object of type QPoint is not JSON serializable
+2025-09-06 14:16:13,880 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - App launched: main_calendar
+2025-09-06 14:16:13,880 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - Đã khởi chạy app thành công: main_calendar
+2025-09-06 14:16:17,307 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - App closed: main_calendar
+2025-09-06 14:16:17,307 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - App closed: main_calendar
+2025-09-06 14:16:20,076 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Handle app launch: main_calendar
+2025-09-06 14:16:20,091 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - Đang khởi chạy app: main_calendar
+2025-09-06 14:16:20,125 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - ERROR - Lỗi save settings: Object of type QPoint is not JSON serializable
+2025-09-06 14:16:20,126 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - App launched: main_calendar
+2025-09-06 14:16:20,126 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - Đã khởi chạy app thành công: main_calendar
+2025-09-06 14:16:24,506 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - ERROR - Lỗi save settings: Object of type QPoint is not JSON serializable
+2025-09-06 14:16:24,570 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - ERROR - Lỗi save settings: Object of type QPoint is not JSON serializable
+2025-09-06 14:16:24,571 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 14:16:24,571 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 0 icons
+2025-09-06 14:16:24,571 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Auto-saved settings
+2025-09-06 14:16:37,767 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - App closed: main_calendar
+2025-09-06 14:16:37,767 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - App closed: main_calendar
+2025-09-06 14:16:49,626 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 14:16:49,627 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 14:16:49,628 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 0 icons
+2025-09-06 14:16:49,647 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - Cleaning up app launcher service...
+2025-09-06 14:16:49,648 - __main__ - INFO - Shutting down application...
+2025-09-06 14:16:49,651 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 14:16:49,652 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 14:16:49,653 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 0 icons
+2025-09-06 14:16:49,653 - __main__ - INFO - ✓ Settings saved
+2025-09-06 14:16:49,653 - __main__ - ERROR - Error during shutdown: 'DatabaseManager' object has no attribute 'close'
+2025-09-06 14:16:49,653 - __main__ - INFO - ======================================================================
+2025-09-06 14:16:49,653 - __main__ - INFO - Application shutdown complete
+2025-09-06 14:16:49,653 - __main__ - INFO - ======================================================================
+2025-09-06 14:16:49,660 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - App closed: question_bank
+2025-09-06 14:16:49,684 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - App closed: question_bank

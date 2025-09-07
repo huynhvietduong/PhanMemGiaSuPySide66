@@ -1,0 +1,115 @@
+# Cấu trúc dự án - PhanMemGiaSuPySide6
+Tạo tự động bởi generate_tree.py
+
+app_qt.py/ ← Ứng dụng Qt chính
+constants.py/ ← Các hằng số của ứng dụng
+Crip.py/
+Cấu Trúc Dự Án.py/
+data/
+├─ giasu_management.db
+├─ lesson_boards/
+│  └─ Nhóm_9.1/
+│     └─ 2025-08-04/
+├─ lessons/
+│  ├─ 10/
+│  ├─ 11/
+│  ├─ 12/
+│  ├─ 13/
+│  ├─ 2/
+│  ├─ 28/
+│  ├─ 29/
+│  ├─ 4/
+│  ├─ 5/
+│  ├─ 6/
+│  │  └─ Nhm_9.2+luyn__thi_chuyn_Ton+2025-08-09.bmp
+│  └─ 8/
+├─ question_images/
+└─ submissions/
+   ├─ 11_6_1753731364.pdf
+   ├─ 8_3_1753732406.pdf
+   ├─ 9_4_1753731123.pdf
+   ├─ 9_4_1753731216.pdf
+   ├─ 9_4_1753731607.pdf
+   ├─ 9_4_1753731786.pdf
+   ├─ 9_4_1753736425.pdf
+   ├─ 9_4_1753736547.pdf
+   ├─ 9_4_1753736792.pdf
+   └─ 9_4_1753737225.pdf
+database.py/ ← Quản lý cơ sở dữ liệu
+debug_question_bank_import.py/
+file tổng/
+main_qt.py/ ← File khởi chạy giao diện Qt
+migration_exercise_tree.py/
+ui_qt/ ← Giao diện người dùng Qt
+├─ __init__.py
+├─ board/ ← Module bảng vẽ
+│  ├─ __init__.py
+│  ├─ core/ ← Logic cốt lõi ứng dụng
+│  │  ├─ canvas_widget.py
+│  │  ├─ data_models.py
+│  │  ├─ layer_manager.py
+│  │  └─ tool_api.py
+│  ├─ io/
+│  │  └─ file_io.py
+│  ├─ state/
+│  │  └─ board_state.py
+│  ├─ tools/
+│  │  ├─ brush_effects.py
+│  │  ├─ erase_area_tool.py
+│  │  ├─ eraser_tool.py
+│  │  ├─ pen_tool.py
+│  │  ├─ screen_snip.py
+│  │  ├─ select_tool.py
+│  │  └─ shape_tool.py
+│  ├─ ui/
+│  │  ├─ __init__.py
+│  │  ├─ layer_panel.py
+│  │  ├─ toolbar.py
+│  │  └─ width_menu.py
+│  └─ window.py
+├─ core/ ← Logic cốt lõi ứng dụng
+│  ├─ base_window.py
+│  ├─ models/
+│  │  ├─ groups_model.py
+│  │  └─ students_model.py
+│  ├─ theme.py
+│  └─ widgets/
+│     └─ search_combo.py
+├─ main_window.py
+├─ resources/ ← Tài nguyên (icon, images, styles)
+│  └─ resources_rc.py
+└─ windows/ ← Các cửa sổ giao diện
+   ├─ __init__.py
+   ├─ add_exercise_window_qt.py
+   ├─ assign_exercise_window_qt.py
+   ├─ assigned_exercise_manager_window_qt.py
+   ├─ attendance_report_window_qt.py
+   ├─ create_test_window_qt.py
+   ├─ dashboard_window_qt.py
+   ├─ exercise_manager_window_qt.py
+   ├─ exercise_suggestion_window_qt.py
+   ├─ exercise_tree_manager_qt.py
+   ├─ group_suggestion_window_qt.py
+   ├─ group_window_qt.py
+   ├─ package_window_qt.py
+   ├─ progress_report_window_qt.py
+   ├─ question_bank_module/ ← Module ngân hàng câu hỏi
+   │  ├─ cua_so_chinh.py
+   │  ├─ dialog_cau_hoi.py
+   │  ├─ import_export.py
+   │  ├─ quan_ly_cay.py
+   │  ├─ quan_ly_tags.py
+   │  ├─ tien_ich.py
+   │  ├─ tim_kiem_loc.py
+   │  └─ xu_ly_media.py
+   ├─ question_bank_window_qt.py
+   ├─ questione.py
+   ├─ salary_window_qt.py
+   ├─ schedule_makeup_window_qt.py
+   ├─ session_detail_window_qt.py
+   ├─ skill_rating_window_qt.py
+   ├─ student_skill_report_window_qt.py
+   ├─ student_window_qt.py
+   ├─ submit_exercise_window_qt.py
+   └─ submitted_exercise_manager_window_qt.py
+utils.py/ ← Các tiện ích chung

@@ -1,0 +1,65 @@
+2025-09-06 22:38:25,221 - __main__ - INFO - ======================================================================
+2025-09-06 22:38:25,221 - __main__ - INFO - 🚀 Starting Dashboard Desktop Application
+2025-09-06 22:38:25,221 - __main__ - INFO - ======================================================================
+2025-09-06 22:38:25,242 - __main__ - INFO - ✓ Application initialized
+2025-09-06 22:38:26,694 - __main__ - INFO - ✓ Directory structure ready (mode: main)
+2025-09-06 22:38:26,700 - __main__ - INFO - ✓ Database connected
+2025-09-06 22:38:26,751 - ui_qt.windows.dashboard_window_qt.utils.assets - INFO - Assets manager đã khởi tạo
+2025-09-06 22:38:26,758 - __main__ - INFO - Loading MainDashboard (Desktop-Style)...
+2025-09-06 22:38:26,768 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã load settings từ C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 22:38:26,769 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã load vị trí 0 icons
+2025-09-06 22:38:26,784 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 22:38:26,784 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Wallpaper set: default (mode: fill)
+2025-09-06 22:38:26,784 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Desktop settings loaded
+2025-09-06 22:38:26,784 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Đang load desktop icons...
+2025-09-06 22:38:26,791 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Added desktop icon: Quản lý học sinh
+2025-09-06 22:38:26,793 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Added desktop icon: Quản lý nhóm học
+2025-09-06 22:38:26,794 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Added desktop icon: Lịch dạy (Main)
+2025-09-06 22:38:26,794 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Added desktop icon: Ngân hàng câu hỏi
+2025-09-06 22:38:26,795 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Đã load 4 desktop icons
+2025-09-06 22:38:26,795 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Desktop Area initialized
+2025-09-06 22:38:26,795 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Desktop area created successfully
+2025-09-06 22:38:26,817 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đang load desktop icons...
+2025-09-06 22:38:26,818 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Sẽ load 4 icons lên desktop
+2025-09-06 22:38:26,820 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 22:38:26,820 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo icon: Quản lý học sinh tại PySide6.QtCore.QPoint(50, 50)
+2025-09-06 22:38:26,821 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 22:38:26,821 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo icon: Quản lý nhóm học tại PySide6.QtCore.QPoint(170, 50)
+2025-09-06 22:38:26,822 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 22:38:26,822 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo icon: Lịch dạy (Main) tại PySide6.QtCore.QPoint(290, 50)
+2025-09-06 22:38:26,823 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 22:38:26,823 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo icon: Ngân hàng câu hỏi tại PySide6.QtCore.QPoint(410, 50)
+2025-09-06 22:38:26,823 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Đã tạo thành công 4 icons
+2025-09-06 22:38:26,844 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Dashboard window hiển thị thành công
+2025-09-06 22:38:26,845 - __main__ - INFO - ✓ Dashboard loaded (main)
+2025-09-06 22:38:26,882 - __main__ - INFO - Assets manager initialized
+2025-09-06 22:38:26,885 - __main__ - INFO - Settings loaded
+2025-09-06 22:38:26,892 - __main__ - INFO - All services initialized successfully
+2025-09-06 22:38:26,893 - __main__ - INFO - ✓ Application ready - Starting event loop
+2025-09-06 22:38:27,848 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - === DEBUG DESKTOP ICONS ===
+2025-09-06 22:38:27,848 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Desktop area type: <class 'ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area.DesktopArea'>
+2025-09-06 22:38:27,848 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Icon container exists: <PySide6.QtWidgets.QWidget(0x22b0666b9b0) at 0x0000022B09C25E40>
+2025-09-06 22:38:27,848 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Container visible: True
+2025-09-06 22:38:27,848 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Container size: PySide6.QtCore.QSize(1536, 600)
+2025-09-06 22:38:27,848 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Desktop icons count: 4
+2025-09-06 22:38:27,849 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   - student_manager: visible=True, pos=PySide6.QtCore.QPoint(50, 50)
+2025-09-06 22:38:27,849 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   - group_manager: visible=True, pos=PySide6.QtCore.QPoint(170, 50)
+2025-09-06 22:38:27,849 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   - main_calendar: visible=True, pos=PySide6.QtCore.QPoint(290, 50)
+2025-09-06 22:38:27,849 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   - question_bank: visible=True, pos=PySide6.QtCore.QPoint(410, 50)
+2025-09-06 22:38:27,849 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - === END DEBUG ===
+2025-09-06 22:38:28,848 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - === DEBUG DESKTOP STATE ===
+2025-09-06 22:38:28,848 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Desktop area exists: True
+2025-09-06 22:38:28,849 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Desktop area visible: True
+2025-09-06 22:38:28,849 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Desktop area size: PySide6.QtCore.QSize(1536, 600)
+2025-09-06 22:38:28,849 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Desktop area children: 2
+2025-09-06 22:38:28,849 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Desktop icons count: 4
+2025-09-06 22:38:28,849 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   - Icon student_manager: visible=True, pos=PySide6.QtCore.QPoint(50, 50), size=PySide6.QtCore.QSize(75, 90)
+2025-09-06 22:38:28,849 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   - Icon group_manager: visible=True, pos=PySide6.QtCore.QPoint(170, 50), size=PySide6.QtCore.QSize(75, 90)
+2025-09-06 22:38:28,849 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   - Icon main_calendar: visible=True, pos=PySide6.QtCore.QPoint(290, 50), size=PySide6.QtCore.QSize(75, 90)
+2025-09-06 22:38:28,849 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   - Icon question_bank: visible=True, pos=PySide6.QtCore.QPoint(410, 50), size=PySide6.QtCore.QSize(75, 90)
+2025-09-06 22:38:28,849 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Total apps in repository: 17
+2025-09-06 22:38:28,850 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Pinned apps: 4
+2025-09-06 22:38:28,850 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   - App 0: Quản lý học sinh (pinned: True)
+2025-09-06 22:38:28,850 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   - App 1: Quản lý nhóm học (pinned: True)
+2025-09-06 22:38:28,850 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO -   - App 2: Quản lý gói học (pinned: False)
+2025-09-06 22:38:28,850 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - === END DEBUG ===

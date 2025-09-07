@@ -1,0 +1,9 @@
+2025-09-04 01:10:34,230 - __main__ - INFO - ======================================================================
+2025-09-04 01:10:34,231 - __main__ - INFO - 🚀 Starting Dashboard Desktop Application
+2025-09-04 01:10:34,231 - __main__ - INFO - ======================================================================
+2025-09-04 01:10:34,286 - __main__ - INFO - ✓ Application initialized
+2025-09-04 01:10:36,525 - __main__ - INFO - ✓ Directory structure ready (mode: main)
+2025-09-04 01:10:36,534 - __main__ - INFO - ✓ Database connected
+2025-09-04 01:10:36,572 - __main__ - INFO - Loading MainDashboard (Desktop-Style)...
+2025-09-04 01:10:36,575 - __main__ - ERROR - Failed to load dashboard: load_wallpaper() takes 1 positional argument but 2 were given
+2025-09-04 01:10:36,602 - __main__ - ERROR - ✗ Failed to create window: load_wallpaper() takes 1 positional argument but 2 were given

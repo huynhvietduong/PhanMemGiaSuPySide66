@@ -1,0 +1,1247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="b6c71a00-5efc-46ee-afdc-a475b522e228" name="Changes" comment="cập nhật Quản Lí Học SInh">
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112600" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112604" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112606" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112608" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112630" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112632" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112636" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112638" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112640" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112644" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112646" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112648" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112676" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112678" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112680" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112682" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112684" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112686" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112690" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112692" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112694" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112698" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112736" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112770" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112774" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112814" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112816" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112820" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112822" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112826" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112828" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112850" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112852" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112856" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112858" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112860" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112862" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/112864" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/113040" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/113044" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/1508" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29766" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29770" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29774" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29778" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29810" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29812" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29816" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29820" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29822" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29826" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29850" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29852" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29856" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29858" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29862" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29864" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29868" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29890" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29892" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29896" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29900" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29902" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29910" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29914" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29942" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29946" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29948" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29952" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29956" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29958" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29982" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29984" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29988" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29992" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/29996" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30000" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30004" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30006" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30010" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30014" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30018" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30040" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30044" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30046" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30050" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30054" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30058" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30062" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30092" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30096" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30098" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30102" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30106" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30108" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30130" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30134" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30138" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30142" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30146" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30172" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30176" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30180" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30184" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30188" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30190" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30192" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30220" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30224" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30226" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30230" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30236" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30262" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30266" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30270" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30274" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30278" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30312" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30314" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30322" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30326" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30350" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30354" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30358" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30362" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30366" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30390" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30394" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30706" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30708" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30714" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30726" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30750" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30752" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30756" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30760" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30764" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30766" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30790" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30792" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30800" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30802" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30804" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30808" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30836" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30838" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30840" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30842" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30847" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30849" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30853" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30855" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/30857" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/41145" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/41147" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/41149" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/41172" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/41176" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/41180" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/41182" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/41184" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/41186" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/41188" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/41190" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/41220" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/41222" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/41224" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/41226" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/41230" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/41232" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/41234" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/41238" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/41262" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/41266" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/41270" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/41272" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/41274" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/41276" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/41278" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.tmp.driveupload/43935" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Crip.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/crip_debog_loi_data.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250904_010920.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250904_011034.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250904_011350.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250904_012450.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250904_014842.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250904_014919.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250904_020104.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250904_024542.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250906_121014.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250906_131945.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250906_132039.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250906_132111.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250906_134304.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250906_134502.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250906_135637.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250906_141522.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250906_222713.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250906_223825.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250906_224005.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250906_224511.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250906_225318.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250906_230212.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250906_230312.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250906_231451.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250906_233037.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250906_233418.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250906_233501.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250906_234406.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250906_235219.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_000702.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_000828.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_001241.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_001428.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_004104.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_004926.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_010133.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_010420.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_010700.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_011740.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_013910.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_015358.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_021945.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_022007.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_022106.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_095019.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_095906.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_100801.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_101709.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_101902.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_102051.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_102301.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_103520.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_103826.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_105957.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_110230.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_110439.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_110621.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_111525.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_113207.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/dashboard_20250907_114648.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/.idea/PhanMemGiaSuTVC.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PyQt6/Qt6/bin/MSVCP140.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PyQt6/Qt6/bin/MSVCP140_1.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PyQt6/Qt6/bin/Qt6Gui.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PyQt6/Qt6/bin/Qt6OpenGL.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PyQt6/Qt6/bin/Qt6OpenGLWidgets.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PyQt6/Qt6/bin/Qt6Quick3DAssetImport.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PyQt6/Qt6/bin/Qt6QuickControls2Impl.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PyQt6/Qt6/bin/Qt6Sensors.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PyQt6/Qt6/bin/Qt6ShaderTools.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PyQt6/Qt6/bin/Qt6SpatialAudio.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PyQt6/Qt6/bin/Qt6StateMachine.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PyQt6/Qt6/bin/Qt6WebChannel.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PyQt6/Qt6/bin/VCRUNTIME140_1.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/CONCRT140.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/MSVCP140.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt63DAnimation.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt63DCore.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt63DInput.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt63DQuick.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt63DQuickExtras.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt63DRender.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6Bluetooth.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6ChartsQml.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6Concurrent.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6DBus.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6DataVisualizationQml.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6Designer.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6GraphsWidgets.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6Help.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6LabsPlatform.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6LabsSettings.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6Network.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6OpenGL.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6OpenGLWidgets.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6Pdf.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6PdfQuick.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6PositioningQuick.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6PrintSupport.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6QmlCore.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6QmlMeta.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6QmlModels.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6Quick3D.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6Quick3DAssetUtils.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6Quick3DHelpersImpl.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6Quick3DParticles.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6Quick3DSpatialAudio.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6Quick3DXr.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6QuickControls2BasicStyleImpl.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6QuickControls2FluentWinUI3StyleImpl.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6QuickControls2Fusion.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6QuickControls2Imagine.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6QuickControls2ImagineStyleImpl.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6QuickControls2Impl.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6QuickControls2Material.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6QuickDialogs2.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6QuickDialogs2Utils.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6QuickParticles.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6QuickShapes.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6QuickTemplates2.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6QuickTest.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6QuickVectorImage.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6QuickVectorImageGenerator.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6RemoteObjects.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6RemoteObjectsQml.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6Scxml.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6Sensors.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6SerialPort.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6SpatialAudio.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6StateMachine.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6StateMachineQml.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6SvgWidgets.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6TextToSpeech.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6UiTools.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6VirtualKeyboard.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6VirtualKeyboardQml.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6VirtualKeyboardSettings.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6WebChannel.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6WebChannelQuick.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6WebEngineQuick.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/Qt6WebEngineWidgets.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/QtCore.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/QtNetwork.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/QtWidgets.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/VCRUNTIME140.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/VCRUNTIME140_1.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/avcodec-61.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/plugins/iconengines/qsvgicon.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/plugins/imageformats/qgif.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/plugins/imageformats/qicns.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/plugins/imageformats/qjpeg.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/plugins/imageformats/qwebp.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/plugins/networkinformation/qnetworklistmanager.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/plugins/platforms/qminimal.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/plugins/tls/qopensslbackend.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/plugins/tls/qschannelbackend.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/pyside6qml.abi3.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/swresample-5.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/swscale-8.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qt_ar.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qt_ca.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qt_da.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qt_en.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qt_es.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qt_fi.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qt_gl.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qt_help_ar.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qt_help_da.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qt_help_es.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qt_help_gl.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qt_help_hu.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qt_help_it.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qt_help_ko.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qt_help_pl.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qt_help_pt_BR.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qt_help_ru.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qt_help_sk.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qt_hu.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qt_ja.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qt_ko.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qt_lt.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qt_lv.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qt_nl.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qt_pl.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qt_sl.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qt_zh_CN.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qtbase_bg.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qtbase_cs.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qtbase_da.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qtbase_de.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qtbase_fa.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qtbase_fr.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qtbase_hr.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qtbase_hu.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qtbase_it.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qtbase_ka.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qtbase_nn.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qtbase_sk.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qtbase_tr.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qtbase_uk.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/PySide6/translations/qtbase_zh_CN.qm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/VCRUNTIME140_1.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_sqlite3.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/auto.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/big5.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/cns11643.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/cp1250.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/cp1252.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/cp1254.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/cp1255.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/cp1257.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/cp775.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/cp860.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/cp861.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/cp863.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/cp865.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/cp869.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/cp874.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/cp932.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/euc-kr.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/gb12345.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/gb1988.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/iso2022-jp.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/iso2022.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/iso8859-11.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/iso8859-13.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/iso8859-15.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/iso8859-3.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/iso8859-5.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/iso8859-8.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/koi8-r.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/koi8-ru.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/koi8-t.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/koi8-u.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/ksc5601.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/macIceland.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/macJapan.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/macRomania.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/encoding/tis-620.enc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/http1.0/http.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/init.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/af_za.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/ar.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/ar_sy.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/bg.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/ca.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/cs.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/da.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/el.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/en_bw.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/en_ca.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/en_gb.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/en_ie.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/en_in.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/en_sg.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/en_za.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/eo.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/es.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/es_ar.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/es_bo.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/es_cl.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/es_do.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/es_ec.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/es_gt.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/es_hn.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/es_ni.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/es_pr.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/eu.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/eu_es.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/fa_in.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/fi.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/fr.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/ga.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/ga_ie.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/gl.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/gv.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/gv_gb.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/he.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/hi.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/hi_in.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/hr.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/hu.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/id.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/id_id.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/it.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/it_ch.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/ja.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/ko_kr.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/kw.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/kw_gb.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/lv.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/mr.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/mr_in.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/ms.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/ms_my.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/nb.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/nl_be.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/ru.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/sh.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/sk.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/sr.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/sv.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/ta.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/te.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/te_in.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/th.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/uk.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/zh_cn.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/zh_hk.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/msgs/zh_tw.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/opt0.4/optparse.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/opt0.4/pkgIndex.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/package.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/parray.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tclIndex" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tm.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Africa/Abidjan" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Africa/Accra" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Africa/Asmara" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Africa/Asmera" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Africa/Bamako" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Africa/Bangui" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Africa/Banjul" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Africa/Blantyre" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Africa/Brazzaville" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Africa/Bujumbura" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Africa/Cairo" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Africa/Djibouti" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Africa/Freetown" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Africa/Harare" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Africa/Johannesburg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Africa/Juba" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Africa/Kampala" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Africa/Libreville" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Africa/Lome" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Africa/Luanda" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Africa/Lubumbashi" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Africa/Maputo" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Africa/Mogadishu" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Africa/Monrovia" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Africa/Ndjamena" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Africa/Nouakchott" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Africa/Timbuktu" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Africa/Tripoli" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Africa/Tunis" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Antigua" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Argentina/Buenos_Aires" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Argentina/Cordoba" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Argentina/Jujuy" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Argentina/La_Rioja" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Argentina/Mendoza" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Argentina/Rio_Gallegos" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Argentina/Salta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Argentina/Tucuman" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Argentina/Ushuaia" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Aruba" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Asuncion" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Atikokan" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Atka" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Bahia_Banderas" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Barbados" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Belem" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Blanc-Sablon" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Boa_Vista" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Bogota" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Boise" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Catamarca" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Cayenne" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Chihuahua" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Ciudad_Juarez" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Danmarkshavn" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Dawson_Creek" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Denver" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Detroit" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Edmonton" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Fort_Wayne" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Goose_Bay" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Guadeloupe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Guatemala" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Guayaquil" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Guyana" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Halifax" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Havana" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Hermosillo" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Indiana/Indianapolis" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Indiana/Knox" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Indiana/Marengo" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Indiana/Tell_City" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Indiana/Vevay" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Indiana/Vincennes" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Indiana/Winamac" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Indianapolis" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Jujuy" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Juneau" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Knox_IN" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Kralendijk" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/La_Paz" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Los_Angeles" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Maceio" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Manaus" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Matamoros" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Mazatlan" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Metlakatla" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Mexico_City" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Moncton" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Monterrey" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Montreal" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Montserrat" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Nassau" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Nipigon" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Nome" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Noronha" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/North_Dakota/Beulah" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/North_Dakota/Center" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Panama" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Pangnirtung" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Porto_Acre" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Punta_Arenas" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Recife" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Rio_Branco" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Rosario" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Santarem" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Santiago" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Santo_Domingo" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Sao_Paulo" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Scoresbysund" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/St_Kitts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/St_Thomas" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/St_Vincent" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Swift_Current" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Thule" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Thunder_Bay" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Tijuana" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Toronto" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Vancouver" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Whitehorse" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Winnipeg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/America/Yakutat" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Antarctica/Casey" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Antarctica/Davis" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Antarctica/DumontDUrville" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Antarctica/McMurdo" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Antarctica/Rothera" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Arctic/Longyearbyen" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Aden" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Amman" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Aqtobe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Atyrau" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Bahrain" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Baku" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Barnaul" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Bishkek" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Choibalsan" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Chongqing" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Chungking" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Colombo" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Dacca" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Dhaka" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Dubai" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Gaza" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Harbin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Ho_Chi_Minh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Hovd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Irkutsk" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Istanbul" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Jakarta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Kabul" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Kamchatka" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Kathmandu" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Katmandu" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Khandyga" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Kuala_Lumpur" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Kuching" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Kuwait" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Manila" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Muscat" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Nicosia" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Novokuznetsk" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Novosibirsk" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Pyongyang" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Qatar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Riyadh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Sakhalin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Samarkand" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Seoul" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Shanghai" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Tashkent" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Tbilisi" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Tokyo" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Tomsk" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Ulaanbaatar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Ulan_Bator" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Urumqi" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Ust-Nera" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Vientiane" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Vladivostok" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Yangon" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Asia/Yerevan" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Atlantic/Cape_Verde" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Atlantic/Faroe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Atlantic/South_Georgia" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Australia/Broken_Hill" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Australia/Currie" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Australia/Hobart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Australia/LHI" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Australia/Lord_Howe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Australia/NSW" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Australia/Perth" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Australia/Sydney" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Australia/Tasmania" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Australia/Victoria" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Australia/West" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Brazil/Acre" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Brazil/DeNoronha" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Brazil/East" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/CST6CDT" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Canada/Central" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Canada/Eastern" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Canada/Mountain" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Canada/Newfoundland" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Canada/Pacific" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Canada/Saskatchewan" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Canada/Yukon" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Chile/Continental" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Chile/EasterIsland" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Cuba" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/EET" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/EST" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/EST5EDT" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Egypt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Etc/GMT" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Etc/GMT-0" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Etc/GMT-1" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Etc/GMT-10" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Etc/GMT-11" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Etc/GMT-12" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Etc/GMT-13" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Etc/GMT-14" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Etc/GMT-2" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Etc/GMT-3" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Etc/GMT-4" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Etc/GMT-5" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Etc/GMT-6" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Etc/GMT-7" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Etc/GMT-8" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Etc/GMT-9" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Etc/GMT0" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Etc/Greenwich" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Etc/Zulu" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Amsterdam" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Andorra" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Astrakhan" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Athens" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Belfast" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Berlin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Brussels" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Busingen" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Chisinau" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Gibraltar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Guernsey" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Jersey" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Kyiv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Lisbon" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Ljubljana" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/London" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Luxembourg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Malta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Mariehamn" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Moscow" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Oslo" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Prague" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Riga" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Samara" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Sarajevo" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Tallinn" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Tirane" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Tiraspol" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Ulyanovsk" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Uzhgorod" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Vaduz" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Vatican" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Vienna" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Volgograd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Zagreb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Zaporozhye" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Europe/Zurich" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/GB" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/GB-Eire" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/GMT+0" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/HST" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Hongkong" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Iceland" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Indian/Chagos" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Indian/Christmas" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Indian/Comoro" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Indian/Kerguelen" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Indian/Maldives" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Indian/Mauritius" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Indian/Mayotte" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Indian/Reunion" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Israel" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Jamaica" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Libya" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/MET" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/MST7MDT" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Mexico/BajaNorte" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Mexico/BajaSur" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/PRC" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/PST8PDT" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Pacific/Chatham" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Pacific/Easter" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Pacific/Efate" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Pacific/Fiji" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Pacific/Funafuti" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Pacific/Galapagos" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Pacific/Guam" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Pacific/Honolulu" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Pacific/Johnston" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Pacific/Kiritimati" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Pacific/Kosrae" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Pacific/Kwajalein" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Pacific/Majuro" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Pacific/Midway" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Pacific/Nauru" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Pacific/Palau" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Pacific/Pohnpei" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Pacific/Port_Moresby" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Pacific/Rarotonga" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Pacific/Saipan" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Pacific/Tongatapu" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Pacific/Wake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Poland" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Singapore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/SystemV/AST4ADT" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/SystemV/CST6CDT" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/SystemV/HST10" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/SystemV/MST7" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/SystemV/YST9YDT" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Turkey" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/UCT" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/US/Indiana-Starke" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/WET" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/tzdata/Zulu" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tcl_data/word.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/choosedir.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/comdlg.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/console.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/focus.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/fontchooser.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/images/logo64.gif" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/images/pwrdLogo200.gif" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/images/pwrdLogo75.gif" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/license.terms" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/listbox.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/megawidget.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/menu.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/mkpsenc.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/msgs/da.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/msgs/el.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/msgs/en.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/msgs/eo.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/msgs/fi.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/msgs/fr.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/msgs/hu.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/msgs/nl.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/msgs/pt.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/msgs/ru.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/msgs/sv.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/msgs/zh_cn.msg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/obsolete.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/panedwindow.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/pkgIndex.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/scrlbar.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/tclIndex" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/tk.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/ttk/altTheme.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/ttk/aquaTheme.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/ttk/classicTheme.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/ttk/combobox.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/ttk/defaults.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/ttk/notebook.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/ttk/panedwindow.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/ttk/progress.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/ttk/scrollbar.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/ttk/spinbox.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/ttk/treeview.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/ttk/ttk.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/ttk/utils.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/ttk/vistaTheme.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/_tk_data/ttk/xpTheme.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/assets/icons/assignment.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/assets/icons/calendar.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/assets/icons/folder.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/assets/icons/progress.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/assets/icons/rating.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/assets/icons/skill.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/assets/icons/submit.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/assets/icons/suggest.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/data/giasu_management.db" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/data/lesson_boards/Nhóm_9.1/2025-08-04/2025-08-04_015722.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/data/lessons/10/9.2_2025_08_14_no_topic.board.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/data/lessons/2/Nhóm_9.1_04-08-2025_no_topic.board.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/data/lessons/5/Nhóm_9.2_09-08-2025_luyện_đề_thi_chuyên_Toán.board.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/data/lessons/6/Nhm_9.2+luyn__thi_chuyn_Ton+2025-08-09(1).png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/data/lessons/6/Nhm_9.2+luyn__thi_chuyn_Ton+2025-08-09.bmp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/data/lessons/6/Nhm_9.2+luyn__thi_chuyn_Ton+2025-08-09.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/data/question_images/1753900750903.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/data/question_images/1753900787965.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/data/submissions/11_6_1753731364.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/data/submissions/9_4_1753731786.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/data/submissions/9_4_1753736792.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/data/submissions/9_4_1753737021.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/debug_question_bank_import.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/libcrypto-3.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/libffi-8.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/libssl-3.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/pymupdf/mupdfcpp64.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/select.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/sqlite3.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/tcl8/8.5/msgcat-1.6.1.tm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/tcl86t.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/ui_qt/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/ui_qt/board/Cấu Trúc.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/ui_qt/board/core/data_models.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/ui_qt/board/io/file_io.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/ui_qt/board/tools/select_tool.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/ui_qt/board/ui/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/ui_qt/board/ui/width_menu.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/ui_qt/board/window.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/ui_qt/main_window.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/ui_qt/resources/resources_rc.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/ui_qt/windows/add_exercise_window_qt.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/ui_qt/windows/assign_exercise_window_qt.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/ui_qt/windows/assigned_exercise_manager_window_qt.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/ui_qt/windows/exercise_suggestion_window_qt.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/ui_qt/windows/exercise_tree_manager_qt.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/ui_qt/windows/pandoc-3.7.0.2-windows-x86_64.msi" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/ui_qt/windows/question_bank_window_qt.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/ui_qt/windows/schedule_makeup_window_qt.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/ui_qt/windows/session_detail_window_qt.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/ui_qt/windows/submit_exercise_window_qt.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/unicodedata.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/output/app_qt/_internal/zlib1.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/project_structure.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/#dashboard_window_qt.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/assets/icons/app/assignment.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/assets/icons/app/attendance.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/assets/icons/app/folder.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/assets/icons/app/question_bank.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/assets/icons/app/rating.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/assets/icons/app/skill.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/assets/icons/app/students.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/assets/icons/app/suggest.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/logs/dashboard_20250902_153159.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/logs/dashboard_20250902_155232.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/repositories/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/repositories/settings_repository.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/repositories/stats_repository.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/services/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/services/app_launcher_service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/services/window_manager_service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/utils/assets.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/utils/constants.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/views/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/views/desktop/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/views/desktop/desktop_drag_handler.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/views/desktop/desktop_icon_manager.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/views/main_dashboard.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/views/start_menu/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/views/start_menu/start_menu_tiles.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/views/taskbar/taskbar.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/views/widgets/app_icon_widget.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/views/widgets/clock_widget.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/views/widgets/notification_widget.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/dashboard_window_qt/views/widgets/weather_widget.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/pandoc-3.7.0.2-windows-x86_64.msi" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/question_bank/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/question_bank/repositories/tree_repository.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/question_bank/services/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/question_bank/services/question_service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/question_bank/services/search_service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/question_bank/services/tree_service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/question_bank/services/validation_service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/question_bank/utils/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/question_bank/views/dialogs/fullscreen_image_dialog.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/question_bank/views/dialogs/question_edit_dialog.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/question_bank/views/dialogs/tree_node_dialog.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/question_bank/views/widgets/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/question_bank/views/widgets/filter_widget.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/question_bank/views/widgets/image_viewer_widget.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ui_qt/windows/question_bank/views/widgets/pdf_viewer_widget.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ui_qt/windows/add_exercise_window_qt.py" beforeDir="false" afterPath="$PROJECT_DIR$/ui_qt/windows/add_exercise_window_qt.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Jupyter Notebook" />
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;huynhvietduong&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/huynhvietduong/PhanMemGiaSuPySide66.git&quot;,
+    &quot;accountId&quot;: &quot;335ef856-397c-4ae9-b712-239e6cf77b5a&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
+  <component name="ProjectId" id="316c4g6VoqObLw2pbvmGyZIFX6K" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.Cay_thu_muc.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Code_Bang_Ve.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Crip.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Cấu Trúc Dự Án.executor&quot;: &quot;Run&quot;,
+    &quot;Python.__init__.executor&quot;: &quot;Run&quot;,
+    &quot;Python.app_launcher_service.executor&quot;: &quot;Run&quot;,
+    &quot;Python.app_qt.executor&quot;: &quot;Run&quot;,
+    &quot;Python.app_repository.executor&quot;: &quot;Run&quot;,
+    &quot;Python.base_window.executor&quot;: &quot;Run&quot;,
+    &quot;Python.canvas_widget.executor&quot;: &quot;Run&quot;,
+    &quot;Python.clock_widget.executor&quot;: &quot;Run&quot;,
+    &quot;Python.create_structure.executor&quot;: &quot;Run&quot;,
+    &quot;Python.crip_debog_loi_data.executor&quot;: &quot;Run&quot;,
+    &quot;Python.cua_so_chinh.executor&quot;: &quot;Run&quot;,
+    &quot;Python.cấu trúc.executor&quot;: &quot;Run&quot;,
+    &quot;Python.database.executor&quot;: &quot;Run&quot;,
+    &quot;Python.desktop_context_menu.executor&quot;: &quot;Run&quot;,
+    &quot;Python.desktop_service.executor&quot;: &quot;Run&quot;,
+    &quot;Python.dialog_cau_hoi.executor&quot;: &quot;Run&quot;,
+    &quot;Python.docx_math_to_mathjax.executor&quot;: &quot;Run&quot;,
+    &quot;Python.exercise_tree_manager_qt.executor&quot;: &quot;Run&quot;,
+    &quot;Python.fullscreen_image_dialog.executor&quot;: &quot;Run&quot;,
+    &quot;Python.image_viewer_widget.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main_dashboard.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main_qt.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main_window.executor&quot;: &quot;Run&quot;,
+    &quot;Python.quan_ly_cay.executor&quot;: &quot;Run&quot;,
+    &quot;Python.question.executor&quot;: &quot;Run&quot;,
+    &quot;Python.question_bank_directory_structure.executor&quot;: &quot;Run&quot;,
+    &quot;Python.question_bank_window_qt.executor&quot;: &quot;Run&quot;,
+    &quot;Python.question_edit_dialog.executor&quot;: &quot;Run&quot;,
+    &quot;Python.questione.executor&quot;: &quot;Run&quot;,
+    &quot;Python.screen_snip.executor&quot;: &quot;Run&quot;,
+    &quot;Python.session_detail_window_qt.executor&quot;: &quot;Run&quot;,
+    &quot;Python.student_window.executor&quot;: &quot;Run&quot;,
+    &quot;Python.student_window_qt.executor&quot;: &quot;Run&quot;,
+    &quot;Python.taskbar.executor&quot;: &quot;Run&quot;,
+    &quot;Python.tree_folder.executor&quot;: &quot;Run&quot;,
+    &quot;Python.whiteboard.executor&quot;: &quot;Run&quot;,
+    &quot;Python.whiteboard_area_eraser_shape_group.executor&quot;: &quot;Run&quot;,
+    &quot;Python.whiteboard_eraser_unified.executor&quot;: &quot;Run&quot;,
+    &quot;Python.whiteboard_separate_width.executor&quot;: &quot;Run&quot;,
+    &quot;Python.window.executor&quot;: &quot;Run&quot;,
+    &quot;Python.word_viewer_window_qt.executor&quot;: &quot;Run&quot;,
+    &quot;Python.xu_ly_media.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/lenovo/PycharmProjects/PhanMemGiaSuPySide6&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\lenovo\PycharmProjects\PhanMemGiaSuPySide6" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\lenovo\PycharmProjects\PhanMemGiaSuPySide6\ui_qt\windows" />
+      <recent name="C:\Users\lenovo\PycharmProjects\PhanMemGiaSuPySide6" />
+      <recent name="C:\Users\lenovo\PycharmProjects\PhanMemGiaSuPySide6\data" />
+      <recent name="C:\Users\lenovo\PycharmProjects\PhanMemGiaSuPySide6\ui\windows" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-9f8e2b94138c-36ea0e71a18c-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-251.26094.141" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration>C:\Users\lenovo\AppData\Roaming\Subversion</configuration>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="b6c71a00-5efc-46ee-afdc-a475b522e228" name="Changes" comment="" />
+      <created>1754847772741</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1754847772741</updated>
+    </task>
+    <task id="LOCAL-00001" summary="ok">
+      <option name="closed" value="true" />
+      <created>1755024705042</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1755024705042</updated>
+    </task>
+    <task id="LOCAL-00002" summary="ok">
+      <option name="closed" value="true" />
+      <created>1755024727380</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1755024727381</updated>
+    </task>
+    <task id="LOCAL-00003" summary="khắc phục lỗi snipcontroler">
+      <option name="closed" value="true" />
+      <created>1755366388033</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1755366388034</updated>
+    </task>
+    <task id="LOCAL-00004" summary="khắc phục lỗi snipcontroler">
+      <option name="closed" value="true" />
+      <created>1755372065730</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1755372065730</updated>
+    </task>
+    <task id="LOCAL-00005" summary="cập nhật bảng vẽ">
+      <option name="closed" value="true" />
+      <created>1755373930025</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1755373930025</updated>
+    </task>
+    <task id="LOCAL-00006" summary="cập nhật bảng vẽ">
+      <option name="closed" value="true" />
+      <created>1755374467195</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1755374467195</updated>
+    </task>
+    <task id="LOCAL-00007" summary="cập nhật">
+      <option name="closed" value="true" />
+      <created>1755411897165</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1755411897165</updated>
+    </task>
+    <task id="LOCAL-00008" summary="cập nhật Quản Lí Học SInh">
+      <option name="closed" value="true" />
+      <created>1755421010434</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1755421010434</updated>
+    </task>
+    <task id="LOCAL-00009" summary="cập nhật Quản Lí Học SInh">
+      <option name="closed" value="true" />
+      <created>1755450283650</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1755450283650</updated>
+    </task>
+    <task id="LOCAL-00010" summary="cập nhật Quản Lí Học SInh">
+      <option name="closed" value="true" />
+      <created>1755613670723</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1755613670723</updated>
+    </task>
+    <task id="LOCAL-00011" summary="cập nhật Quản Lí Học SInh">
+      <option name="closed" value="true" />
+      <created>1755623445655</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1755623445655</updated>
+    </task>
+    <task id="LOCAL-00012" summary="cập nhật Quản Lí Học SInh">
+      <option name="closed" value="true" />
+      <created>1755629206188</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1755629206188</updated>
+    </task>
+    <task id="LOCAL-00013" summary="cập nhật Quản Lí Học SInh">
+      <option name="closed" value="true" />
+      <created>1755991600430</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1755991600430</updated>
+    </task>
+    <task id="LOCAL-00014" summary="cập nhật Quản Lí Học SInh">
+      <option name="closed" value="true" />
+      <created>1756006749114</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1756006749114</updated>
+    </task>
+    <task id="LOCAL-00015" summary="cập nhật Quản Lí Học SInh">
+      <option name="closed" value="true" />
+      <created>1756016068544</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1756016068544</updated>
+    </task>
+    <task id="LOCAL-00016" summary="cập nhật Quản Lí Học SInh">
+      <option name="closed" value="true" />
+      <created>1757221921578</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1757221921578</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
+    <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="ok" />
+    <MESSAGE value="khắc phục lỗi snipcontroler" />
+    <MESSAGE value="cập nhật bảng vẽ" />
+    <MESSAGE value="cập nhật" />
+    <MESSAGE value="cập nhật Quản Lí Học SInh" />
+    <option name="LAST_COMMIT_MESSAGE" value="cập nhật Quản Lí Học SInh" />
+  </component>
+</project>

@@ -1,0 +1,105 @@
+# dialogs/question_detail_dialog.py
+from PySide6 import QtWidgets, QtCore, QtGui
+class QuestionDetailDialog(QtWidgets.QDialog):
+    """Dialog hiển thị chi tiết đầy đủ của câu hỏi"""
+
+    def __init__(self, db_manager, question_id, parent=None):
+        super().__init__(parent)
+        self.db = db_manager
+        self.question_id = question_id
+
+        self.setWindowTitle(f"Chi tiết câu hỏi #{question_id}")
+        self.setModal(True)
+        self.resize(800, 600)
+
+        self._setup_ui()
+        self._load_question_data()
+
+    def _setup_ui(self):
+        """Thiết lập giao diện dialog"""
+        layout = QtWidgets.QVBoxLayout(self)
+
+        # Scroll area để chứa nội dung
+        scroll = QtWidgets.QScrollArea()
+        scroll.setWidgetResizable(True)
+
+        content_widget = QtWidgets.QWidget()
+        content_layout = QtWidgets.QVBoxLayout(content_widget)
+
+        # Thông tin cơ bản
+        info_group = QtWidgets.QGroupBox("📋 Thông tin cơ bản")
+        info_layout = QtWidgets.QFormLayout(info_group)
+
+        self.id_label = QtWidgets.QLabel()
+        self.difficulty_label = QtWidgets.QLabel()
+        self.created_label = QtWidgets.QLabel()
+
+        info_layout.addRow("🆔 ID:", self.id_label)
+        info_layout.addRow("🎯 Độ khó:", self.difficulty_label)
+        info_layout.addRow("📅 Ngày tạo:", self.created_label)
+
+        content_layout.addWidget(info_group)
+
+        # Nội dung câu hỏi
+        content_group = QtWidgets.QGroupBox("📝 Nội dung câu hỏi")
+        content_content_layout = QtWidgets.QVBoxLayout(content_group)
+
+        self.content_display = QtWidgets.QTextEdit()
+        self.content_display.setReadOnly(True)
+        self.content_display.setMaximumHeight(300)
+        content_content_layout.addWidget(self.content_display)
+
+        content_layout.addWidget(content_group)
+
+        # Đáp án
+        answer_group = QtWidgets.QGroupBox("✅ Đáp án")
+        answer_layout = QtWidgets.QVBoxLayout(answer_group)
+
+        self.answer_display = QtWidgets.QTextEdit()
+        self.answer_display.setReadOnly(True)
+        self.answer_display.setMaximumHeight(150)
+        answer_layout.addWidget(self.answer_display)
+
+        content_layout.addWidget(answer_group)
+
+        scroll.setWidget(content_widget)
+        layout.addWidget(scroll)
+
+        # Buttons
+        button_layout = QtWidgets.QHBoxLayout()
+        close_btn = QtWidgets.QPushButton("Đóng")
+        close_btn.clicked.connect(self.accept)
+        button_layout.addStretch()
+        button_layout.addWidget(close_btn)
+        layout.addLayout(button_layout)
+
+    def _load_question_data(self):
+        """Load dữ liệu câu hỏi chi tiết"""
+        try:
+            question = self.db.execute_query(
+                "SELECT * FROM question_bank WHERE id=?",
+                (self.question_id,), fetch="one"
+            )
+
+            if question:
+                # Convert to dict nếu cần
+                if hasattr(question, 'keys'):
+                    q_dict = dict(question)
+                else:
+                    q_dict = question
+
+                # Hiển thị thông tin
+                self.id_label.setText(str(q_dict.get('id', '')))
+                self.difficulty_label.setText(q_dict.get('difficulty_level', 'Medium'))
+                self.created_label.setText(q_dict.get('created_date', 'Không rõ'))
+
+                # Hiển thị nội dung
+                content_text = q_dict.get('content_text', '')
+                self.content_display.setText(content_text)
+
+                # Hiển thị đáp án
+                answer_text = q_dict.get('answer_text', '')
+                self.answer_display.setText(answer_text)
+
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể load dữ liệu: {e}")

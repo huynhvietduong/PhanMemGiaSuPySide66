@@ -1,0 +1,272 @@
+# dialogs/question_tags_dialog.py
+from PySide6 import QtWidgets, QtCore, QtGui
+from PySide6.QtCore import Qt
+
+
+# #(Dialog quản lý tags cho câu hỏi - tên thực tế là TagsManagerDialog)
+class TagsManagerDialog(QtWidgets.QDialog):
+    """Dialog quản lý tags cho câu hỏi"""
+
+    def __init__(self, db_manager, question_id, parent=None):
+        super().__init__(parent)
+        self.db = db_manager
+        self.question_id = question_id
+
+        self.setWindowTitle(f"🏷️ Quản lý Tags - Câu hỏi #{question_id}")
+        self.setModal(True)
+        self.resize(500, 400)
+
+        self._setup_ui()
+        self._load_current_tags()
+        self._load_available_tags()
+
+    def _setup_ui(self):
+        """Thiết lập giao diện dialog"""
+        layout = QtWidgets.QVBoxLayout(self)
+
+        # Tiêu đề
+        title = QtWidgets.QLabel("Quản lý Tags cho câu hỏi")
+        title.setStyleSheet("font-weight: bold; font-size: 16px; margin-bottom: 15px;")
+        title.setAlignment(Qt.AlignCenter)
+        layout.addWidget(title)
+
+        # Phần thêm tag mới
+        add_group = QtWidgets.QGroupBox("➕ Thêm Tag Mới")
+        add_layout = QtWidgets.QHBoxLayout(add_group)
+
+        self.new_tag_input = QtWidgets.QLineEdit()
+        self.new_tag_input.setPlaceholderText("Nhập tên tag mới...")
+        add_layout.addWidget(self.new_tag_input)
+
+        # Color picker cho tag mới
+        self.current_color = '#3498db'
+        self.color_btn = QtWidgets.QPushButton("🎨 Màu")
+        self.color_btn.setStyleSheet(f"background-color: {self.current_color}; color: white;")
+        self.color_btn.clicked.connect(self._pick_color)
+        add_layout.addWidget(self.color_btn)
+
+        self.add_btn = QtWidgets.QPushButton("➕ Thêm")
+        self.add_btn.clicked.connect(self._add_new_tag)
+        add_layout.addWidget(self.add_btn)
+
+        layout.addWidget(add_group)
+
+        # Container cho 2 danh sách tags
+        lists_container = QtWidgets.QHBoxLayout()
+
+        # Danh sách tags hiện tại
+        current_group = QtWidgets.QGroupBox("🏷️ Tags hiện tại")
+        current_layout = QtWidgets.QVBoxLayout(current_group)
+
+        self.current_tags_list = QtWidgets.QListWidget()
+        self.current_tags_list.setMaximumHeight(200)
+        current_layout.addWidget(self.current_tags_list)
+
+        remove_btn = QtWidgets.QPushButton("❌ Xóa tag được chọn")
+        remove_btn.clicked.connect(self._remove_selected_tag)
+        current_layout.addWidget(remove_btn)
+
+        lists_container.addWidget(current_group)
+
+        # Danh sách tags có sẵn
+        available_group = QtWidgets.QGroupBox("📦 Tags có sẵn")
+        available_layout = QtWidgets.QVBoxLayout(available_group)
+
+        self.available_tags_list = QtWidgets.QListWidget()
+        self.available_tags_list.setMaximumHeight(200)
+        self.available_tags_list.itemDoubleClicked.connect(self._add_existing_tag)
+        available_layout.addWidget(self.available_tags_list)
+
+        available_layout.addWidget(QtWidgets.QLabel("💡 Double-click để thêm tag"))
+
+        lists_container.addWidget(available_group)
+
+        layout.addLayout(lists_container)
+
+        # Buttons
+        button_layout = QtWidgets.QHBoxLayout()
+
+        close_btn = QtWidgets.QPushButton("Đóng")
+        close_btn.clicked.connect(self.accept)
+
+        button_layout.addStretch()
+        button_layout.addWidget(close_btn)
+        layout.addLayout(button_layout)
+
+    # Copy tất cả phương thức còn lại từ file gốc:
+    # _pick_color(), _load_current_tags(), _load_available_tags(),
+    # _add_new_tag(), _add_existing_tag(), _remove_selected_tag()
+
+    def _pick_color(self):
+        """Chọn màu cho tag"""
+        color = QtWidgets.QColorDialog.getColor(QtGui.QColor(self.current_color), self)
+        if color.isValid():
+            self.current_color = color.name()
+            self.color_btn.setStyleSheet(f"background-color: {self.current_color}; color: white;")
+
+    def _load_current_tags(self):
+        """Load tags hiện tại của câu hỏi"""
+        try:
+            tags = self.db.execute_query(
+                "SELECT * FROM question_tags WHERE question_id=?",
+                (self.question_id,), fetch="all"
+            ) or []
+
+            self.current_tags_list.clear()
+
+            for tag in tags:
+                tag_dict = dict(tag) if hasattr(tag, 'keys') else {}
+                tag_name = tag_dict.get('tag_name', '')
+                tag_color = tag_dict.get('color', '#3498db')
+
+                if tag_name:
+                    item = QtWidgets.QListWidgetItem(tag_name)
+                    item.setBackground(QtGui.QColor(tag_color))
+                    item.setForeground(QtGui.QColor('white'))
+                    item.setData(Qt.UserRole, tag_color)
+                    self.current_tags_list.addItem(item)
+
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể load tags hiện tại: {e}")
+
+    def _load_available_tags(self):
+        """Load tất cả tags có sẵn trong hệ thống"""
+        try:
+            # Lấy tất cả tags unique, loại trừ tags đã có
+            current_tag_names = [self.current_tags_list.item(i).text()
+                                 for i in range(self.current_tags_list.count())]
+
+            all_tags = self.db.execute_query(
+                "SELECT DISTINCT tag_name, color FROM question_tags ORDER BY tag_name",
+                fetch="all"
+            ) or []
+
+            self.available_tags_list.clear()
+
+            for tag in all_tags:
+                tag_dict = dict(tag) if hasattr(tag, 'keys') else {}
+                tag_name = tag_dict.get('tag_name', '')
+                tag_color = tag_dict.get('color', '#3498db')
+
+                # Chỉ hiển thị tags chưa được thêm
+                if tag_name and tag_name not in current_tag_names:
+                    item = QtWidgets.QListWidgetItem(f"🏷️ {tag_name}")
+                    item.setBackground(QtGui.QColor(tag_color))
+                    item.setForeground(QtGui.QColor('white'))
+                    item.setData(Qt.UserRole, {'name': tag_name, 'color': tag_color})
+                    self.available_tags_list.addItem(item)
+
+        except Exception as e:
+            print(f"⚠️ Lỗi load available tags: {e}")
+
+    def _add_new_tag(self):
+        """Thêm tag mới"""
+        tag_name = self.new_tag_input.text().strip()
+        if not tag_name:
+            QtWidgets.QMessageBox.warning(self, "Lỗi", "Vui lòng nhập tên tag")
+            return
+
+        # Kiểm tra tag đã tồn tại chưa
+        existing_tags = [self.current_tags_list.item(i).text()
+                         for i in range(self.current_tags_list.count())]
+
+        if tag_name in existing_tags:
+            QtWidgets.QMessageBox.warning(self, "Lỗi", "Tag này đã tồn tại")
+            return
+
+        try:
+            # Thêm vào database
+            self.db.execute_query(
+                "INSERT OR IGNORE INTO question_tags (question_id, tag_name, color) VALUES (?, ?, ?)",
+                (self.question_id, tag_name, self.current_color)
+            )
+
+            # Thêm vào danh sách hiện tại
+            item = QtWidgets.QListWidgetItem(tag_name)
+            item.setBackground(QtGui.QColor(self.current_color))
+            item.setForeground(QtGui.QColor('white'))
+            item.setData(Qt.UserRole, self.current_color)
+            self.current_tags_list.addItem(item)
+
+            # Clear input
+            self.new_tag_input.clear()
+
+            # Refresh available tags
+            self._load_available_tags()
+
+            QtWidgets.QMessageBox.information(self, "Thành công", f"Đã thêm tag '{tag_name}'")
+
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể thêm tag: {e}")
+
+    def _add_existing_tag(self, item):
+        """Thêm tag có sẵn vào câu hỏi"""
+        if not item:
+            return
+
+        tag_data = item.data(Qt.UserRole)
+        if not tag_data:
+            return
+
+        tag_name = tag_data['name']
+        tag_color = tag_data['color']
+
+        try:
+            # Thêm vào database
+            self.db.execute_query(
+                "INSERT OR IGNORE INTO question_tags (question_id, tag_name, color) VALUES (?, ?, ?)",
+                (self.question_id, tag_name, tag_color)
+            )
+
+            # Thêm vào danh sách hiện tại
+            new_item = QtWidgets.QListWidgetItem(tag_name)
+            new_item.setBackground(QtGui.QColor(tag_color))
+            new_item.setForeground(QtGui.QColor('white'))
+            new_item.setData(Qt.UserRole, tag_color)
+            self.current_tags_list.addItem(new_item)
+
+            # Xóa khỏi available tags
+            row = self.available_tags_list.row(item)
+            self.available_tags_list.takeItem(row)
+
+            QtWidgets.QMessageBox.information(self, "Thành công", f"Đã thêm tag '{tag_name}'")
+
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể thêm tag: {e}")
+
+    def _remove_selected_tag(self):
+        """Xóa tag được chọn"""
+        current_item = self.current_tags_list.currentItem()
+        if not current_item:
+            QtWidgets.QMessageBox.warning(self, "Lỗi", "Vui lòng chọn tag để xóa")
+            return
+
+        tag_name = current_item.text()
+
+        if QtWidgets.QMessageBox.question(
+                self, "Xác nhận", f"Bạn có muốn xóa tag '{tag_name}'?"
+        ) != QtWidgets.QMessageBox.Yes:
+            return
+
+        try:
+            # Xóa khỏi database
+            self.db.execute_query(
+                "DELETE FROM question_tags WHERE question_id=? AND tag_name=?",
+                (self.question_id, tag_name)
+            )
+
+            # Xóa khỏi danh sách
+            row = self.current_tags_list.row(current_item)
+            self.current_tags_list.takeItem(row)
+
+            # Refresh available tags
+            self._load_available_tags()
+
+            QtWidgets.QMessageBox.information(self, "Thành công", f"Đã xóa tag '{tag_name}'")
+
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Lỗi", f"Không thể xóa tag: {e}")
+
+
+# Alias để tương thích với tên cũ
+QuestionTagsDialog = TagsManagerDialog

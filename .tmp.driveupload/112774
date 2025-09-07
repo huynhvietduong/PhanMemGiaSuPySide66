@@ -1,0 +1,8 @@
+# Controller chính của ứng dụng
+class AppController:
+    def __init__(self, config):
+        self.config = config
+
+    def run(self):
+        """Khởi chạy ứng dụng"""
+        print("Question Bank Application đang khởi động...")

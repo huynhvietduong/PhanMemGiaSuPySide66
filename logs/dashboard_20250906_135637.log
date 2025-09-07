@@ -1,0 +1,22 @@
+2025-09-06 13:56:37,185 - __main__ - INFO - ======================================================================
+2025-09-06 13:56:37,185 - __main__ - INFO - 🚀 Starting Dashboard Desktop Application
+2025-09-06 13:56:37,185 - __main__ - INFO - ======================================================================
+2025-09-06 13:56:37,208 - __main__ - INFO - ✓ Application initialized
+2025-09-06 13:56:38,614 - __main__ - INFO - ✓ Directory structure ready (mode: main)
+2025-09-06 13:56:38,620 - __main__ - INFO - ✓ Database connected
+2025-09-06 13:56:38,681 - ui_qt.windows.dashboard_window_qt.utils.assets - INFO - Assets manager đã khởi tạo
+2025-09-06 13:56:38,686 - __main__ - INFO - Loading MainDashboard (Desktop-Style)...
+2025-09-06 13:56:38,696 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã load settings từ C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 13:56:38,697 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã load vị trí 0 icons
+2025-09-06 13:56:38,715 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 13:56:38,715 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Wallpaper set: default (mode: fill)
+2025-09-06 13:56:38,715 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Desktop settings loaded
+2025-09-06 13:56:38,715 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Đang load desktop icons...
+2025-09-06 13:56:38,722 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Added desktop icon: Quản lý học sinh
+2025-09-06 13:56:38,723 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Added desktop icon: Quản lý nhóm học
+2025-09-06 13:56:38,724 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Added desktop icon: Lịch dạy (Main)
+2025-09-06 13:56:38,725 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Added desktop icon: Ngân hàng câu hỏi
+2025-09-06 13:56:38,725 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Đã load 4 desktop icons
+2025-09-06 13:56:38,725 - ui_qt.windows.dashboard_window_qt.views.desktop.desktop_area - INFO - Desktop Area initialized
+2025-09-06 13:56:38,725 - __main__ - ERROR - Failed to load dashboard: 'MainDashboard' object has no attribute 'handle_app_launch'
+2025-09-06 13:56:38,747 - __main__ - ERROR - ✗ Failed to create window: 'MainDashboard' object has no attribute 'handle_app_launch'

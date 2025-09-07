@@ -1,0 +1,165 @@
+# viewers/image_viewer.py
+from PySide6 import QtWidgets, QtCore, QtGui
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QPixmap, QImage
+
+
+class ImageViewer(QtWidgets.QWidget):
+    """Widget hiển thị và chỉnh sửa ảnh"""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.current_pixmap = None
+        self.scale_factor = 1.0
+        self._setup_ui()
+
+    def _setup_ui(self):
+        """Thiết lập giao diện"""
+        layout = QtWidgets.QVBoxLayout(self)
+        layout.setContentsMargins(5, 5, 5, 5)
+
+        # #(Toolbar cho các chức năng ảnh)
+        toolbar = QtWidgets.QToolBar()
+        toolbar.addAction("📁 Mở ảnh", self.load_image)
+        toolbar.addAction("📋 Paste", self.paste_image)
+        toolbar.addAction("🔍 Zoom In", lambda: self.zoom(1.2))
+        toolbar.addAction("🔍 Zoom Out", lambda: self.zoom(0.8))
+        toolbar.addAction("↩️ Reset", self.fit_to_window)
+        toolbar.addAction("🗑️ Xóa", self.clear_image)
+        layout.addWidget(toolbar)
+
+        # #(Scroll area chứa ảnh)
+        self.scroll_area = QtWidgets.QScrollArea()
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setAlignment(Qt.AlignCenter)
+
+        # #(Label hiển thị ảnh)
+        self.image_label = QtWidgets.QLabel()
+        self.image_label.setAlignment(Qt.AlignCenter)
+        self.image_label.setStyleSheet("border: 1px dashed #ccc; background: #f9f9f9;")
+        self.image_label.setText("📷 Chưa có ảnh\nKéo thả ảnh vào đây hoặc click 'Mở ảnh'")
+        self.image_label.setMinimumSize(300, 200)
+
+        self.scroll_area.setWidget(self.image_label)
+        layout.addWidget(self.scroll_area)
+
+        # #(Thiết lập drag & drop)
+        self.setAcceptDrops(True)
+
+    def load_image(self):
+        """Mở dialog chọn ảnh"""
+        file_path, _ = QtWidgets.QFileDialog.getOpenFileName(
+            self, "Chọn ảnh", "",
+            "Images (*.png *.jpg *.jpeg *.gif *.bmp *.tiff *.webp)")
+
+        if file_path:
+            pixmap = QPixmap(file_path)
+            if not pixmap.isNull():
+                self.set_pixmap(pixmap)
+            else:
+                QtWidgets.QMessageBox.warning(self, "Lỗi", "Không thể mở ảnh này")
+
+    def set_pixmap(self, pixmap):
+        """Thiết lập ảnh hiển thị"""
+        if pixmap and not pixmap.isNull():
+            self.current_pixmap = pixmap
+            self.scale_factor = 1.0
+            self.display_image()
+        else:
+            self.clear_image()
+
+    def set_image(self, image):
+        """Thiết lập ảnh từ QImage"""
+        if isinstance(image, QImage):
+            pixmap = QPixmap.fromImage(image)
+            self.set_pixmap(pixmap)
+        elif isinstance(image, QPixmap):
+            self.set_pixmap(image)
+
+    def display_image(self):
+        """Hiển thị ảnh với scale hiện tại"""
+        if not self.current_pixmap:
+            return
+
+        scaled_pixmap = self.current_pixmap.scaled(
+            self.current_pixmap.size() * self.scale_factor,
+            Qt.KeepAspectRatio,
+            Qt.SmoothTransformation
+        )
+
+        self.image_label.setPixmap(scaled_pixmap)
+        self.image_label.resize(scaled_pixmap.size())
+
+    def fit_to_window(self):
+        """Reset zoom về 100%"""
+        self.scale_factor = 1.0
+        self.display_image()
+
+    def zoom(self, factor):
+        """Zoom ảnh"""
+        if not self.current_pixmap:
+            return
+
+        self.scale_factor *= factor
+        # Giới hạn zoom từ 10% đến 500%
+        self.scale_factor = max(0.1, min(5.0, self.scale_factor))
+        self.display_image()
+
+    def paste_image(self):
+        """Paste ảnh từ clipboard"""
+        clipboard = QtWidgets.QApplication.clipboard()
+        mime_data = clipboard.mimeData()
+
+        if mime_data.hasImage():
+            image = clipboard.image()
+            if not image.isNull():
+                self.set_image(image)
+                QtWidgets.QMessageBox.information(self, "Thành công", "Đã paste ảnh từ clipboard")
+            else:
+                QtWidgets.QMessageBox.warning(self, "Lỗi", "Ảnh trong clipboard không hợp lệ")
+        else:
+            QtWidgets.QMessageBox.information(self, "Thông báo", "Không có ảnh trong clipboard")
+
+    def clear_image(self):
+        """Xóa ảnh"""
+        self.current_pixmap = None
+        self.scale_factor = 1.0
+        self.image_label.clear()
+        self.image_label.setText("📷 Chưa có ảnh\nKéo thả ảnh vào đây hoặc click 'Mở ảnh'")
+
+    def get_pixmap(self):
+        """Lấy pixmap hiện tại"""
+        return self.current_pixmap
+
+    def has_image(self):
+        """Kiểm tra có ảnh hay không"""
+        return self.current_pixmap is not None
+
+    # #(Drag & Drop handlers)
+    def dragEnterEvent(self, event):
+        """Xử lý kéo file"""
+        if event.mimeData().hasImage() or event.mimeData().hasUrls():
+            event.acceptProposedAction()
+
+    def dropEvent(self, event):
+        """Xử lý thả file"""
+        mime_data = event.mimeData()
+
+        if mime_data.hasImage():
+            # Thả ảnh trực tiếp
+            self.set_image(mime_data.imageData())
+        elif mime_data.hasUrls():
+            # Thả file ảnh
+            for url in mime_data.urls():
+                file_path = url.toLocalFile()
+                if file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.tiff', '.webp')):
+                    pixmap = QPixmap(file_path)
+                    if not pixmap.isNull():
+                        self.set_pixmap(pixmap)
+                        break
+
+    def mousePressEvent(self, event):
+        """Xử lý click để mở ảnh"""
+        if event.button() == Qt.LeftButton and not self.has_image():
+            self.load_image()
+        super().mousePressEvent(event)

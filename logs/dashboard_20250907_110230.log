@@ -1,0 +1,46 @@
+2025-09-07 11:02:30,623 - __main__ - INFO - ======================================================================
+2025-09-07 11:02:30,623 - __main__ - INFO - 🚀 Starting Dashboard Desktop Application
+2025-09-07 11:02:30,624 - __main__ - INFO - ======================================================================
+2025-09-07 11:02:30,644 - __main__ - INFO - ✓ Application initialized
+2025-09-07 11:02:32,095 - __main__ - INFO - ✓ Directory structure ready (mode: main)
+2025-09-07 11:02:32,099 - __main__ - INFO - ✓ Database connected
+2025-09-07 11:02:32,144 - ui_qt.windows.dashboard_window_qt.utils.assets - INFO - Assets manager đã khởi tạo
+2025-09-07 11:02:32,151 - __main__ - INFO - Loading MainDashboard (Desktop-Style)...
+2025-09-07 11:02:32,574 - ui_qt.windows.dashboard_window_qt.views.taskbar.system_tray - INFO - System Tray initialized
+2025-09-07 11:02:32,576 - ui_qt.windows.dashboard_window_qt.views.taskbar.taskbar - INFO - Using default taskbar settings
+2025-09-07 11:02:32,576 - ui_qt.windows.dashboard_window_qt.views.taskbar.taskbar - INFO - Skipping pinned apps for now
+2025-09-07 11:02:32,576 - ui_qt.windows.dashboard_window_qt.views.taskbar.taskbar - INFO - Taskbar initialized
+2025-09-07 11:02:32,595 - ui_qt.windows.dashboard_window_qt.repositories.app_repository - INFO - Storage path: dashboard_apps.json
+2025-09-07 11:02:32,595 - ui_qt.windows.dashboard_window_qt.repositories.app_repository - INFO - Storage exists: True
+2025-09-07 11:02:32,596 - ui_qt.windows.dashboard_window_qt.repositories.app_repository - INFO - Total apps in storage: 17
+2025-09-07 11:02:32,596 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - WARNING - Have 17 apps but may only show some!
+2025-09-07 11:02:33,017 - __main__ - INFO - ✓ Dashboard loaded (main)
+2025-09-07 11:02:33,371 - __main__ - INFO - Assets manager initialized
+2025-09-07 11:02:33,374 - __main__ - INFO - Settings loaded
+2025-09-07 11:02:33,380 - __main__ - INFO - All services initialized successfully
+2025-09-07 11:02:33,381 - __main__ - INFO - ✓ Application ready - Starting event loop
+2025-09-07 11:02:40,283 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - Đang khởi chạy app: question_bank
+2025-09-07 11:02:40,283 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - Importing module: ui_qt.windows.question_bank.views.main_window
+2025-09-07 11:02:40,730 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - App launched: question_bank
+2025-09-07 11:02:40,730 - ui_qt.windows.dashboard_window_qt.views.taskbar.taskbar - INFO - Adding button for app: question_bank
+2025-09-07 11:02:40,731 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - ERROR - Error adding button to taskbar: maximum recursion depth exceeded
+2025-09-07 11:02:40,748 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - App launched: question_bank
+2025-09-07 11:02:40,748 - ui_qt.windows.dashboard_window_qt.views.taskbar.taskbar - INFO - Adding button for app: question_bank
+2025-09-07 11:02:40,758 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - ERROR - Error adding button to taskbar: maximum recursion depth exceeded
+2025-09-07 11:02:40,758 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - Đã khởi chạy app thành công: question_bank
+2025-09-07 11:03:32,671 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 0 icons
+2025-09-07 11:03:37,785 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - Đang khởi chạy app: student_manager
+2025-09-07 11:03:37,785 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - Importing module: ui_qt.windows.student_window_qt
+2025-09-07 11:03:38,147 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - ERROR - Lỗi tạo window cho student_manager: StudentWindowQt.__init__() missing 1 required positional argument: 'db_manager'
+2025-09-07 11:03:38,147 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - ERROR - Lỗi khởi chạy app student_manager: Không thể tạo window: StudentWindowQt.__init__() missing 1 required positional argument: 'db_manager'
+2025-09-07 11:03:38,150 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - ERROR - App error student_manager: Không thể tạo window: StudentWindowQt.__init__() missing 1 required positional argument: 'db_manager'
+2025-09-07 11:03:41,919 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - Đang khởi chạy app: main_calendar
+2025-09-07 11:03:41,919 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - Importing module: ui_qt.main_window
+2025-09-07 11:03:41,947 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - App launched: main_calendar
+2025-09-07 11:03:41,947 - ui_qt.windows.dashboard_window_qt.views.taskbar.taskbar - INFO - Adding button for app: main_calendar
+2025-09-07 11:03:41,950 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - ERROR - Error adding button to taskbar: maximum recursion depth exceeded
+2025-09-07 11:03:41,968 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - App launched: main_calendar
+2025-09-07 11:03:41,968 - ui_qt.windows.dashboard_window_qt.views.taskbar.taskbar - INFO - Adding button for app: main_calendar
+2025-09-07 11:03:41,979 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - ERROR - Error adding button to taskbar: maximum recursion depth exceeded
+2025-09-07 11:03:41,980 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - Đã khởi chạy app thành công: main_calendar
+2025-09-07 11:04:32,665 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 0 icons

@@ -1,0 +1,15 @@
+# dialogs/__init__.py
+from .question_edit_dialog import QuestionEditDialog
+from .question_detail_dialog import QuestionDetailDialog
+from .question_tags_dialog import TagsManagerDialog, QuestionTagsDialog  # Cả 2 tên
+from .tree_node_dialog import TreeNodeDialog
+from .tree_manager_dialog import TreeManagerDialog
+
+__all__ = [
+    'QuestionEditDialog',
+    'QuestionDetailDialog',
+    'TagsManagerDialog',    # Tên thực tế
+    'QuestionTagsDialog',   # Alias để tương thích
+    'TreeNodeDialog',
+    'TreeManagerDialog'
+]

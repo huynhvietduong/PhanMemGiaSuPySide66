@@ -1,0 +1,45 @@
+2025-09-06 13:21:11,684 - __main__ - INFO - ======================================================================
+2025-09-06 13:21:11,685 - __main__ - INFO - 🚀 Starting Dashboard Desktop Application
+2025-09-06 13:21:11,685 - __main__ - INFO - ======================================================================
+2025-09-06 13:21:11,707 - __main__ - INFO - ✓ Application initialized
+2025-09-06 13:21:13,817 - __main__ - INFO - ✓ Directory structure ready (mode: main)
+2025-09-06 13:21:13,824 - __main__ - INFO - ✓ Database connected
+2025-09-06 13:21:13,880 - ui_qt.windows.dashboard_window_qt.utils.assets - INFO - Assets manager đã khởi tạo
+2025-09-06 13:21:13,885 - __main__ - INFO - Loading MainDashboard (Desktop-Style)...
+2025-09-06 13:21:13,894 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã load settings từ C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 13:21:13,895 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã load vị trí 4 icons
+2025-09-06 13:21:13,902 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - WARNING - Desktop area module not found, using basic MDI
+2025-09-06 13:21:13,927 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Desktop icon added: student_manager
+2025-09-06 13:21:13,928 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 13:21:13,928 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 1 icons
+2025-09-06 13:21:13,928 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã thêm icon: student_manager
+2025-09-06 13:21:13,928 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Desktop icon added: group_manager
+2025-09-06 13:21:13,929 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 13:21:13,929 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 2 icons
+2025-09-06 13:21:13,929 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã thêm icon: group_manager
+2025-09-06 13:21:13,929 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Desktop icon added: main_calendar
+2025-09-06 13:21:13,930 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 13:21:13,930 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 3 icons
+2025-09-06 13:21:13,930 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã thêm icon: main_calendar
+2025-09-06 13:21:13,930 - ui_qt.windows.dashboard_window_qt.views.main_dashboard - INFO - Desktop icon added: question_bank
+2025-09-06 13:21:13,930 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 13:21:13,930 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 4 icons
+2025-09-06 13:21:13,930 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã thêm icon: question_bank
+2025-09-06 13:21:13,950 - __main__ - INFO - ✓ Dashboard loaded (main)
+2025-09-06 13:21:13,996 - __main__ - INFO - Assets manager initialized
+2025-09-06 13:21:13,999 - __main__ - INFO - Settings loaded
+2025-09-06 13:21:14,004 - __main__ - INFO - All services initialized successfully
+2025-09-06 13:21:14,006 - __main__ - INFO - ✓ Application ready - Starting event loop
+2025-09-06 13:21:23,105 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 13:21:23,106 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 13:21:23,106 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 4 icons
+2025-09-06 13:21:23,155 - ui_qt.windows.dashboard_window_qt.services.app_launcher_service - INFO - Cleaning up app launcher service...
+2025-09-06 13:21:23,155 - __main__ - INFO - Shutting down application...
+2025-09-06 13:21:23,156 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 13:21:23,158 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-06 13:21:23,158 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã lưu vị trí 4 icons
+2025-09-06 13:21:23,158 - __main__ - INFO - ✓ Settings saved
+2025-09-06 13:21:23,158 - __main__ - ERROR - Error during shutdown: 'DatabaseManager' object has no attribute 'close'
+2025-09-06 13:21:23,158 - __main__ - INFO - ======================================================================
+2025-09-06 13:21:23,158 - __main__ - INFO - Application shutdown complete
+2025-09-06 13:21:23,159 - __main__ - INFO - ======================================================================

@@ -1,0 +1,15 @@
+2025-09-04 01:48:42,131 - __main__ - INFO - ======================================================================
+2025-09-04 01:48:42,132 - __main__ - INFO - 🚀 Starting Dashboard Desktop Application
+2025-09-04 01:48:42,132 - __main__ - INFO - ======================================================================
+2025-09-04 01:48:42,322 - __main__ - INFO - ✓ Application initialized
+2025-09-04 01:48:45,020 - __main__ - INFO - ✓ Directory structure ready (mode: main)
+2025-09-04 01:48:45,033 - __main__ - INFO - ✓ Database connected
+2025-09-04 01:48:45,178 - ui_qt.windows.dashboard_window_qt.utils.assets - INFO - Assets manager đã khởi tạo
+2025-09-04 01:48:45,196 - __main__ - INFO - Loading MainDashboard (Desktop-Style)...
+2025-09-04 01:48:45,197 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã save settings vào C:\Users\lenovo\AppData\Roaming\DashboardQt\settings.json
+2025-09-04 01:48:45,198 - ui_qt.windows.dashboard_window_qt.repositories.settings_repository - INFO - Đã tạo settings mặc định
+2025-09-04 01:48:45,485 - ui_qt.windows.dashboard_window_qt.repositories.app_repository - INFO - Đã load 17 apps mặc định
+2025-09-04 01:48:45,493 - ui_qt.windows.dashboard_window_qt.services.desktop_service - INFO - Đã load vị trí 0 icons
+2025-09-04 01:48:45,503 - ui_qt.windows.dashboard_window_qt.utils.assets - ERROR - Lỗi load wallpaper: 'PySide6.QtGui.QPainter' object has no attribute 'createLinearGradient'
+2025-09-04 01:48:45,503 - __main__ - ERROR - Failed to load dashboard: 'PySide6.QtGui.QPainter' object has no attribute 'createLinearGradient'
+2025-09-04 01:48:45,528 - __main__ - ERROR - ✗ Failed to create window: 'PySide6.QtGui.QPainter' object has no attribute 'createLinearGradient'

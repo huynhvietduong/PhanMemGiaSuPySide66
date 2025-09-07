@@ -1,0 +1,4 @@
+# viewers/__init__.py
+from .pdf_viewer import PDFViewer
+from .image_viewer import ImageViewer
+__all__ = ['PDFViewer', 'ImageViewer']
